@@ -24,13 +24,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, cb) => {
-      // allow non-browser requests (like curl/postman) with no origin
-      if (!origin) return cb(null, true);
-
-      if (allowedOrigins.includes(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked: ${origin}`));
-    },
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   })
 );
