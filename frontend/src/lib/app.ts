@@ -1,74 +1,64 @@
-import dotenv from "dotenv";
-dotenv.config();
+// frontend/src/lib/api.ts
 
-import express from "express";
-import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+const BASE =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
+  "http://localhost:4000";
 
-import intakeRoutes from "./routes/intake";
-import adminRoutes from "./routes/admin";
+// Generic JSON helper
+async function request<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const url = `${BASE}${path}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(options.headers || {}),
+    },
+  });
 
-const app = express();
-const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
+  // Try to parse JSON either way (for clean error messages)
+  const data = await res.json().catch(() => ({}));
 
-// --- Security headers ---
-app.use(helmet());
+  if (!res.ok) {
+    const msg = (data && (data.error || data.message)) || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
 
-// --- CORS ---
-// In production, set FRONTEND_URL to your Vercel domain (e.g. https://owen-lane-demo.vercel.app)
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
-    credentials: true,
-  })
-);
+  return data as T;
+}
 
-// --- Body parsing ---
-app.use(express.json({ limit: "1mb" }));
+// Minimal API surface your pages can use
+export const api = {
+  health: () => request<{ status: string; timestamp: string }>("/api/health"),
 
-// --- Rate limiting ---
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many requests, please try again later" },
-});
+  adminLogin: (email: string, password: string) =>
+    request<{ token: string }>("/api/admin/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    }),
 
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many login attempts, please try again later" },
-});
+  listSubmissions: (token: string) =>
+    request<any[]>("/api/admin/submissions", {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
 
-app.use("/api", generalLimiter);
-app.use("/api/admin/login", authLimiter);
+  getSubmission: (token: string, id: string) =>
+    request<any>(`/api/admin/submissions/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
 
-// --- Routes ---
-app.use("/api/intake", intakeRoutes);
-app.use("/api/admin", adminRoutes);
+  updateSubmissionStatus: (token: string, id: string, status: string) =>
+    request<any>(`/api/admin/submissions/${id}/status`, {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    }),
 
-// --- Health check ---
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
-});
-
-// --- 404 ---
-app.use((_req, res) => {
-  res.status(404).json({ error: "Route not found" });
-});
-
-// --- Error handler ---
-app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error("Unhandled error:", err);
-  res.status(500).json({ error: "Internal server error" });
-});
-
-app.listen(PORT, () => {
-  console.log(`Dental intake API running on port ${PORT}`);
-});
-
-export default app;
+  submitIntake: (payload: any) =>
+    request<{ id: string }>("/api/intake", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }),
+};
