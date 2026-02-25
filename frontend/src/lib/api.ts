@@ -1,38 +1,93 @@
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
+// frontend/src/lib/api.ts
+
+const BASE =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
   "http://localhost:4000";
 
-type RequestOptions = {
-  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-  body?: any;
-  token?: string;
-};
+// Generic JSON helper
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const url = `${BASE}${path}`;
 
-export async function api(path: string, opts: RequestOptions = {}) {
-  const res = await fetch(`${API_URL}${path}`, {
-    method: opts.method || "GET",
+  const res = await fetch(url, {
+    ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(opts.token ? { Authorization: `Bearer ${opts.token}` } : {}),
+      ...(options.headers || {}),
     },
-    body: opts.body ? JSON.stringify(opts.body) : undefined,
-    cache: "no-store",
   });
 
-  const text = await res.text();
-  let data: any = null;
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    data = text;
-  }
+  const data = await res.json().catch(() => ({}));
 
   if (!res.ok) {
-    const msg =
-      (data && (data.error || data.message)) ||
-      `Request failed (${res.status})`;
+    const msg = (data && (data.error || data.message)) || `HTTP ${res.status}`;
     throw new Error(msg);
   }
 
-  return data;
+  return data as T;
 }
+
+/** Health */
+export function health() {
+  return request<{ status: string; timestamp: string }>("/api/health");
+}
+
+/** Admin auth */
+export function adminLogin(email: string, password: string) {
+  return request<{ token: string }>("/api/admin/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+/** Intake submit */
+export function submitIntake(payload: any) {
+  return request<{ id: string }>("/api/intake", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+/** Admin submissions */
+export function getSubmissions(token: string) {
+  return request<any[]>("/api/admin/submissions", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function getSubmissionById(token: string, id: string) {
+  return request<any>(`/api/admin/submissions/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function updateSubmissionStatus(
+  token: string,
+  id: string,
+  status: string
+) {
+  return request<any>(`/api/admin/submissions/${id}/status`, {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ status }),
+  });
+}
+
+export function exportCsv(token: string) {
+  return request<{ csv: string }>("/api/admin/submissions/export", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+/**
+ * Optional convenience object (won't break named imports)
+ * Pages can use either: adminLogin(...) OR api.adminLogin(...)
+ */
+export const api = {
+  health,
+  adminLogin,
+  submitIntake,
+  getSubmissions,
+  getSubmissionById,
+  updateSubmissionStatus,
+  exportCsv,
+};
