@@ -43,7 +43,7 @@ export function adminLogin(email: string, password: string) {
 
 /** Intake submit */
 export function submitIntake(payload: any) {
-  return request<{ id: string }>("/api/intake", {
+  return request<{ id: string }>("/api/intake/submit", {
     method: "POST",
     body: JSON.stringify(payload),
   });
