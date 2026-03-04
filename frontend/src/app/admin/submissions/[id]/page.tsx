@@ -36,7 +36,8 @@ export default function SubmissionDetailPage() {
     setLoading(true);
     setError('');
     try {
-      const res = await getSubmissionById(id);
+      const token = localStorage.getItem('admin_token') || '';
+  const res = await getSubmissionById(token, id);
       setData(res);
     } catch (err: any) {
       if (String(err?.message || '').includes('Authentication') || String(err?.message || '').includes('401')) {
@@ -64,7 +65,8 @@ export default function SubmissionDetailPage() {
     setSaving(true);
     setError('');
     try {
-      const res = await updateSubmissionStatus(data.id, status);
+      const token = localStorage.getItem('admin_token') || '';
+const res = await updateSubmissionStatus(token, data.id, status);
       // backend returns { message, submission }
       setData((prev: any) => ({ ...prev, ...res.submission }));
     } catch (err: any) {

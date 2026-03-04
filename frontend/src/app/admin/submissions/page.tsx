@@ -42,8 +42,9 @@ export default function SubmissionsPage() {
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
 
-      const res = await getSubmissions(params);
-      setSubmissions(res.submissions);
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await getSubmissions(token, params);
+      setSubmissions(res.submissions || res.data || []);
       setPagination(res.pagination);
     } catch (err: any) {
       if (err.message.includes('Authentication') || err.message.includes('401')) {
@@ -73,7 +74,8 @@ export default function SubmissionsPage() {
       const params: Record<string, string> = {};
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
-      const csv = await exportCsv(params);
+      const token = localStorage.getItem('admin_token') || '';
+      const csv = await exportCsv(token, params);
       const blob = new Blob([csv], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
