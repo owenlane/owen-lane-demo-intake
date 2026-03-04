@@ -84,7 +84,7 @@ export function updateSubmissionStatus(
 
 export function exportCsv(token: string, params: Record<string, string> = {}) {
   const qs = new URLSearchParams(params).toString();
-  const path = qs ? `/api/admin/submissions/export?${qs}` : `/api/admin/submissions/export`;
+  const path = qs ? `/api/admin/submissions/export/csv?${qs}` : `/api/admin/submissions/export/csv`;
   
   return request<string>(path, {
     headers: { Authorization: `Bearer ${token}` },
