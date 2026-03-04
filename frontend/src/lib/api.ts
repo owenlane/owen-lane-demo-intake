@@ -2,7 +2,7 @@
 
 const BASE =
   process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ||
-  "http://localhost:4000";
+  "http://localhost:5000";
 
 // Generic JSON helper
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -32,8 +32,10 @@ export function health() {
 }
 
 /** Admin auth */
+export type AdminUser = { id: string; email: string; role: string };
+
 export function adminLogin(email: string, password: string) {
-  return request<{ token: string }>("/api/admin/login", {
+  return request<{ token: string; user: AdminUser }>("/api/admin/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
@@ -48,9 +50,17 @@ export function submitIntake(payload: any) {
 }
 
 /** Admin submissions */
-export function getSubmissions(token: string) {
-  return request<any[]>("/api/admin/submissions", {
-    headers: { Authorization: `Bearer ${token}` },
+export function getSubmissions(
+  token: string,
+  params: Record<string, string> = {}
+) {
+  const qs = new URLSearchParams(params).toString();
+  const path = qs ? `/api/admin/submissions?${qs}` : `/api/admin/submissions`;
+
+  return request<any>(path, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
   });
 }
 
@@ -72,8 +82,11 @@ export function updateSubmissionStatus(
   });
 }
 
-export function exportCsv(token: string) {
-  return request<{ csv: string }>("/api/admin/submissions/export", {
+export function exportCsv(token: string, params: Record<string, string> = {}) {
+  const qs = new URLSearchParams(params).toString();
+  const path = qs ? `/api/admin/submissions/export?${qs}` : `/api/admin/submissions/export`;
+  
+  return request<string>(path, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
