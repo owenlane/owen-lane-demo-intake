@@ -159,7 +159,7 @@ export default function IntakePage() {
     setSubmitting(true);
     try {
       const res = await submitIntake(form);
-      setSubmissionId(res.submissionId);
+      setSubmissionId(res.id);
       localStorage.removeItem(STORAGE_KEY);
     } catch (err: any) {
       setErrors({ submit: err.message || 'Submission failed. Please try again.' });
