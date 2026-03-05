@@ -197,11 +197,11 @@ export default function IntakePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dental-50 via-white to-emerald-50">
+    <div className="min-h-screen bg-gradient-to-br from-black via-neutral-950 to-zinc-900">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-20">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-dental-500 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center">
             <ClipboardList className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -229,9 +229,9 @@ export default function IntakePage() {
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all text-sm font-medium ${
                       isDone
-                        ? 'bg-dental-500 text-white'
+                        ? 'bg-red-600 text-white'
                         : isActive
-                        ? 'bg-dental-500 text-white ring-4 ring-dental-100'
+                        ? 'bg-red-600 text-white ring-4 ring-dental-100'
                         : 'bg-slate-200 text-slate-500'
                     }`}
                   >
@@ -252,7 +252,7 @@ export default function IntakePage() {
 
           <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
             <div
-              className="progress-fill h-full bg-gradient-to-r from-dental-400 to-dental-500 rounded-full"
+  className="progress-fill h-full bg-gradient-to-r from-red-600 to-red-700 rounded-full"
               style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
             />
           </div>
@@ -305,7 +305,7 @@ export default function IntakePage() {
           {step < 3 ? (
             <button
               onClick={nextStep}
-              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-dental-500 text-white font-semibold hover:bg-dental-600 transition shadow-lg shadow-dental-500/20"
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60"
             >
               Continue
               <ChevronRight className="w-4 h-4" />
@@ -314,7 +314,7 @@ export default function IntakePage() {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-dental-500 text-white font-semibold hover:bg-dental-600 transition shadow-lg shadow-dental-500/20 disabled:opacity-60"
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-dental-500/20 disabled:opacity-60"
             >
               {submitting ? (
                 <>
