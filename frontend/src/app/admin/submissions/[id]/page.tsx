@@ -104,6 +104,15 @@ export default function SubmissionDetailPage() {
   const payload = data?.json_payload;
   const currentStatus = (data?.status || 'new') as 'new' | 'reviewed' | 'completed';
   const statusMeta = STATUS_META[currentStatus] || STATUS_META.new;
+  const submittedAt = data?.created_at
+  ? new Date(data.created_at).toLocaleString([], {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    })
+  : '—';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-neutral-950 to-zinc-900">
@@ -179,7 +188,28 @@ export default function SubmissionDetailPage() {
           </div>
         ) : (
           <>
-            {/* Top grid */}
+  {/* Audit strip */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div className="rounded-2xl border border-white/10 bg-obsidian-900/60 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-4">
+      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+        Submission ID
+      </p>
+      <p className="font-mono text-sm text-steel-50 break-all">
+        {data?.id || '—'}
+      </p>
+    </div>
+
+    <div className="rounded-2xl border border-white/10 bg-obsidian-900/60 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-4">
+      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+        Submitted
+      </p>
+      <p className="text-sm text-steel-50">
+        {submittedAt}
+      </p>
+    </div>
+  </div>
+
+  {/* Top grid */}
             <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6">
               {/* Patient Card */}
               <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden">
@@ -394,6 +424,15 @@ export default function SubmissionDetailPage() {
                   </pre>
                 </details>
               </div>
+                        </div>
+
+            <div className="pt-2 text-center space-y-1">
+              <p className="text-[11px] uppercase tracking-wider text-steel-200/35">
+                {CLIENT.systemProvider}
+              </p>
+              <p className="text-[11px] text-steel-200/25">
+                {CLIENT.systemTagline}
+              </p>
             </div>
           </>
         )}

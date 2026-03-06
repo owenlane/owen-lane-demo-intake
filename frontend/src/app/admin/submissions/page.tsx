@@ -396,6 +396,14 @@ export default function SubmissionsPage() {
             </div>
           )}
         </div>
+                <div className="pt-5 text-center space-y-1">
+          <p className="text-[11px] uppercase tracking-wider text-steel-200/35">
+            {CLIENT.systemProvider}
+          </p>
+          <p className="text-[11px] text-steel-200/25">
+            {CLIENT.systemTagline}
+          </p>
+        </div>
       </main>
     </div>
   );

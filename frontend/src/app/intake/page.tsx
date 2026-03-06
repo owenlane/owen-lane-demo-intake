@@ -16,6 +16,7 @@ import {
   FileCheck,
   ShieldCheck,
   Lock,
+  Database,
 } from 'lucide-react';
 
 const STEPS = ['Personal Info', 'Insurance', 'Medical History', 'Consent'];
@@ -217,19 +218,19 @@ export default function IntakePage() {
           </div>
 
           <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-            <TrustMini
-              icon={<Lock className="w-4 h-4 text-redlux-500" />}
-              label="Secure submission"
-            />
-            <TrustMini
-              icon={<ShieldCheck className="w-4 h-4 text-redlux-500" />}
-              label="Office-ready intake"
-            />
-            <TrustMini
-              icon={<CheckCircle2 className="w-4 h-4 text-redlux-500" />}
-              label="Completion confirmation"
-            />
-          </div>
+  <TrustMini
+    icon={<ShieldCheck className="w-4 h-4 text-redlux-500" />}
+    label="HIPAA Aware"
+  />
+  <TrustMini
+    icon={<Lock className="w-4 h-4 text-redlux-500" />}
+    label="Secure Transmission"
+  />
+  <TrustMini
+    icon={<Database className="w-4 h-4 text-redlux-500" />}
+    label="Encrypted Record Handling"
+  />
+</div>
         </div>
 
         {/* Progress */}
@@ -320,49 +321,51 @@ export default function IntakePage() {
 
       {/* Bottom nav */}
       <div className="fixed bottom-0 inset-x-0 bg-obsidian-900/80 backdrop-blur border-t border-white/10 p-4 z-20">
-        <div className="max-w-2xl mx-auto flex gap-3">
-          {step > 0 && (
-            <button
-              type="button"
-              onClick={prevStep}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/15 text-steel-200 font-medium hover:bg-white/5 transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </button>
-          )}
+        <div className="max-w-2xl mx-auto">
+          <div className="flex gap-3">
+            {step > 0 && (
+              <button
+                type="button"
+                onClick={prevStep}
+                className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/15 text-steel-200 font-medium hover:bg-white/5 transition"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                Back
+              </button>
+            )}
 
-          {step < 3 ? (
-            <button
-              type="button"
-              onClick={nextStep}
-              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60"
-            >
-              Continue
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={submitting}
-              className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60 ${
-                submitting ? "cursor-not-allowed" : ""
-              }`}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  Submit Form
-                  <CheckCircle2 className="w-5 h-5" />
-                </>
-              )}
-            </button>
-          )}
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={nextStep}
+                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60"
+              >
+                Continue
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
+                className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60 ${
+                  submitting ? "cursor-not-allowed" : ""
+                }`}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  <>
+                    Submit Form
+                    <CheckCircle2 className="w-5 h-5" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -545,8 +548,17 @@ function Step1({
           error={errors["address.zip"]}
           required
         />
-      </div>
-    </div>
+        </div>
+
+  <div className="pt-3 text-center space-y-1">
+    <p className="text-[11px] uppercase tracking-wider text-steel-200/35">
+      {CLIENT.systemProvider}
+    </p>
+    <p className="text-[11px] text-steel-200/25">
+      {CLIENT.systemTagline}
+    </p>
+  </div>
+</div>
   );
 }
 
