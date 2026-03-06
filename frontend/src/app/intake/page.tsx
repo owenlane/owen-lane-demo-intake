@@ -13,7 +13,9 @@ import {
   Heart,
   ClipboardList,
   UserRound,
-  FileCheck
+  FileCheck,
+  ShieldCheck,
+  Lock,
 } from 'lucide-react';
 
 const STEPS = ['Personal Info', 'Insurance', 'Medical History', 'Consent'];
@@ -68,9 +70,7 @@ export default function IntakePage() {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [submissionId, setSubmissionId] = useState<string | null>(null);
 
-  // Load draft
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -81,12 +81,9 @@ export default function IntakePage() {
     } catch {}
   }, []);
 
-  // Auto-save draft
   useEffect(() => {
-    if (!submissionId) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
-    }
-  }, [form, submissionId]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(form));
+  }, [form]);
 
   const updatePersonal = useCallback((field: string, value: string) => {
     setForm((f) => ({ ...f, personalInfo: { ...f.personalInfo, [field]: value } }));
@@ -159,8 +156,8 @@ export default function IntakePage() {
     setSubmitting(true);
     try {
       const res = await submitIntake(form);
-localStorage.removeItem(STORAGE_KEY);
-window.location.href = `/intake/success?id=${encodeURIComponent(res.id)}`;
+      localStorage.removeItem(STORAGE_KEY);
+      window.location.href = `/intake/success?id=${encodeURIComponent(res.id)}`;
     } catch (err: any) {
       setErrors({ submit: err.message || 'Submission failed. Please try again.' });
     } finally {
@@ -168,56 +165,68 @@ window.location.href = `/intake/success?id=${encodeURIComponent(res.id)}`;
     }
   }
 
-  // Confirmation screen
-  if (submissionId) {
-    return (
-      <div className="min-h-screen bg-obsidian-950 text-steel-50">
-        <div className="max-w-md w-full text-center space-y-6 p-8">
-          <div className="mx-auto w-20 h-20 rounded-full bg-redlux-500 hover:bg-redlux-600 flex items-center justify-center">
-            <CheckCircle2 className="w-10 h-10 text-white" />
-          </div>
-
-          <h1 className="font-display text-3xl font-bold text-steel-50">
-  Form Submitted!
-</h1>
-
-          <p className="text-slate-600">
-            Your intake form has been received. Please save your confirmation ID for your records.
-          </p>
-
-          <div className="bg-white border-2 border-dental-200 rounded-xl p-4">
-            <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Confirmation ID</p>
-            <p className="font-mono text-lg font-semibold text-dental-700 break-all">{submissionId}</p>
-          </div>
-
-          <p className="text-sm text-slate-500">
-            If you have any questions, call our office {CLIENT.phone}.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-neutral-950 to-zinc-900">
+      {/* ambient glow */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[980px] h-[980px] rounded-full bg-red-600/10 blur-3xl opacity-70" />
+        <div className="absolute top-[32%] right-[-180px] w-[760px] h-[760px] rounded-full bg-red-700/10 blur-3xl opacity-60" />
+        <div className="absolute bottom-[-220px] left-[-140px] w-[700px] h-[700px] rounded-full bg-white/[0.03] blur-3xl" />
+      </div>
+
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-white/10 bg-obsidian-900/80 backdrop-blur-xl">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <ClipboardList className="w-5 h-5 text-white" />
           </div>
+
           <div>
             <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
-  {CLIENT.name}
-</h1>
-<p className="text-xs text-steel-200/70">
-  {CLIENT.intakeTitle}
-</p>
+              {CLIENT.name}
+            </h1>
+            <p className="text-xs text-steel-200/70">{CLIENT.intakeTitle}</p>
           </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 pb-32">
+      <main className="relative max-w-2xl mx-auto px-4 py-6 pb-32">
+        {/* hero trust strip */}
+        <div className="mb-6 rounded-2xl border border-white/10 bg-obsidian-900/55 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] overflow-hidden">
+          <div className="px-5 py-5 border-b border-white/10 bg-white/[0.03]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-wider text-steel-200/65 mb-3">
+                  <ShieldCheck className="w-3.5 h-3.5 text-redlux-500" />
+                  Secure Digital Intake
+                </div>
+
+                <h2 className="font-display text-2xl font-bold text-steel-50 leading-tight">
+                  New Patient Submission
+                </h2>
+                <p className="mt-2 text-sm text-steel-200/70 max-w-lg">
+                  Complete your intake securely online. Your information is sent directly to the office for review.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
+            <TrustMini
+              icon={<Lock className="w-4 h-4 text-redlux-500" />}
+              label="Secure submission"
+            />
+            <TrustMini
+              icon={<ShieldCheck className="w-4 h-4 text-redlux-500" />}
+              label="Office-ready intake"
+            />
+            <TrustMini
+              icon={<CheckCircle2 className="w-4 h-4 text-redlux-500" />}
+              label="Completion confirmation"
+            />
+          </div>
+        </div>
+
         {/* Progress */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
@@ -229,6 +238,7 @@ window.location.href = `/intake/success?id=${encodeURIComponent(res.id)}`;
               return (
                 <button
                   key={label}
+                  type="button"
                   onClick={() => i < step && setStep(i)}
                   className={`flex flex-col items-center gap-1.5 transition-all ${i <= step ? 'cursor-pointer' : 'cursor-default'}`}
                 >
@@ -237,7 +247,7 @@ window.location.href = `/intake/success?id=${encodeURIComponent(res.id)}`;
                       isDone
                         ? 'bg-red-600 text-white'
                         : isActive
-                        ? 'bg-red-600 text-white ring-4 ring-dental-100'
+                        ? 'bg-red-600 text-white ring-4 ring-redlux-500/15'
                         : 'bg-white/10 text-steel-200'
                     }`}
                   >
@@ -258,90 +268,115 @@ window.location.href = `/intake/success?id=${encodeURIComponent(res.id)}`;
 
           <div className="h-2 bg-white/10 rounded-full overflow-hidden">
             <div
-  className="progress-fill h-full bg-gradient-to-r from-red-600 to-red-700 rounded-full"
+              className="h-full bg-gradient-to-r from-red-600 to-red-700 rounded-full"
               style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Form card */}
-        <div className="rounded-2xl border border-white/10 bg-obsidian-900/70 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-6 md:p-8 step-enter">
-          {step === 0 && (
-            <Step1
-              data={form.personalInfo}
-              errors={errors}
-              updatePersonal={updatePersonal}
-              updateAddress={updateAddress}
-            />
-          )}
+        <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden">
+          <div className="px-6 md:px-8 py-5 border-b border-white/10 bg-white/[0.03]">
+            <p className="text-xs uppercase tracking-wider text-steel-200/55">
+              Step {step + 1} of {STEPS.length}
+            </p>
+          </div>
 
-          {step === 1 && <Step2 data={form.insuranceInfo} updateInsurance={updateInsurance} />}
+          <div className="p-6 md:p-8 step-enter">
+            {step === 0 && (
+              <Step1
+                data={form.personalInfo}
+                errors={errors}
+                updatePersonal={updatePersonal}
+                updateAddress={updateAddress}
+              />
+            )}
 
-          {step === 2 && (
-            <Step3
-              data={form.medicalHistory}
-              updateMedical={updateMedical}
-              toggleCondition={toggleCondition}
-            />
-          )}
+            {step === 1 && <Step2 data={form.insuranceInfo} updateInsurance={updateInsurance} />}
 
-          {step === 3 && <Step4 data={form.consent} errors={errors} updateConsent={updateConsent} />}
+            {step === 2 && (
+              <Step3
+                data={form.medicalHistory}
+                updateMedical={updateMedical}
+                toggleCondition={toggleCondition}
+              />
+            )}
 
-          {errors.submit && (
-            <div className="mt-4 p-3 bg-redlux-500/10 border border-redlux-500/30 rounded-lg text-sm text-redlux-500">
-              {errors.submit}
-            </div>
-          )}
+            {step === 3 && <Step4 data={form.consent} errors={errors} updateConsent={updateConsent} />}
+
+            {errors.submit && (
+              <div className="mt-4 p-3 bg-redlux-500/10 border border-redlux-500/30 rounded-lg text-sm text-redlux-500">
+                {errors.submit}
+              </div>
+            )}
+          </div>
         </div>
       </main>
 
       {/* Bottom nav */}
-<div className="fixed bottom-0 inset-x-0 bg-obsidian-900/80 backdrop-blur border-t border-white/10 p-4 z-20">
-  <div className="max-w-2xl mx-auto flex gap-3">
-    {step > 0 && (
-      <button
-        type="button"
-        onClick={prevStep}
-        className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/15 text-steel-200 font-medium hover:bg-white/5 transition"
-      >
-        <ChevronLeft className="w-4 h-4" />
-        Back
-      </button>
-    )}
+      <div className="fixed bottom-0 inset-x-0 bg-obsidian-900/80 backdrop-blur border-t border-white/10 p-4 z-20">
+        <div className="max-w-2xl mx-auto flex gap-3">
+          {step > 0 && (
+            <button
+              type="button"
+              onClick={prevStep}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/15 text-steel-200 font-medium hover:bg-white/5 transition"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Back
+            </button>
+          )}
 
-    {step < 3 ? (
-      <button
-        type="button"
-        onClick={nextStep}
-        className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60"
-      >
-        Continue
-        <ChevronRight className="w-4 h-4" />
-      </button>
-    ) : (
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={submitting}
-        className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60 ${
-          submitting ? "cursor-not-allowed" : ""
-        }`}
-      >
-        {submitting ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Submitting...
-          </>
-        ) : (
-          <>
-            Submit Form
-            <CheckCircle2 className="w-5 h-5" />
-          </>
-        )}
-      </button>
-    )}
-  </div>
-</div>
+          {step < 3 ? (
+            <button
+              type="button"
+              onClick={nextStep}
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60"
+            >
+              Continue
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60 ${
+                submitting ? "cursor-not-allowed" : ""
+              }`}
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  Submit Form
+                  <CheckCircle2 className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TrustMini({
+  icon,
+  label,
+}: {
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-obsidian-950/30 px-3 py-3 flex items-center gap-2.5">
+      <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
+        {icon}
+      </div>
+      <span className="text-xs text-steel-200/75">{label}</span>
     </div>
   );
 }
@@ -369,10 +404,7 @@ function InputField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium text-steel-200"
-      >
+      <label htmlFor={id} className="block text-sm font-medium text-steel-200">
         {label}
         {required && <span className="text-redlux-500 ml-1">*</span>}
       </label>
@@ -472,7 +504,6 @@ function Step1({
         />
       </div>
 
-      {/* divider (dark theme) */}
       <hr className="border-white/10" />
 
       <InputField
@@ -672,6 +703,7 @@ function Step3({
     </div>
   );
 }
+
 function Step4({
   data,
   errors,
@@ -692,7 +724,6 @@ function Step4({
         </p>
       </div>
 
-      {/* Notice box */}
       <div className="rounded-xl border border-white/10 bg-obsidian-950/45 p-4 text-xs leading-relaxed text-steel-200/80">
         <p className="mb-2 text-sm font-semibold text-steel-50">
           HIPAA Notice of Privacy Practices
@@ -712,7 +743,6 @@ function Step4({
         </div>
       </div>
 
-      {/* HIPAA checkbox */}
       <label
         className={[
           "flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition",
@@ -745,7 +775,6 @@ function Step4({
         </div>
       </label>
 
-      {/* Treatment checkbox */}
       <label
         className={[
           "flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition",
@@ -780,13 +809,9 @@ function Step4({
 
       <hr className="border-white/10" />
 
-      {/* Signature + Date */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
-          <label
-            htmlFor="sig"
-            className="block text-sm font-medium text-steel-200 mb-1.5"
-          >
+          <label htmlFor="sig" className="block text-sm font-medium text-steel-200 mb-1.5">
             Typed Signature <span className="text-redlux-500">*</span>
           </label>
 
@@ -812,10 +837,7 @@ function Step4({
         </div>
 
         <div>
-          <label
-            htmlFor="sigDate"
-            className="block text-sm font-medium text-steel-200 mb-1.5"
-          >
+          <label htmlFor="sigDate" className="block text-sm font-medium text-steel-200 mb-1.5">
             Date
           </label>
 
