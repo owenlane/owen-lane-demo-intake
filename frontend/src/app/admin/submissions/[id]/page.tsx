@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Loader2,
+  ShieldCheck,
+  HeartPulse,
 } from 'lucide-react';
 
 const STATUS_META: Record<
@@ -22,7 +24,7 @@ const STATUS_META: Record<
 > = {
   new: {
     label: 'New',
-    pill: 'border-white/10 bg-white/5 text-steel-50',
+    pill: 'border-redlux-500/25 bg-redlux-500/10 text-steel-50',
     dot: 'bg-red-600',
     activeBtn: 'bg-red-600 text-white border-red-600 shadow-lg shadow-red-600/20',
     idleBtn: 'bg-obsidian-950/30 text-steel-200 border-white/10 hover:bg-white/5 hover:border-white/15',
@@ -31,14 +33,14 @@ const STATUS_META: Record<
     label: 'Reviewed',
     pill: 'border-white/10 bg-white/5 text-steel-50',
     dot: 'bg-amber-400',
-    activeBtn: 'bg-white/10 text-steel-50 border-white/15',
+    activeBtn: 'bg-white/10 text-steel-50 border-white/15 shadow-lg shadow-black/20',
     idleBtn: 'bg-obsidian-950/30 text-steel-200 border-white/10 hover:bg-white/5 hover:border-white/15',
   },
   completed: {
     label: 'Completed',
-    pill: 'border-white/10 bg-white/5 text-steel-50',
+    pill: 'border-emerald-500/25 bg-emerald-500/10 text-steel-50',
     dot: 'bg-emerald-400',
-    activeBtn: 'bg-white/10 text-steel-50 border-white/15',
+    activeBtn: 'bg-emerald-500/15 text-steel-50 border-emerald-500/25 shadow-lg shadow-emerald-500/10',
     idleBtn: 'bg-obsidian-950/30 text-steel-200 border-white/10 hover:bg-white/5 hover:border-white/15',
   },
 };
@@ -104,51 +106,54 @@ export default function SubmissionDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-neutral-950 to-zinc-900">
-      {/* subtle glow */}
-      <div className="pointer-events-none absolute inset-0 opacity-60">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-red-600/10 blur-3xl" />
-        <div className="absolute -bottom-40 right-[-120px] w-[760px] h-[760px] rounded-full bg-red-700/10 blur-3xl" />
+      {/* Ambient glow */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[920px] h-[920px] rounded-full bg-red-600/10 blur-3xl opacity-70" />
+        <div className="absolute top-[28%] right-[-180px] w-[760px] h-[760px] rounded-full bg-red-700/10 blur-3xl opacity-60" />
+        <div className="absolute bottom-[-220px] left-[-140px] w-[700px] h-[700px] rounded-full bg-white/[0.03] blur-3xl" />
       </div>
 
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-obsidian-900/80 backdrop-blur-xl">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-20 border-b border-white/10 bg-obsidian-900/70 backdrop-blur-2xl">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push('/admin/submissions')}
-              className="p-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition"
+              className="p-2.5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
               title="Back"
               type="button"
             >
               <ArrowLeft className="w-5 h-5 text-steel-50" />
             </button>
 
-            <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
               <ClipboardList className="w-5 h-5 text-steel-50" />
             </div>
 
             <div>
-              <h1 className="font-display text-base font-bold text-steel-50 leading-tight">
+              <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
                 Submission Detail
               </h1>
-              <p className="text-[11px] text-steel-200/70">Bright Smile Dental</p>
+              <p className="text-xs text-steel-200/65 tracking-wide">Bright Smile Dental</p>
             </div>
           </div>
 
-          <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold capitalize border ${statusMeta.pill}`}>
+          <span
+            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl text-xs font-semibold capitalize border shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] ${statusMeta.pill}`}
+          >
             <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
             {statusMeta.label}
           </span>
         </div>
       </header>
 
-      <main className="relative max-w-5xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <main className="relative max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         {loading ? (
-          <div className="rounded-2xl border border-white/10 bg-obsidian-900/70 backdrop-blur-xl p-10 text-steel-200/70 flex items-center gap-2">
+          <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl p-10 text-steel-200/70 flex items-center gap-2 shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)]">
             <Loader2 className="w-5 h-5 animate-spin" />
             Loading submission...
           </div>
         ) : error ? (
-          <div className="rounded-2xl border border-redlux-500/30 bg-redlux-500/10 backdrop-blur-xl p-6 text-redlux-500 flex items-start gap-2">
+          <div className="rounded-3xl border border-redlux-500/30 bg-redlux-500/10 backdrop-blur-xl p-6 text-redlux-500 flex items-start gap-3 shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)]">
             <AlertTriangle className="w-5 h-5 mt-0.5" />
             <div>
               <div className="font-semibold">Error</div>
@@ -163,171 +168,180 @@ export default function SubmissionDetailPage() {
             </div>
           </div>
         ) : !data ? (
-          <div className="rounded-2xl border border-white/10 bg-obsidian-900/70 backdrop-blur-xl p-10 text-steel-200/70">
+          <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-xl p-10 text-steel-200/70 shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)]">
             Submission not found.
           </div>
         ) : (
           <>
-            {/* Patient Card */}
-            <div className="rounded-2xl border border-white/10 bg-obsidian-900/70 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-6">
-              <h2 className="font-display text-lg font-bold text-steel-50 mb-4">Patient</h2>
-
-              <div className="grid sm:grid-cols-2 gap-4 text-sm">
-                <div className="flex items-start gap-3">
-                  <User className="w-5 h-5 text-steel-200/40 mt-0.5" />
+            {/* Top grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-[1.15fr_0.85fr] gap-6">
+              {/* Patient Card */}
+              <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden">
+                <div className="border-b border-white/10 bg-white/[0.03] px-6 py-5 flex items-center justify-between">
                   <div>
-                    <div className="text-steel-200/60 text-xs">Name</div>
-                    <div className="font-semibold text-steel-50">
-                      {p?.first_name} {p?.last_name}
-                    </div>
+                    <h2 className="font-display text-xl font-bold text-steel-50">Patient</h2>
+                    <p className="text-sm text-steel-200/65 mt-1">Primary contact and intake identity</p>
+                  </div>
+
+                  <div className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-steel-200/70">
+                    <User className="w-3.5 h-3.5" />
+                    Profile
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-steel-200/40 mt-0.5" />
-                  <div>
-                    <div className="text-steel-200/60 text-xs">Email</div>
-                    <div className="font-semibold text-steel-50 break-all">{p?.email}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-steel-200/40 mt-0.5" />
-                  <div>
-                    <div className="text-steel-200/60 text-xs">Phone</div>
-                    <div className="font-semibold text-steel-50">{p?.phone}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <Calendar className="w-5 h-5 text-steel-200/40 mt-0.5" />
-                  <div>
-                    <div className="text-steel-200/60 text-xs">DOB</div>
-                    <div className="font-semibold text-steel-50">{p?.date_of_birth}</div>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 sm:col-span-2">
-                  <MapPin className="w-5 h-5 text-steel-200/40 mt-0.5" />
-                  <div>
-                    <div className="text-steel-200/60 text-xs">Address</div>
-                    <div className="font-semibold text-steel-50">
-                      {p?.address_street}, {p?.address_city}, {p?.address_state} {p?.address_zip}
+                <div className="p-6">
+                  <div className="grid sm:grid-cols-2 gap-4 text-sm">
+                    <InfoTile
+                      icon={<User className="w-5 h-5 text-steel-200/40 mt-0.5" />}
+                      label="Name"
+                      value={`${p?.first_name || ''} ${p?.last_name || ''}`.trim() || '—'}
+                    />
+                    <InfoTile
+                      icon={<Mail className="w-5 h-5 text-steel-200/40 mt-0.5" />}
+                      label="Email"
+                      value={p?.email || '—'}
+                      breakWords
+                    />
+                    <InfoTile
+                      icon={<Phone className="w-5 h-5 text-steel-200/40 mt-0.5" />}
+                      label="Phone"
+                      value={p?.phone || '—'}
+                    />
+                    <InfoTile
+                      icon={<Calendar className="w-5 h-5 text-steel-200/40 mt-0.5" />}
+                      label="DOB"
+                      value={p?.date_of_birth || '—'}
+                    />
+                    <div className="sm:col-span-2">
+                      <InfoTile
+                        icon={<MapPin className="w-5 h-5 text-steel-200/40 mt-0.5" />}
+                        label="Address"
+                        value={
+                          [
+                            p?.address_street,
+                            p?.address_city,
+                            p?.address_state,
+                            p?.address_zip,
+                          ]
+                            .filter(Boolean)
+                            .join(', ') || '—'
+                        }
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Status Controls */}
-            <div className="rounded-2xl border border-white/10 bg-obsidian-900/70 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-6">
-              <h2 className="font-display text-lg font-bold text-steel-50 mb-2">Workflow</h2>
-              <p className="text-sm text-steel-200/70 mb-4">Update the status as your team reviews the form.</p>
-
-              <div className="flex flex-wrap gap-2">
-                {(['new', 'reviewed', 'completed'] as const).map((s) => {
-                  const meta = STATUS_META[s] || STATUS_META.new;
-                  const isActive = data.status === s;
-
-                  return (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setStatus(s)}
-                      disabled={saving || isActive}
-                      className={[
-                        'px-4 py-2 rounded-xl text-sm font-semibold transition border',
-                        isActive ? meta.activeBtn : meta.idleBtn,
-                        saving ? 'opacity-70' : '',
-                      ].join(' ')}
-                    >
-                      {saving && !isActive ? 'Updating...' : meta.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {saving && (
-                <div className="mt-3 text-sm text-steel-200/70 flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving status...
-                </div>
-              )}
-            </div>
-
-            {/* Form Summary (your upgraded block kept) */}
-            <div className="rounded-2xl border border-white/10 bg-obsidian-900/70 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-6">
-              <div className="flex items-start justify-between gap-4 mb-4">
-                <div>
-                  <h2 className="font-display text-lg font-bold text-steel-50">Form Summary</h2>
-                  <p className="text-sm text-steel-200/70">
-                    A clean snapshot of what the patient submitted.
+              {/* Workflow Card */}
+              <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden">
+                <div className="border-b border-white/10 bg-white/[0.03] px-6 py-5">
+                  <h2 className="font-display text-xl font-bold text-steel-50">Workflow</h2>
+                  <p className="text-sm text-steel-200/65 mt-1">
+                    Move this submission through your internal review process.
                   </p>
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-obsidian-950/40 px-3 py-1 text-xs text-steel-200">
+                <div className="p-6 space-y-5">
+                  <div className="rounded-2xl border border-white/10 bg-obsidian-950/35 p-4">
+                    <p className="text-xs uppercase tracking-wider text-steel-200/55 mb-2">Current Status</p>
+                    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-white/10 bg-white/5 text-sm font-semibold text-steel-50">
+                      <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
+                      {statusMeta.label}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-steel-200/55 mb-3">Update Status</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(['new', 'reviewed', 'completed'] as const).map((s) => {
+                        const meta = STATUS_META[s] || STATUS_META.new;
+                        const isActive = data.status === s;
+
+                        return (
+                          <button
+                            key={s}
+                            type="button"
+                            onClick={() => setStatus(s)}
+                            disabled={saving || isActive}
+                            className={[
+                              'px-4 py-2.5 rounded-2xl text-sm font-semibold transition border',
+                              isActive ? meta.activeBtn : meta.idleBtn,
+                              saving ? 'opacity-70' : '',
+                            ].join(' ')}
+                          >
+                            {saving && !isActive ? 'Updating...' : meta.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {saving && (
+                    <div className="text-sm text-steel-200/70 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Saving status...
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Form Summary */}
+            <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden">
+              <div className="border-b border-white/10 bg-white/[0.03] px-6 py-5 flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-display text-xl font-bold text-steel-50">Form Summary</h2>
+                  <p className="text-sm text-steel-200/65 mt-1">
+                    Clean human-readable breakdown of the submitted intake.
+                  </p>
+                </div>
+
+                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-obsidian-950/40 px-3 py-1.5 text-xs text-steel-200/70">
                   <CheckCircle2 className="h-4 w-4 text-redlux-500" />
                   Stored in Supabase
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="p-6 grid grid-cols-1 xl:grid-cols-2 gap-5">
                 {/* Consent */}
-                <div className="rounded-xl border border-white/10 bg-obsidian-950/35 p-4">
-                  <p className="text-xs uppercase tracking-wider text-steel-200/70 mb-3">Consent</p>
+                <div className="rounded-2xl border border-white/10 bg-obsidian-950/35 p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <ShieldCheck className="w-4 h-4 text-redlux-500" />
+                    <p className="text-xs uppercase tracking-wider text-steel-200/65">Consent</p>
+                  </div>
 
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-steel-200/80">HIPAA acknowledged</span>
-                      <span
-                        className={[
-                          'text-xs font-semibold px-2.5 py-1 rounded-lg border',
-                          payload?.consent?.hipaaAcknowledged
-                            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-                            : 'border-redlux-500/30 bg-redlux-500/10 text-redlux-200',
-                        ].join(' ')}
-                      >
-                        {payload?.consent?.hipaaAcknowledged ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-steel-200/80">Treatment consent</span>
-                      <span
-                        className={[
-                          'text-xs font-semibold px-2.5 py-1 rounded-lg border',
-                          payload?.consent?.treatmentConsent
-                            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-                            : 'border-redlux-500/30 bg-redlux-500/10 text-redlux-200',
-                        ].join(' ')}
-                      >
-                        {payload?.consent?.treatmentConsent ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-steel-200/80">Signature</span>
-                      <span className="font-semibold text-steel-50 truncate max-w-[60%]">
-                        {payload?.consent?.signatureText || '—'}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-steel-200/80">Signature date</span>
-                      <span className="font-semibold text-steel-50">
-                        {payload?.consent?.signatureDate || '—'}
-                      </span>
-                    </div>
+                  <div className="space-y-3 text-sm">
+                    <SummaryRow
+                      label="HIPAA acknowledged"
+                      value={payload?.consent?.hipaaAcknowledged ? 'Yes' : 'No'}
+                      positive={!!payload?.consent?.hipaaAcknowledged}
+                    />
+                    <SummaryRow
+                      label="Treatment consent"
+                      value={payload?.consent?.treatmentConsent ? 'Yes' : 'No'}
+                      positive={!!payload?.consent?.treatmentConsent}
+                    />
+                    <SummaryTextRow
+                      label="Signature"
+                      value={payload?.consent?.signatureText || '—'}
+                    />
+                    <SummaryTextRow
+                      label="Signature date"
+                      value={payload?.consent?.signatureDate || '—'}
+                    />
                   </div>
                 </div>
 
                 {/* Medical */}
-                <div className="rounded-xl border border-white/10 bg-obsidian-950/35 p-4">
-                  <p className="text-xs uppercase tracking-wider text-steel-200/70 mb-3">Medical</p>
+                <div className="rounded-2xl border border-white/10 bg-obsidian-950/35 p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <HeartPulse className="w-4 h-4 text-redlux-500" />
+                    <p className="text-xs uppercase tracking-wider text-steel-200/65">Medical</p>
+                  </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     <div>
-                      <p className="text-xs text-steel-200/70 mb-1.5">Conditions</p>
+                      <p className="text-xs text-steel-200/65 mb-2">Conditions</p>
                       {Array.isArray(payload?.medicalHistory?.conditions) &&
                       payload.medicalHistory.conditions.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
@@ -341,48 +355,123 @@ export default function SubmissionDetailPage() {
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-steel-200/70">None selected</p>
+                        <p className="text-sm text-steel-200/65">None selected</p>
                       )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="rounded-lg border border-white/10 bg-obsidian-950/30 p-3">
-                        <p className="text-xs text-steel-200/70 mb-1">Medications</p>
-                        <p className="text-sm text-steel-50 whitespace-pre-wrap break-words">
-                          {payload?.medicalHistory?.medications || '—'}
-                        </p>
-                      </div>
-
-                      <div className="rounded-lg border border-white/10 bg-obsidian-950/30 p-3">
-                        <p className="text-xs text-steel-200/70 mb-1">Allergies</p>
-                        <p className="text-sm text-steel-50 whitespace-pre-wrap break-words">
-                          {payload?.medicalHistory?.allergies || '—'}
-                        </p>
-                      </div>
+                      <SummaryBox
+                        label="Medications"
+                        value={payload?.medicalHistory?.medications || '—'}
+                      />
+                      <SummaryBox
+                        label="Allergies"
+                        value={payload?.medicalHistory?.allergies || '—'}
+                      />
                     </div>
 
-                    <div className="rounded-lg border border-white/10 bg-obsidian-950/30 p-3">
-                      <p className="text-xs text-steel-200/70 mb-1">Previous dental surgeries</p>
-                      <p className="text-sm text-steel-50 whitespace-pre-wrap break-words">
-                        {payload?.medicalHistory?.dentalSurgeries || '—'}
-                      </p>
-                    </div>
+                    <SummaryBox
+                      label="Previous dental surgeries"
+                      value={payload?.medicalHistory?.dentalSurgeries || '—'}
+                    />
                   </div>
                 </div>
               </div>
 
-              <details className="mt-5 rounded-xl border border-white/10 bg-obsidian-950/25 p-4">
-                <summary className="cursor-pointer text-sm font-medium text-steel-200 hover:text-steel-50 select-none">
-                  View raw JSON
-                </summary>
-                <pre className="mt-3 text-xs rounded-xl border border-white/10 bg-obsidian-950/50 p-4 overflow-auto text-steel-200">
+              <div className="px-6 pb-6">
+                <details className="rounded-2xl border border-white/10 bg-obsidian-950/25 p-4">
+                  <summary className="cursor-pointer text-sm font-medium text-steel-200 hover:text-steel-50 select-none">
+                    View raw JSON
+                  </summary>
+                  <pre className="mt-3 text-xs rounded-2xl border border-white/10 bg-obsidian-950/50 p-4 overflow-auto text-steel-200">
 {JSON.stringify(payload, null, 2)}
-                </pre>
-              </details>
+                  </pre>
+                </details>
+              </div>
             </div>
           </>
         )}
       </main>
+    </div>
+  );
+}
+
+function InfoTile({
+  icon,
+  label,
+  value,
+  breakWords = false,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  breakWords?: boolean;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-obsidian-950/30 p-4 flex items-start gap-3">
+      {icon}
+      <div className="min-w-0">
+        <div className="text-steel-200/60 text-xs mb-1">{label}</div>
+        <div className={`font-semibold text-steel-50 ${breakWords ? 'break-all' : ''}`}>
+          {value}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  positive,
+}: {
+  label: string;
+  value: string;
+  positive: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-steel-200/80">{label}</span>
+      <span
+        className={[
+          'text-xs font-semibold px-2.5 py-1 rounded-lg border',
+          positive
+            ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
+            : 'border-redlux-500/30 bg-redlux-500/10 text-redlux-200',
+        ].join(' ')}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function SummaryTextRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-steel-200/80">{label}</span>
+      <span className="font-semibold text-steel-50 max-w-[60%] truncate">{value}</span>
+    </div>
+  );
+}
+
+function SummaryBox({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-obsidian-950/30 p-3">
+      <p className="text-xs text-steel-200/65 mb-1">{label}</p>
+      <p className="text-sm text-steel-50 whitespace-pre-wrap break-words">{value}</p>
     </div>
   );
 }
