@@ -1,12 +1,12 @@
-﻿"use client";
-
-import { CLIENT } from "@/lib/client";
-import { useSearchParams } from "next/navigation";
+﻿import { CLIENT } from "@/lib/client";
 import { CheckCircle2 } from "lucide-react";
 
-export default function IntakeSuccessPage() {
-  const params = useSearchParams();
-  const id = params.get("id") || "";
+export default function IntakeSuccessPage({
+  searchParams,
+}: {
+  searchParams?: { id?: string };
+}) {
+  const id = searchParams?.id || "";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-neutral-950 to-zinc-900 text-steel-50">
@@ -19,6 +19,7 @@ export default function IntakeSuccessPage() {
           <h1 className="font-display text-3xl font-bold text-steel-50">
             Form Submitted
           </h1>
+
           <p className="mt-2 text-sm text-steel-200/80">
             Your intake form has been received. Save your confirmation ID.
           </p>
