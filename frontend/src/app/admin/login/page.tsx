@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { CLIENT } from "@/lib/client";
 import { adminLogin } from '@/lib/api';
 import { Lock, LogIn, Loader2, ClipboardList } from 'lucide-react';
 
@@ -42,7 +43,12 @@ export default function AdminLoginPage() {
             <ClipboardList className="w-7 h-7 text-steel-50" />
           </div>
           <h1 className="font-display text-2xl font-bold text-steel-50">Admin Dashboard</h1>
-          <p className="text-steel-200/70 text-sm mt-1">Bright Smile Dental</p>
+          <div className="mt-1 space-y-1">
+  <p className="text-steel-200/70 text-sm">{CLIENT.name}</p>
+  <p className="text-[11px] uppercase tracking-wider text-steel-200/40">
+    {CLIENT.systemProvider}
+  </p>
+</div>
         </div>
 
         {/* Glass card */}

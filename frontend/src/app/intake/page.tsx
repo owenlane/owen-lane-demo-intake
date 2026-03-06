@@ -204,9 +204,14 @@ export default function IntakePage() {
                 <h2 className="font-display text-2xl font-bold text-steel-50 leading-tight">
                   New Patient Submission
                 </h2>
-                <p className="mt-2 text-sm text-steel-200/70 max-w-lg">
-                  Complete your intake securely online. Your information is sent directly to the office for review.
-                </p>
+                <>
+  <p className="mt-2 text-sm text-steel-200/70 max-w-lg">
+    Complete your intake securely online. Your information is sent directly to the office for review.
+  </p>
+  <p className="mt-3 text-[11px] uppercase tracking-wider text-steel-200/45">
+    Powered by {CLIENT.systemProvider}
+  </p>
+</>
               </div>
             </div>
           </div>

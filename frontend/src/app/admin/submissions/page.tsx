@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { CLIENT } from "@/lib/client";
 import { getSubmissions, exportCsv } from '@/lib/api';
 import {
   Search,
@@ -141,9 +142,14 @@ export default function SubmissionsPage() {
               <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
                 Submission Command Center
               </h1>
-              <p className="text-xs text-steel-200/65 tracking-wide">
-                Bright Smile Dental
-              </p>
+              <div className="space-y-1">
+  <p className="text-xs text-steel-200/65 tracking-wide">
+    {CLIENT.name}
+  </p>
+  <p className="text-[11px] uppercase tracking-wider text-steel-200/40">
+    {CLIENT.systemProvider}
+  </p>
+</div>
             </div>
           </div>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { CLIENT } from "@/lib/client";
 import { getSubmissionById, updateSubmissionStatus } from '@/lib/api';
 import {
   ArrowLeft,
@@ -133,7 +134,12 @@ export default function SubmissionDetailPage() {
               <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
                 Submission Detail
               </h1>
-              <p className="text-xs text-steel-200/65 tracking-wide">Bright Smile Dental</p>
+              <div className="space-y-1">
+  <p className="text-xs text-steel-200/65 tracking-wide">{CLIENT.name}</p>
+  <p className="text-[11px] uppercase tracking-wider text-steel-200/40">
+    {CLIENT.systemProvider}
+  </p>
+</div>
             </div>
           </div>
 

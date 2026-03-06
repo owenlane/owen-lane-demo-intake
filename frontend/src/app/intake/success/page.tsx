@@ -80,11 +80,14 @@ export default function IntakeSuccessPage({
               </div>
             </div>
 
-            <div className="mt-6 pt-5 border-t border-white/10 text-center">
-              <p className="text-xs uppercase tracking-wider text-steel-200/45">
-                {CLIENT.name}
-              </p>
-            </div>
+            <div className="mt-6 pt-5 border-t border-white/10 text-center space-y-1">
+  <p className="text-xs uppercase tracking-wider text-steel-200/45">
+    {CLIENT.systemProvider}
+  </p>
+  <p className="text-[11px] text-steel-200/35">
+    {CLIENT.systemTagline}
+  </p>
+</div>
           </div>
         </div>
       </div>
