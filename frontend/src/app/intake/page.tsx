@@ -159,8 +159,8 @@ export default function IntakePage() {
     setSubmitting(true);
     try {
       const res = await submitIntake(form);
-      setSubmissionId(res.id);
-      localStorage.removeItem(STORAGE_KEY);
+localStorage.removeItem(STORAGE_KEY);
+window.location.href = `/intake/success?id=${encodeURIComponent(res.id)}`;
     } catch (err: any) {
       setErrors({ submit: err.message || 'Submission failed. Please try again.' });
     } finally {
@@ -171,13 +171,15 @@ export default function IntakePage() {
   // Confirmation screen
   if (submissionId) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-dental-50 via-white to-emerald-50">
+      <div className="min-h-screen bg-obsidian-950 text-steel-50">
         <div className="max-w-md w-full text-center space-y-6 p-8">
-          <div className="mx-auto w-20 h-20 rounded-full bg-dental-500 flex items-center justify-center">
+          <div className="mx-auto w-20 h-20 rounded-full bg-redlux-500 hover:bg-redlux-600 flex items-center justify-center">
             <CheckCircle2 className="w-10 h-10 text-white" />
           </div>
 
-          <h1 className="font-display text-3xl font-bold text-slate-900">Form Submitted!</h1>
+          <h1 className="font-display text-3xl font-bold text-steel-50">
+  Form Submitted!
+</h1>
 
           <p className="text-slate-600">
             Your intake form has been received. Please save your confirmation ID for your records.
@@ -199,14 +201,18 @@ export default function IntakePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-neutral-950 to-zinc-900">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-20">
+      <header className="sticky top-0 z-20 border-b border-white/10 bg-obsidian-900/80 backdrop-blur-xl">
         <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center">
             <ClipboardList className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-display text-lg font-bold text-slate-900 leading-tight">{CLIENT.name}</h1>
-            <p className="text-xs text-slate-500">{CLIENT.intakeTitle}</p>
+            <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
+  {CLIENT.name}
+</h1>
+<p className="text-xs text-steel-200/70">
+  {CLIENT.intakeTitle}
+</p>
           </div>
         </div>
       </header>
@@ -232,7 +238,7 @@ export default function IntakePage() {
                         ? 'bg-red-600 text-white'
                         : isActive
                         ? 'bg-red-600 text-white ring-4 ring-dental-100'
-                        : 'bg-slate-200 text-slate-500'
+                        : 'bg-white/10 text-steel-200'
                     }`}
                   >
                     {isDone ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
@@ -240,7 +246,7 @@ export default function IntakePage() {
 
                   <span
                     className={`text-[11px] font-medium hidden sm:block ${
-                      isActive ? 'text-dental-700' : isDone ? 'text-dental-600' : 'text-slate-400'
+                      isActive ? 'text-steel-50' : isDone ? 'text-steel-200' : 'text-steel-400'
                     }`}
                   >
                     {label}
@@ -250,7 +256,7 @@ export default function IntakePage() {
             })}
           </div>
 
-          <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
             <div
   className="progress-fill h-full bg-gradient-to-r from-red-600 to-red-700 rounded-full"
               style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
@@ -259,7 +265,7 @@ export default function IntakePage() {
         </div>
 
         {/* Form card */}
-        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 step-enter" key={step}>
+        <div className="rounded-2xl border border-white/10 bg-obsidian-900/70 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-6 md:p-8 step-enter">
           {step === 0 && (
             <Step1
               data={form.personalInfo}
@@ -282,7 +288,7 @@ export default function IntakePage() {
           {step === 3 && <Step4 data={form.consent} errors={errors} updateConsent={updateConsent} />}
 
           {errors.submit && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div className="mt-4 p-3 bg-redlux-500/10 border border-redlux-500/30 rounded-lg text-sm text-redlux-500">
               {errors.submit}
             </div>
           )}
@@ -290,47 +296,52 @@ export default function IntakePage() {
       </main>
 
       {/* Bottom nav */}
-      <div className="fixed bottom-0 inset-x-0 bg-white/90 backdrop-blur border-t border-slate-200 p-4 z-20">
-        <div className="max-w-2xl mx-auto flex gap-3">
-          {step > 0 && (
-            <button
-              onClick={prevStep}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 transition"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              Back
-            </button>
-          )}
+<div className="fixed bottom-0 inset-x-0 bg-obsidian-900/80 backdrop-blur border-t border-white/10 p-4 z-20">
+  <div className="max-w-2xl mx-auto flex gap-3">
+    {step > 0 && (
+      <button
+        type="button"
+        onClick={prevStep}
+        className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/15 text-steel-200 font-medium hover:bg-white/5 transition"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Back
+      </button>
+    )}
 
-          {step < 3 ? (
-            <button
-              onClick={nextStep}
-              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60"
-            >
-              Continue
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-dental-500/20 disabled:opacity-60"
-            >
-              {submitting ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Submitting...
-                </>
-              ) : (
-                <>
-                  Submit Form
-                  <CheckCircle2 className="w-5 h-5" />
-                </>
-              )}
-            </button>
-          )}
-        </div>
-      </div>
+    {step < 3 ? (
+      <button
+        type="button"
+        onClick={nextStep}
+        className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60"
+      >
+        Continue
+        <ChevronRight className="w-4 h-4" />
+      </button>
+    ) : (
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={submitting}
+        className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60 ${
+          submitting ? "cursor-not-allowed" : ""
+        }`}
+      >
+        {submitting ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            Submitting...
+          </>
+        ) : (
+          <>
+            Submit Form
+            <CheckCircle2 className="w-5 h-5" />
+          </>
+        )}
+      </button>
+    )}
+  </div>
+</div>
     </div>
   );
 }
@@ -357,10 +368,13 @@ function InputField({
   required?: boolean;
 }) {
   return (
-    <div>
-      <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1.5">
+    <div className="space-y-1.5">
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-steel-200"
+      >
         {label}
-        {required && <span className="text-red-400 ml-0.5">*</span>}
+        {required && <span className="text-redlux-500 ml-1">*</span>}
       </label>
 
       <input
@@ -369,14 +383,17 @@ function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`w-full px-4 py-2.5 rounded-xl border text-sm transition focus:outline-none focus:ring-2 ${
+        className={[
+          "w-full px-4 py-3 rounded-xl border text-[15px] transition",
+          "bg-obsidian-950/60 text-steel-50 placeholder:text-steel-400",
+          "focus:outline-none focus:ring-2",
           error
-            ? 'border-red-300 focus:ring-red-200 bg-red-50'
-            : 'border-slate-300 focus:ring-dental-200 focus:border-dental-400 bg-white'
-        }`}
+            ? "border-redlux-500/60 focus:ring-redlux-500/25"
+            : "border-white/10 focus:border-white/20 focus:ring-redlux-500/20",
+        ].join(" ")}
       />
 
-      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+      {error && <p className="text-xs text-redlux-500">{error}</p>}
     </div>
   );
 }
@@ -387,7 +404,7 @@ function Step1({
   updatePersonal,
   updateAddress,
 }: {
-  data: FormData['personalInfo'];
+  data: FormData["personalInfo"];
   errors: Record<string, string>;
   updatePersonal: (f: string, v: string) => void;
   updateAddress: (f: string, v: string) => void;
@@ -395,8 +412,12 @@ function Step1({
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-display text-xl font-bold text-slate-900">Personal Information</h2>
-        <p className="text-sm text-slate-500 mt-1">Please provide your basic contact details.</p>
+        <h2 className="font-display text-xl font-bold text-steel-50">
+          Personal Information
+        </h2>
+        <p className="text-sm text-steel-200/80 mt-1">
+          Please provide your basic contact details.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -404,7 +425,7 @@ function Step1({
           label="First Name"
           id="firstName"
           value={data.firstName}
-          onChange={(v) => updatePersonal('firstName', v)}
+          onChange={(v) => updatePersonal("firstName", v)}
           error={errors.firstName}
           required
         />
@@ -412,7 +433,7 @@ function Step1({
           label="Last Name"
           id="lastName"
           value={data.lastName}
-          onChange={(v) => updatePersonal('lastName', v)}
+          onChange={(v) => updatePersonal("lastName", v)}
           error={errors.lastName}
           required
         />
@@ -423,7 +444,7 @@ function Step1({
         id="dob"
         type="date"
         value={data.dateOfBirth}
-        onChange={(v) => updatePersonal('dateOfBirth', v)}
+        onChange={(v) => updatePersonal("dateOfBirth", v)}
         error={errors.dateOfBirth}
         required
       />
@@ -434,7 +455,7 @@ function Step1({
           id="phone"
           type="tel"
           value={data.phone}
-          onChange={(v) => updatePersonal('phone', v)}
+          onChange={(v) => updatePersonal("phone", v)}
           error={errors.phone}
           placeholder="(702) 555-0123"
           required
@@ -444,21 +465,22 @@ function Step1({
           id="email"
           type="email"
           value={data.email}
-          onChange={(v) => updatePersonal('email', v)}
+          onChange={(v) => updatePersonal("email", v)}
           error={errors.email}
           placeholder="you@email.com"
           required
         />
       </div>
 
-      <hr className="border-slate-100" />
+      {/* divider (dark theme) */}
+      <hr className="border-white/10" />
 
       <InputField
         label="Street Address"
         id="street"
         value={data.address.street}
-        onChange={(v) => updateAddress('street', v)}
-        error={errors['address.street']}
+        onChange={(v) => updateAddress("street", v)}
+        error={errors["address.street"]}
         required
       />
 
@@ -467,24 +489,24 @@ function Step1({
           label="City"
           id="city"
           value={data.address.city}
-          onChange={(v) => updateAddress('city', v)}
-          error={errors['address.city']}
+          onChange={(v) => updateAddress("city", v)}
+          error={errors["address.city"]}
           required
         />
         <InputField
           label="State"
           id="state"
           value={data.address.state}
-          onChange={(v) => updateAddress('state', v)}
-          error={errors['address.state']}
+          onChange={(v) => updateAddress("state", v)}
+          error={errors["address.state"]}
           required
         />
         <InputField
           label="ZIP"
           id="zip"
           value={data.address.zip}
-          onChange={(v) => updateAddress('zip', v)}
-          error={errors['address.zip']}
+          onChange={(v) => updateAddress("zip", v)}
+          error={errors["address.zip"]}
           required
         />
       </div>
@@ -496,21 +518,25 @@ function Step2({
   data,
   updateInsurance,
 }: {
-  data: FormData['insuranceInfo'];
+  data: FormData["insuranceInfo"];
   updateInsurance: (f: string, v: string) => void;
 }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-display text-xl font-bold text-slate-900">Insurance Information</h2>
-        <p className="text-sm text-slate-500 mt-1">Optional — leave blank if self-pay.</p>
+        <h2 className="font-display text-xl font-bold text-steel-50">
+          Insurance Information
+        </h2>
+        <p className="text-sm text-steel-200/80 mt-1">
+          Optional — leave blank if self-pay.
+        </p>
       </div>
 
       <InputField
         label="Insurance Provider"
         id="provider"
         value={data.provider}
-        onChange={(v) => updateInsurance('provider', v)}
+        onChange={(v) => updateInsurance("provider", v)}
         placeholder="e.g. Delta Dental, Cigna"
       />
 
@@ -519,19 +545,19 @@ function Step2({
           label="Member ID"
           id="memberId"
           value={data.memberId}
-          onChange={(v) => updateInsurance('memberId', v)}
+          onChange={(v) => updateInsurance("memberId", v)}
           placeholder="Member ID #"
         />
         <InputField
           label="Group Number"
           id="groupNumber"
           value={data.groupNumber}
-          onChange={(v) => updateInsurance('groupNumber', v)}
+          onChange={(v) => updateInsurance("groupNumber", v)}
           placeholder="Group #"
         />
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-700">
+      <div className="rounded-xl border border-white/10 bg-obsidian-950/40 p-4 text-sm text-steel-200">
         <p className="font-medium mb-1">Don&apos;t have your insurance card handy?</p>
         <p>No worries — you can bring it to your appointment and we&apos;ll update your file then.</p>
       </div>
@@ -544,176 +570,267 @@ function Step3({
   updateMedical,
   toggleCondition,
 }: {
-  data: FormData['medicalHistory'];
+  data: FormData["medicalHistory"];
   updateMedical: (f: string, v: string | string[]) => void;
   toggleCondition: (c: string) => void;
 }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-display text-xl font-bold text-slate-900">Medical History</h2>
-        <p className="text-sm text-slate-500 mt-1">Check any conditions that apply to you.</p>
+        <h2 className="font-display text-xl font-bold text-steel-50">
+          Medical History
+        </h2>
+        <p className="text-sm text-steel-200/80 mt-1">
+          Check any conditions that apply to you.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-60 overflow-y-auto pr-2">
-        {MEDICAL_CONDITIONS.map((c) => (
-          <label
-            key={c}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition text-sm ${
-              data.conditions.includes(c) ? 'bg-dental-50 text-dental-800' : 'hover:bg-slate-50 text-slate-700'
-            }`}
-          >
-            <input
-              type="checkbox"
-              checked={data.conditions.includes(c)}
-              onChange={() => toggleCondition(c)}
-              className="w-4 h-4 rounded border-slate-300 text-dental-500 focus:ring-dental-300 cursor-pointer"
-            />
-            {c}
+        {MEDICAL_CONDITIONS.map((c) => {
+          const checked = data.conditions.includes(c);
+
+          return (
+            <label
+              key={c}
+              className={[
+                "flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer transition text-sm border",
+                "select-none",
+                checked
+                  ? "bg-redlux-500/12 border-redlux-500/35 text-steel-50"
+                  : "bg-obsidian-950/25 border-white/10 text-steel-200 hover:bg-white/5 hover:border-white/15",
+              ].join(" ")}
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => toggleCondition(c)}
+                className={[
+                  "w-4 h-4 rounded border cursor-pointer",
+                  "border-white/20 bg-obsidian-950",
+                  "accent-red-600",
+                  "focus:outline-none focus:ring-2 focus:ring-redlux-500/30",
+                ].join(" ")}
+              />
+              <span className="leading-tight">{c}</span>
+            </label>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-steel-200 mb-1.5">
+            Current Medications
           </label>
-        ))}
-      </div>
+          <textarea
+            value={data.medications}
+            onChange={(e) => updateMedical("medications", e.target.value)}
+            placeholder="List current medications and dosages..."
+            rows={3}
+            className={[
+              "w-full px-4 py-3 rounded-xl border text-sm transition resize-none",
+              "bg-obsidian-950/60 text-steel-50 placeholder:text-steel-400",
+              "border-white/10 focus:outline-none focus:ring-2 focus:ring-redlux-500/20 focus:border-white/20",
+            ].join(" ")}
+          />
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Current Medications</label>
-        <textarea
-          value={data.medications}
-          onChange={(e) => updateMedical('medications', e.target.value)}
-          placeholder="List current medications and dosages..."
-          rows={3}
-          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-dental-200 focus:border-dental-400 resize-none"
-        />
-      </div>
+        <div>
+          <label className="block text-sm font-medium text-steel-200 mb-1.5">
+            Allergies
+          </label>
+          <textarea
+            value={data.allergies}
+            onChange={(e) => updateMedical("allergies", e.target.value)}
+            placeholder="List any known allergies (medications, latex, etc.)..."
+            rows={2}
+            className={[
+              "w-full px-4 py-3 rounded-xl border text-sm transition resize-none",
+              "bg-obsidian-950/60 text-steel-50 placeholder:text-steel-400",
+              "border-white/10 focus:outline-none focus:ring-2 focus:ring-redlux-500/20 focus:border-white/20",
+            ].join(" ")}
+          />
+        </div>
 
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Allergies</label>
-        <textarea
-          value={data.allergies}
-          onChange={(e) => updateMedical('allergies', e.target.value)}
-          placeholder="List any known allergies (medications, latex, etc.)..."
-          rows={2}
-          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-dental-200 focus:border-dental-400 resize-none"
-        />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Previous Dental Surgeries</label>
-        <textarea
-          value={data.dentalSurgeries}
-          onChange={(e) => updateMedical('dentalSurgeries', e.target.value)}
-          placeholder="Describe any past dental surgeries or procedures..."
-          rows={2}
-          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-dental-200 focus:border-dental-400 resize-none"
-        />
+        <div>
+          <label className="block text-sm font-medium text-steel-200 mb-1.5">
+            Previous Dental Surgeries
+          </label>
+          <textarea
+            value={data.dentalSurgeries}
+            onChange={(e) => updateMedical("dentalSurgeries", e.target.value)}
+            placeholder="Describe any past dental surgeries or procedures..."
+            rows={2}
+            className={[
+              "w-full px-4 py-3 rounded-xl border text-sm transition resize-none",
+              "bg-obsidian-950/60 text-steel-50 placeholder:text-steel-400",
+              "border-white/10 focus:outline-none focus:ring-2 focus:ring-redlux-500/20 focus:border-white/20",
+            ].join(" ")}
+          />
+        </div>
       </div>
     </div>
   );
 }
-
 function Step4({
   data,
   errors,
   updateConsent,
 }: {
-  data: FormData['consent'];
+  data: FormData["consent"];
   errors: Record<string, string>;
   updateConsent: (f: string, v: boolean | string) => void;
 }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="font-display text-xl font-bold text-slate-900">Consent &amp; Authorization</h2>
-        <p className="text-sm text-slate-500 mt-1">Please review and acknowledge the following.</p>
-      </div>
-
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600 max-h-40 overflow-y-auto leading-relaxed">
-        <p className="font-semibold text-sm text-slate-800 mb-2">HIPAA Notice of Privacy Practices</p>
-        <p>
-          This practice is committed to protecting your health information. Under HIPAA, you have the right to
-          access, amend, and request restrictions on the use and disclosure of your protected health information
-          (PHI). Your PHI will only be used for treatment, payment, and healthcare operations unless otherwise
-          authorized by you. We maintain administrative, technical, and physical safeguards to protect the
-          confidentiality, integrity, and availability of your information. By acknowledging below, you confirm
-          that you have been informed of our privacy practices and your rights under HIPAA.
+        <h2 className="font-display text-xl font-bold text-steel-50">
+          Consent &amp; Authorization
+        </h2>
+        <p className="text-sm text-steel-200/80 mt-1">
+          Please review and acknowledge the following.
         </p>
       </div>
 
+      {/* Notice box */}
+      <div className="rounded-xl border border-white/10 bg-obsidian-950/45 p-4 text-xs leading-relaxed text-steel-200/80">
+        <p className="mb-2 text-sm font-semibold text-steel-50">
+          HIPAA Notice of Privacy Practices
+        </p>
+        <div className="max-h-40 overflow-y-auto pr-2">
+          <p>
+            This practice is committed to protecting your health information. Under
+            HIPAA, you have the right to access, amend, and request restrictions on
+            the use and disclosure of your protected health information (PHI). Your
+            PHI will only be used for treatment, payment, and healthcare operations
+            unless otherwise authorized by you. We maintain administrative,
+            technical, and physical safeguards to protect the confidentiality,
+            integrity, and availability of your information. By acknowledging
+            below, you confirm that you have been informed of our privacy practices
+            and your rights under HIPAA.
+          </p>
+        </div>
+      </div>
+
+      {/* HIPAA checkbox */}
       <label
-        className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition ${
+        className={[
+          "flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition",
+          "select-none",
           errors.hipaaAcknowledged
-            ? 'border-red-300 bg-red-50'
+            ? "border-redlux-500/55 bg-redlux-500/10"
             : data.hipaaAcknowledged
-            ? 'border-dental-300 bg-dental-50'
-            : 'border-slate-200 hover:bg-slate-50'
-        }`}
+            ? "border-white/15 bg-white/5"
+            : "border-white/10 hover:bg-white/5 hover:border-white/15",
+        ].join(" ")}
       >
         <input
           type="checkbox"
           checked={data.hipaaAcknowledged}
-          onChange={(e) => updateConsent('hipaaAcknowledged', e.target.checked)}
-          className="w-5 h-5 rounded border-slate-300 text-dental-500 focus:ring-dental-300 mt-0.5 cursor-pointer flex-shrink-0"
+          onChange={(e) => updateConsent("hipaaAcknowledged", e.target.checked)}
+          className={[
+            "mt-0.5 h-5 w-5 cursor-pointer rounded border",
+            "border-white/20 bg-obsidian-950",
+            "accent-red-600",
+            "focus:outline-none focus:ring-2 focus:ring-redlux-500/30",
+            "flex-shrink-0",
+          ].join(" ")}
         />
         <div>
-          <p className="text-sm font-medium text-slate-800">HIPAA Acknowledgment</p>
-          <p className="text-xs text-slate-500 mt-0.5">
-            I acknowledge that I have been informed of the practice&apos;s Notice of Privacy Practices.
+          <p className="text-sm font-medium text-steel-50">HIPAA Acknowledgment</p>
+          <p className="text-xs text-steel-200/70 mt-0.5">
+            I acknowledge that I have been informed of the practice&apos;s Notice of
+            Privacy Practices.
           </p>
         </div>
       </label>
 
+      {/* Treatment checkbox */}
       <label
-        className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition ${
+        className={[
+          "flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition",
+          "select-none",
           errors.treatmentConsent
-            ? 'border-red-300 bg-red-50'
+            ? "border-redlux-500/55 bg-redlux-500/10"
             : data.treatmentConsent
-            ? 'border-dental-300 bg-dental-50'
-            : 'border-slate-200 hover:bg-slate-50'
-        }`}
+            ? "border-white/15 bg-white/5"
+            : "border-white/10 hover:bg-white/5 hover:border-white/15",
+        ].join(" ")}
       >
         <input
           type="checkbox"
           checked={data.treatmentConsent}
-          onChange={(e) => updateConsent('treatmentConsent', e.target.checked)}
-          className="w-5 h-5 rounded border-slate-300 text-dental-500 focus:ring-dental-300 mt-0.5 cursor-pointer flex-shrink-0"
+          onChange={(e) => updateConsent("treatmentConsent", e.target.checked)}
+          className={[
+            "mt-0.5 h-5 w-5 cursor-pointer rounded border",
+            "border-white/20 bg-obsidian-950",
+            "accent-red-600",
+            "focus:outline-none focus:ring-2 focus:ring-redlux-500/30",
+            "flex-shrink-0",
+          ].join(" ")}
         />
         <div>
-          <p className="text-sm font-medium text-slate-800">Treatment Consent</p>
-          <p className="text-xs text-slate-500 mt-0.5">
-            I consent to dental examination and treatment as recommended by the dental team.
+          <p className="text-sm font-medium text-steel-50">Treatment Consent</p>
+          <p className="text-xs text-steel-200/70 mt-0.5">
+            I consent to dental examination and treatment as recommended by the
+            dental team.
           </p>
         </div>
       </label>
 
-      <hr className="border-slate-100" />
+      <hr className="border-white/10" />
 
-      <div>
-        <label htmlFor="sig" className="block text-sm font-medium text-slate-700 mb-1.5">
-          Typed Signature <span className="text-red-400">*</span>
-        </label>
-        <input
-          id="sig"
-          type="text"
-          value={data.signatureText}
-          onChange={(e) => updateConsent('signatureText', e.target.value)}
-          placeholder="Type your full legal name"
-          className={`w-full px-4 py-3 rounded-xl border text-sm italic font-serif transition focus:outline-none focus:ring-2 ${
-            errors.signatureText
-              ? 'border-red-300 focus:ring-red-200 bg-red-50'
-              : 'border-slate-300 focus:ring-dental-200 focus:border-dental-400'
-          }`}
-        />
-        {errors.signatureText && <p className="text-xs text-red-500 mt-1">{errors.signatureText}</p>}
-      </div>
+      {/* Signature + Date */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="sm:col-span-2">
+          <label
+            htmlFor="sig"
+            className="block text-sm font-medium text-steel-200 mb-1.5"
+          >
+            Typed Signature <span className="text-redlux-500">*</span>
+          </label>
 
-      <div>
-        <label htmlFor="sigDate" className="block text-sm font-medium text-slate-700 mb-1.5">Date</label>
-        <input
-          id="sigDate"
-          type="date"
-          value={data.signatureDate}
-          onChange={(e) => updateConsent('signatureDate', e.target.value)}
-          className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-dental-200 focus:border-dental-400"
-        />
+          <input
+            id="sig"
+            type="text"
+            value={data.signatureText}
+            onChange={(e) => updateConsent("signatureText", e.target.value)}
+            placeholder="Type your full legal name"
+            className={[
+              "w-full px-4 py-3 rounded-xl border text-sm italic font-serif transition",
+              "bg-obsidian-950/60 text-steel-50 placeholder:text-steel-400",
+              "focus:outline-none focus:ring-2",
+              errors.signatureText
+                ? "border-redlux-500/60 focus:ring-redlux-500/25"
+                : "border-white/10 focus:border-white/20 focus:ring-redlux-500/20",
+            ].join(" ")}
+          />
+
+          {errors.signatureText && (
+            <p className="text-xs text-redlux-500 mt-1">{errors.signatureText}</p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="sigDate"
+            className="block text-sm font-medium text-steel-200 mb-1.5"
+          >
+            Date
+          </label>
+
+          <input
+            id="sigDate"
+            type="date"
+            value={data.signatureDate}
+            onChange={(e) => updateConsent("signatureDate", e.target.value)}
+            className={[
+              "w-full px-4 py-3 rounded-xl border text-sm transition",
+              "bg-obsidian-950/60 text-steel-50",
+              "border-white/10 focus:outline-none focus:ring-2 focus:ring-redlux-500/20 focus:border-white/20",
+            ].join(" ")}
+          />
+        </div>
       </div>
     </div>
   );
