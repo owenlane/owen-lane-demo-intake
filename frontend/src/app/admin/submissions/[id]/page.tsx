@@ -17,6 +17,7 @@ import {
   Loader2,
   ShieldCheck,
   HeartPulse,
+  Printer,
 } from 'lucide-react';
 
 const STATUS_META: Record<
@@ -127,11 +128,11 @@ export default function SubmissionDetailPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => router.push('/admin/submissions')}
-              className="p-2.5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-              title="Back"
-              type="button"
-            >
+  onClick={() => router.push('/admin/submissions')}
+  className="p-2.5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] print:hidden"
+  title="Back"
+  type="button"
+>
               <ArrowLeft className="w-5 h-5 text-steel-50" />
             </button>
 
@@ -152,16 +153,27 @@ export default function SubmissionDetailPage() {
             </div>
           </div>
 
-          <span
-            className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl text-xs font-semibold capitalize border shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] ${statusMeta.pill}`}
-          >
-            <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
-            {statusMeta.label}
-          </span>
+          <div className="flex items-center gap-2 print:hidden">
+  <button
+    type="button"
+    onClick={() => window.print()}
+    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl border border-white/10 bg-white/5 text-steel-200 text-xs font-semibold hover:bg-white/10 hover:border-white/15 transition"
+  >
+    <Printer className="w-4 h-4" />
+    Print Intake
+  </button>
+
+  <span
+    className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl text-xs font-semibold capitalize border shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] ${statusMeta.pill}`}
+  >
+    <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
+    {statusMeta.label}
+  </span>
+</div>
         </div>
       </header>
 
-      <main className="relative max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+      <main className="relative max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 print:max-w-none print:px-0 print:py-0">
         {loading ? (
           <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl p-10 text-steel-200/70 flex items-center gap-2 shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)]">
             <Loader2 className="w-5 h-5 animate-spin" />
@@ -269,7 +281,7 @@ export default function SubmissionDetailPage() {
               </div>
 
               {/* Workflow Card */}
-              <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden">
+              <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden print:hidden">
                 <div className="border-b border-white/10 bg-white/[0.03] px-6 py-5">
                   <h2 className="font-display text-xl font-bold text-steel-50">Workflow</h2>
                   <p className="text-sm text-steel-200/65 mt-1">
@@ -415,7 +427,7 @@ export default function SubmissionDetailPage() {
               </div>
 
               <div className="px-6 pb-6">
-                <details className="rounded-2xl border border-white/10 bg-obsidian-950/25 p-4">
+                <details className="rounded-2xl border border-white/10 bg-obsidian-950/25 p-4 print:hidden">
                   <summary className="cursor-pointer text-sm font-medium text-steel-200 hover:text-steel-50 select-none">
                     View raw JSON
                   </summary>
@@ -426,7 +438,7 @@ export default function SubmissionDetailPage() {
               </div>
                         </div>
 
-            <div className="pt-2 text-center space-y-1">
+            <div className="pt-2 text-center space-y-1 print:hidden">
               <p className="text-[11px] uppercase tracking-wider text-steel-200/35">
                 {CLIENT.systemProvider}
               </p>
