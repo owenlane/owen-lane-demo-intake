@@ -58,3 +58,37 @@ input[type='checkbox']:checked {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  body * {
+    box-shadow: none !important;
+  }
+
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .print\:bg-white {
+    background: #ffffff !important;
+  }
+
+  .print\:text-black {
+    color: #000000 !important;
+  }
+
+  .print\:border-black\/10 {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+  }
+
+  main,
+  section,
+  article,
+  div {
+    background-image: none !important;
+  }
+}
