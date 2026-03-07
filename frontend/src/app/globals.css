@@ -9,6 +9,11 @@
   --font-display: 'Fraunces', Georgia, serif;
 }
 
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -44,6 +49,7 @@ input[type='checkbox']:checked {
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -58,37 +64,181 @@ input[type='checkbox']:checked {
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* PRINT SYSTEM */
 @media print {
+  @page {
+    size: auto;
+    margin: 0.5in;
+  }
+
   html,
   body {
     background: #ffffff !important;
     color: #000000 !important;
+    font-family: Arial, Helvetica, sans-serif !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
-  body * {
+  *,
+  *::before,
+  *::after {
+    color: #000000 !important;
+    background: transparent !important;
+    background-image: none !important;
+    text-shadow: none !important;
     box-shadow: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 
+  /* kill app chrome / visual effects */
   .print\:hidden {
     display: none !important;
   }
 
-  .print\:bg-white {
-    background: #ffffff !important;
+  button,
+  details,
+  summary {
+    display: none !important;
   }
 
-  .print\:text-black {
-    color: #000000 !important;
-  }
-
-  .print\:border-black\/10 {
-    border-color: rgba(0, 0, 0, 0.1) !important;
-  }
-
+  /* structural elements become plain white paper */
+  body,
   main,
   section,
   article,
+  aside,
+  nav,
+  header,
+  footer,
   div {
-    background-image: none !important;
+    background: #ffffff !important;
+  }
+
+  /* keep borders light and printable */
+  .border,
+  [class*='border-'] {
+    border-color: rgba(0, 0, 0, 0.15) !important;
+  }
+
+  /* typography */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  p,
+  span,
+  strong,
+  small,
+  label,
+  li,
+  td,
+  th {
+    color: #000000 !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  p,
+  li,
+  tr,
+  td,
+  th {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* links should print as black text */
+  a,
+  a:visited {
+    color: #000000 !important;
+    text-decoration: none !important;
+  }
+
+  /* forms should remain readable */
+  input,
+  textarea,
+  select {
+    color: #000000 !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.2) !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  /* table behavior */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  tr,
+  img {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* common dark-ui utility cleanup */
+  [class*='bg-obsidian'],
+  [class*='bg-redlux'],
+  [class*='bg-slate'],
+  [class*='bg-zinc'],
+  [class*='bg-neutral'],
+  [class*='from-black'],
+  [class*='via-neutral'],
+  [class*='to-zinc'],
+  [class*='text-steel'],
+  [class*='text-redlux'],
+  [class*='shadow-'],
+  [class*='backdrop-blur'] {
+    background: #ffffff !important;
+    color: #000000 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* keep badges readable if any remain visible */
+  [class*='rounded-full'],
+  [class*='rounded-2xl'],
+  [class*='rounded-3xl'],
+  [class*='rounded-xl'],
+  [class*='rounded-lg'] {
+    box-shadow: none !important;
+  }
+
+  /* avoid awkward clipping */
+  .overflow-hidden,
+  .overflow-auto,
+  .overflow-x-auto,
+  .overflow-y-auto {
+    overflow: visible !important;
+  }
+
+  /* prevent giant empty decorative areas */
+  .min-h-screen,
+  .h-screen {
+    min-height: auto !important;
+    height: auto !important;
   }
 }
