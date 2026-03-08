@@ -177,7 +177,68 @@ export default function SubmissionsPage() {
       </header>
 
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+
+{/* Practice System Status */}
+<div className="rounded-3xl border border-white/10 bg-obsidian-900/65 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden mb-6">
+
+  <div className="border-b border-white/10 bg-white/[0.03] px-5 py-4 flex items-center justify-between">
+    <div>
+      <h2 className="font-display text-lg font-bold text-steel-50">
+        Practice System Overview
+      </h2>
+      <p className="text-sm text-steel-200/65 mt-0.5">
+        Installed Digital Intake Infrastructure
+      </p>
+    </div>
+
+    <div className="hidden md:flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-400">
+      System Live
+    </div>
+  </div>
+
+  <div className="px-5 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+
+    <div className="rounded-xl border border-white/10 bg-obsidian-950/35 p-4">
+      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+        Practice
+      </p>
+      <p className="text-steel-50 font-semibold">
+        {CLIENT.name}
+      </p>
+    </div>
+
+    <div className="rounded-xl border border-white/10 bg-obsidian-950/35 p-4">
+      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+        System Type
+      </p>
+      <p className="text-steel-50 font-semibold">
+        Digital Patient Intake
+      </p>
+    </div>
+
+    <div className="rounded-xl border border-white/10 bg-obsidian-950/35 p-4">
+      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+        Notification Email
+      </p>
+      <p className="text-steel-50 font-semibold break-all">
+        lanecamposgroup@gmail.com
+      </p>
+    </div>
+
+    <div className="rounded-xl border border-white/10 bg-obsidian-950/35 p-4">
+      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+        System Provider
+      </p>
+      <p className="text-steel-50 font-semibold">
+        Lane Campos Group
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
           <StatCard
             icon={<Inbox className="w-5 h-5 text-steel-50" />}
             label="Loaded Records"
