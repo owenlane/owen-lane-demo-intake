@@ -1,8 +1,9 @@
 'use client';
 
+import { CLIENT } from "@/lib/client";
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { CLIENT } from "@/lib/client";
+import { QRCodeSVG } from 'qrcode.react';
 import { getSubmissions, exportCsv } from '@/lib/api';
 import {
   Search,
@@ -19,6 +20,8 @@ import {
   Clock3,
   CheckCircle2,
   Activity,
+  QrCode,
+  ExternalLink,
 } from 'lucide-react';
 
 const STATUS_BADGES: Record<string, string> = {
@@ -59,7 +62,10 @@ export default function SubmissionsPage() {
         setSubmissions(res.submissions || res.data || []);
         setPagination(res.pagination);
       } catch (err: any) {
-        if (String(err?.message || '').includes('Authentication') || String(err?.message || '').includes('401')) {
+        if (
+          String(err?.message || '').includes('Authentication') ||
+          String(err?.message || '').includes('401')
+        ) {
           router.push('/admin/login');
         }
       } finally {
@@ -114,23 +120,30 @@ export default function SubmissionsPage() {
 
   const stats = useMemo(() => {
     const totalLoaded = submissions.length;
-    const newCount = submissions.filter((s) => String(s.status || '').toLowerCase() === 'new').length;
-    const reviewedCount = submissions.filter((s) => String(s.status || '').toLowerCase() === 'reviewed').length;
-    const completedCount = submissions.filter((s) => String(s.status || '').toLowerCase() === 'completed').length;
+    const newCount = submissions.filter(
+      (s) => String(s.status || '').toLowerCase() === 'new'
+    ).length;
+    const reviewedCount = submissions.filter(
+      (s) => String(s.status || '').toLowerCase() === 'reviewed'
+    ).length;
+    const completedCount = submissions.filter(
+      (s) => String(s.status || '').toLowerCase() === 'completed'
+    ).length;
 
     return { totalLoaded, newCount, reviewedCount, completedCount };
   }, [submissions]);
 
+  const intakeUrl =
+    typeof window !== 'undefined' ? `${window.location.origin}/intake` : '';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-neutral-950 to-zinc-900">
-      {/* ambient glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full bg-red-600/10 blur-3xl opacity-70" />
         <div className="absolute top-[30%] right-[-220px] w-[720px] h-[720px] rounded-full bg-red-700/10 blur-3xl opacity-60" />
         <div className="absolute bottom-[-240px] left-[-160px] w-[720px] h-[720px] rounded-full bg-white/[0.03] blur-3xl" />
       </div>
 
-      {/* Header */}
       <header className="sticky top-0 z-20 border-b border-white/10 bg-obsidian-900/70 backdrop-blur-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -143,13 +156,13 @@ export default function SubmissionsPage() {
                 Submission Command Center
               </h1>
               <div className="space-y-1">
-  <p className="text-xs text-steel-200/65 tracking-wide">
-    {CLIENT.name}
-  </p>
-  <p className="text-[11px] uppercase tracking-wider text-steel-200/40">
-    {CLIENT.systemProvider}
-  </p>
-</div>
+                <p className="text-xs text-steel-200/65 tracking-wide">
+                  {CLIENT.name}
+                </p>
+                <p className="text-[11px] uppercase tracking-wider text-steel-200/40">
+                  {CLIENT.systemProvider}
+                </p>
+              </div>
             </div>
           </div>
 
@@ -164,7 +177,6 @@ export default function SubmissionsPage() {
       </header>
 
       <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-10">
-        {/* Top stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
           <StatCard
             icon={<Inbox className="w-5 h-5 text-steel-50" />}
@@ -192,8 +204,79 @@ export default function SubmissionsPage() {
           />
         </div>
 
-        {/* Toolbar */}
-        <div className="rounded-2xl border border-white/10 bg-obsidian-900/60 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-4 mb-6">
+        <div className="rounded-3xl border border-white/10 bg-obsidian-900/65 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden mb-6 print:hidden">
+          <div className="border-b border-white/10 bg-white/[0.03] px-5 py-4 flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-display text-lg font-bold text-steel-50">
+                Patient Intake Access
+              </h2>
+              <p className="text-sm text-steel-200/65 mt-0.5">
+                Patients can scan this code to open the live intake form.
+              </p>
+            </div>
+
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-steel-200/70">
+              <QrCode className="w-3.5 h-3.5 text-redlux-500" />
+              Front Desk Ready
+            </div>
+          </div>
+
+          <div className="px-5 py-5 flex flex-col lg:flex-row items-start gap-6">
+            <div className="rounded-2xl border border-white/10 bg-white p-4 shadow-sm">
+              {intakeUrl ? (
+                <QRCodeSVG
+                  value={intakeUrl}
+                  size={180}
+                  bgColor="#FFFFFF"
+                  fgColor="#000000"
+                  includeMargin={true}
+                />
+              ) : (
+                <div className="w-[180px] h-[180px] flex items-center justify-center text-black text-sm">
+                  QR unavailable
+                </div>
+              )}
+            </div>
+
+            <div className="flex-1 space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-obsidian-950/35 p-4">
+                <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-2">
+                  Intake URL
+                </p>
+                <p className="text-sm text-steel-50 break-all">
+                  {intakeUrl || 'Unavailable on server render'}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={intakeUrl || '#'}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open Intake
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-white/10 text-sm text-steel-200 hover:bg-white/5 hover:border-white/15 transition"
+                >
+                  <Download className="w-4 h-4" />
+                  Print QR
+                </button>
+              </div>
+
+              <p className="text-xs text-steel-200/50 leading-relaxed">
+                Place this at the front desk or waiting room so patients can scan and complete the form on their phone.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-obsidian-900/60 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] p-4 mb-6 print:hidden">
           <div className="flex flex-col xl:flex-row gap-3 xl:items-center">
             <form onSubmit={handleSearch} className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-steel-400" />
@@ -266,11 +349,12 @@ export default function SubmissionsPage() {
           </div>
         </div>
 
-        {/* Command table */}
         <div className="rounded-3xl border border-white/10 bg-obsidian-900/65 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden">
           <div className="border-b border-white/10 bg-white/[0.03] px-5 py-4 flex items-center justify-between">
             <div>
-              <h2 className="font-display text-lg font-bold text-steel-50">Patient Submissions</h2>
+              <h2 className="font-display text-lg font-bold text-steel-50">
+                Patient Submissions
+              </h2>
               <p className="text-sm text-steel-200/65 mt-0.5">
                 Review, triage, and move submissions through your workflow.
               </p>
@@ -329,11 +413,15 @@ export default function SubmissionsPage() {
                         <td className="px-5 py-4">
                           <div className="flex flex-col">
                             <span className="font-semibold text-steel-50">{fullName}</span>
-                            <span className="text-xs text-steel-200/50 mt-0.5">Record #{String(s.id).slice(0, 8)}</span>
+                            <span className="text-xs text-steel-200/50 mt-0.5">
+                              Record #{String(s.id).slice(0, 8)}
+                            </span>
                           </div>
                         </td>
 
-                        <td className="px-5 py-4 text-steel-200/70 hidden sm:table-cell">{email}</td>
+                        <td className="px-5 py-4 text-steel-200/70 hidden sm:table-cell">
+                          {email}
+                        </td>
 
                         <td className="px-5 py-4">
                           <span
@@ -396,7 +484,8 @@ export default function SubmissionsPage() {
             </div>
           )}
         </div>
-                <div className="pt-5 text-center space-y-1">
+
+        <div className="pt-5 text-center space-y-1 print:hidden">
           <p className="text-[11px] uppercase tracking-wider text-steel-200/35">
             {CLIENT.systemProvider}
           </p>
@@ -426,11 +515,15 @@ function StatCard({
         <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
           {icon}
         </div>
-        <span className="text-[11px] uppercase tracking-wider text-steel-200/45">{label}</span>
+        <span className="text-[11px] uppercase tracking-wider text-steel-200/45">
+          {label}
+        </span>
       </div>
 
       <div className="mt-5">
-        <p className="font-display text-3xl font-bold text-steel-50 leading-none">{value}</p>
+        <p className="font-display text-3xl font-bold text-steel-50 leading-none">
+          {value}
+        </p>
         <p className="text-xs text-steel-200/60 mt-2">{subtext}</p>
       </div>
     </div>
