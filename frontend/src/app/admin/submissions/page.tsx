@@ -13,7 +13,6 @@ import {
   ChevronRight,
   Eye,
   LogOut,
-  ClipboardList,
   RefreshCcw,
   ArrowUpDown,
   Inbox,
@@ -25,9 +24,9 @@ import {
 } from 'lucide-react';
 
 const STATUS_BADGES: Record<string, string> = {
-  new: 'bg-redlux-500/12 border-redlux-500/35 text-steel-50',
-  reviewed: 'bg-white/5 border-black/10 text-steel-50',
-  completed: 'bg-emerald-500/12 border-emerald-500/30 text-steel-50',
+  new: 'bg-redlux-500/10 border-redlux-500/25 text-steel-50',
+  reviewed: 'bg-obsidian-900 border-black/10 text-steel-50',
+  completed: 'bg-emerald-500/10 border-emerald-500/25 text-steel-50',
 };
 
 export default function SubmissionsPage() {
@@ -138,33 +137,25 @@ export default function SubmissionsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      
-
       <header className="sticky top-0 z-20 border-b border-black/10 bg-white/95 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="hidden">
-              <ClipboardList className="w-5 h-5 text-white" />
-            </div>
-
-            <div>
-              <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
-                Submission Command Center
-              </h1>
-              <div className="space-y-1">
-                <p className="text-xs text-steel-200/65 tracking-wide">
-                  {CLIENT.name}
-                </p>
-                <p className="text-[11px] uppercase tracking-wider text-steel-200/40">
-                  {CLIENT.systemProvider}
-                </p>
-              </div>
+          <div>
+            <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
+              Submission Command Center
+            </h1>
+            <div className="space-y-1">
+              <p className="text-xs text-steel-200/65 tracking-wide">
+                {CLIENT.name}
+              </p>
+              <p className="text-[11px] uppercase tracking-wider text-steel-200/40">
+                {CLIENT.systemProvider}
+              </p>
             </div>
           </div>
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-steel-50 hover:bg-obsidian-900 transition border border-black/10"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-steel-50 border border-black/10 hover:bg-obsidian-900 transition"
           >
             <LogOut className="w-4 h-4" />
             <span className="hidden sm:inline">Sign Out</span>
@@ -172,69 +163,57 @@ export default function SubmissionsPage() {
         </div>
       </header>
 
-      <main className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 pb-10">
+        <div className="rounded-3xl border border-black/10 bg-white overflow-hidden mb-6">
+          <div className="border-b border-black/10 bg-obsidian-900 px-5 py-4 flex items-center justify-between">
+            <div>
+              <h2 className="font-display text-lg font-bold text-steel-50">
+                Practice System Overview
+              </h2>
+              <p className="text-sm text-steel-200/65 mt-0.5">
+                Installed Digital Intake Infrastructure
+              </p>
+            </div>
 
-{/* Practice System Status */}
-<div className="rounded-3xl border border-black/10 bg-white backdrop-blur-2xl shadow-sm overflow-hidden mb-6">
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-400">
+              System Live
+            </div>
+          </div>
 
-  <div className="border-b border-black/10 bg-obsidian-900 px-5 py-4 flex items-center justify-between">
-    <div>
-      <h2 className="font-display text-lg font-bold text-steel-50">
-        Practice System Overview
-      </h2>
-      <p className="text-sm text-steel-200/65 mt-0.5">
-        Installed Digital Intake Infrastructure
-      </p>
-    </div>
+          <div className="px-5 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4">
+              <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+                Practice
+              </p>
+              <p className="text-steel-50 font-semibold">{CLIENT.name}</p>
+            </div>
 
-    <div className="hidden md:flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-400">
-      System Live
-    </div>
-  </div>
+            <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4">
+              <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+                System Type
+              </p>
+              <p className="text-steel-50 font-semibold">Digital Patient Intake</p>
+            </div>
 
-  <div className="px-5 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4">
+              <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+                Notification Email
+              </p>
+              <p className="text-steel-50 font-semibold break-all">
+                lanecamposgroup@gmail.com
+              </p>
+            </div>
 
-    <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4">
-      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
-        Practice
-      </p>
-      <p className="text-steel-50 font-semibold">
-        {CLIENT.name}
-      </p>
-    </div>
+            <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4">
+              <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
+                System Provider
+              </p>
+              <p className="text-steel-50 font-semibold">Lane Campos Group</p>
+            </div>
+          </div>
+        </div>
 
-    <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4">
-      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
-        System Type
-      </p>
-      <p className="text-steel-50 font-semibold">
-        Digital Patient Intake
-      </p>
-    </div>
-
-    <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4">
-      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
-        Notification Email
-      </p>
-      <p className="text-steel-50 font-semibold break-all">
-        lanecamposgroup@gmail.com
-      </p>
-    </div>
-
-    <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4">
-      <p className="text-[11px] uppercase tracking-wider text-steel-200/45 mb-1">
-        System Provider
-      </p>
-      <p className="text-steel-50 font-semibold">
-        Lane Campos Group
-      </p>
-    </div>
-
-  </div>
-
-</div>
-
-<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
           <StatCard
             icon={<Inbox className="w-5 h-5 text-steel-50" />}
             label="Loaded Records"
@@ -254,14 +233,14 @@ export default function SubmissionsPage() {
             subtext="In workflow"
           />
           <StatCard
-            icon={<CheckCircle2 className="w-5 h-5 text-emerald-400" />}
+            icon={<CheckCircle2 className="w-5 h-5 text-emerald-500" />}
             label="Completed"
             value={String(stats.completedCount)}
             subtext="Closed out"
           />
         </div>
 
-        <div className="rounded-3xl border border-black/10 bg-white backdrop-blur-2xl shadow-sm overflow-hidden mb-6 print:hidden">
+        <div className="rounded-3xl border border-black/10 bg-white overflow-hidden mb-6 print:hidden">
           <div className="border-b border-black/10 bg-obsidian-900 px-5 py-4 flex items-center justify-between gap-4">
             <div>
               <h2 className="font-display text-lg font-bold text-steel-50">
@@ -272,14 +251,14 @@ export default function SubmissionsPage() {
               </p>
             </div>
 
-            <div className="hidden md:flex items-center gap-2 rounded-full border border-black/10 bg-white/5 px-3 py-1.5 text-xs text-steel-200/70">
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs text-steel-200/70">
               <QrCode className="w-3.5 h-3.5 text-redlux-500" />
               Front Desk Ready
             </div>
           </div>
 
           <div className="px-5 py-5 flex flex-col lg:flex-row items-start gap-6">
-            <div className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
               {intakeUrl ? (
                 <QRCodeSVG
                   value={intakeUrl}
@@ -310,7 +289,7 @@ export default function SubmissionsPage() {
                   href={intakeUrl || '#'}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-redlux-500text-white text-sm font-semibold hover:bg-redlux-600 transition shadow-lg shadow-red-600/20"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-steel-50 border border-black/10 text-sm font-semibold hover:bg-obsidian-900 transition"
                 >
                   <ExternalLink className="w-4 h-4" />
                   Open Intake
@@ -319,7 +298,7 @@ export default function SubmissionsPage() {
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-black/10 text-sm text-steel-200 hover:bg-obsidian-900 hover:border-black/10 transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-black/10 text-sm text-steel-200 hover:bg-obsidian-900 transition"
                 >
                   <Download className="w-4 h-4" />
                   Print QR
@@ -333,7 +312,7 @@ export default function SubmissionsPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-black/10 bg-whitebackdrop-blur-xl shadow-sm p-4 mb-6 print:hidden">
+        <div className="rounded-2xl border border-black/10 bg-white p-4 mb-6 print:hidden">
           <div className="flex flex-col xl:flex-row gap-3 xl:items-center">
             <form onSubmit={handleSearch} className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-steel-400" />
@@ -342,11 +321,7 @@ export default function SubmissionsPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by patient name or email..."
-                className={[
-                  'w-full pl-10 pr-4 py-3 rounded-xl border text-sm transition',
-                  'bg-white text-steel-50 placeholder:text-steel-400',
-                  'border-black/10 focus:outline-none focus:ring-2 focus:ring-redlux-500/20 focus:border-white/20',
-                ].join(' ')}
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-black/10 text-sm transition bg-white text-steel-50 placeholder:text-steel-400 focus:outline-none focus:ring-2 focus:ring-redlux-500/15 focus:border-redlux-500/30"
               />
             </form>
 
@@ -359,11 +334,7 @@ export default function SubmissionsPage() {
                     setStatusFilter(e.target.value);
                     setTimeout(() => fetchData(1), 0);
                   }}
-                  className={[
-                    'pl-10 pr-10 py-3 rounded-xl border text-sm transition appearance-none',
-                    'bg-white text-steel-50',
-                    'border-black/10 focus:outline-none focus:ring-2 focus:ring-redlux-500/20 focus:border-white/20',
-                  ].join(' ')}
+                  className="pl-10 pr-10 py-3 rounded-xl border border-black/10 text-sm transition appearance-none bg-white text-steel-50 focus:outline-none focus:ring-2 focus:ring-redlux-500/15 focus:border-redlux-500/30"
                 >
                   <option value="">All Status</option>
                   <option value="new">New</option>
@@ -378,7 +349,7 @@ export default function SubmissionsPage() {
                   setSortOrder((o) => (o === 'desc' ? 'asc' : 'desc'));
                   setTimeout(() => fetchData(1), 0);
                 }}
-                className="flex items-center gap-1.5 px-4 py-3 rounded-xl border border-black/10 text-sm text-steel-200 hover:bg-obsidian-900 hover:border-black/10 transition"
+                className="flex items-center gap-1.5 px-4 py-3 rounded-xl border border-black/10 text-sm text-steel-200 hover:bg-obsidian-900 transition"
                 title="Toggle sort order"
               >
                 <ArrowUpDown className="w-4 h-4" />
@@ -388,7 +359,7 @@ export default function SubmissionsPage() {
               <button
                 type="button"
                 onClick={() => fetchData(pagination.page)}
-                className="flex items-center gap-1.5 px-4 py-3 rounded-xl border border-black/10 text-sm text-steel-200 hover:bg-obsidian-900 hover:border-black/10 transition"
+                className="flex items-center gap-1.5 px-4 py-3 rounded-xl border border-black/10 text-sm text-steel-200 hover:bg-obsidian-900 transition"
                 title="Refresh"
               >
                 <RefreshCcw className="w-4 h-4" />
@@ -397,7 +368,7 @@ export default function SubmissionsPage() {
               <button
                 type="button"
                 onClick={handleExport}
-                className="flex items-center gap-1.5 px-4 py-3 rounded-xl bg-redlux-500 text-white text-sm font-semibold hover:bg-redlux-600 transition shadow-lg shadow-red-600/20"
+                className="flex items-center gap-1.5 px-4 py-3 rounded-xl bg-redlux-500 text-white text-sm font-semibold hover:bg-redlux-600 transition"
               >
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline">Export CSV</span>
@@ -406,7 +377,7 @@ export default function SubmissionsPage() {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-black/10 bg-whitebackdrop-blur-2xl shadow-sm overflow-hidden">
+        <div className="rounded-3xl border border-black/10 bg-white overflow-hidden">
           <div className="border-b border-black/10 bg-obsidian-900 px-5 py-4 flex items-center justify-between">
             <div>
               <h2 className="font-display text-lg font-bold text-steel-50">
@@ -418,7 +389,7 @@ export default function SubmissionsPage() {
             </div>
 
             <div className="hidden md:flex items-center gap-2 text-xs text-steel-200/60">
-              <span className="inline-flex items-center rounded-full border border-black/10 bg-white/5 px-3 py-1">
+              <span className="inline-flex items-center rounded-full border border-black/10 bg-white px-3 py-1">
                 {pagination.total} total
               </span>
             </div>
@@ -456,18 +427,14 @@ export default function SubmissionsPage() {
                     const email = s.patients?.email || '—';
                     const statusClass =
                       STATUS_BADGES[String(s.status || '').toLowerCase()] ||
-                      'bg-white/5 border-black/10 text-steel-200';
+                      'bg-obsidian-900 border-black/10 text-steel-200';
 
                     return (
                       <tr
                         key={s.id}
-                        className={[
-                          'border-b border-white/[0.06] transition',
-                          'hover:bg-white/[0.035]',
-                          index % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.015]',
-                        ].join(' ')}
+                        className={index % 2 === 0 ? 'bg-white' : 'bg-obsidian-900'}
                       >
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-4 border-b border-black/10">
                           <div className="flex flex-col">
                             <span className="font-semibold text-steel-50">{fullName}</span>
                             <span className="text-xs text-steel-200/50 mt-0.5">
@@ -476,11 +443,11 @@ export default function SubmissionsPage() {
                           </div>
                         </td>
 
-                        <td className="px-5 py-4 text-steel-200/70 hidden sm:table-cell">
+                        <td className="px-5 py-4 text-steel-200/70 hidden sm:table-cell border-b border-black/10">
                           {email}
                         </td>
 
-                        <td className="px-5 py-4">
+                        <td className="px-5 py-4 border-b border-black/10">
                           <span
                             className={[
                               'inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold capitalize border',
@@ -491,15 +458,15 @@ export default function SubmissionsPage() {
                           </span>
                         </td>
 
-                        <td className="px-5 py-4 text-steel-200/70 hidden md:table-cell">
+                        <td className="px-5 py-4 text-steel-200/70 hidden md:table-cell border-b border-black/10">
                           {s.created_at ? new Date(s.created_at).toLocaleDateString() : '—'}
                         </td>
 
-                        <td className="px-5 py-4 text-right">
+                        <td className="px-5 py-4 text-right border-b border-black/10">
                           <button
                             type="button"
                             onClick={() => router.push(`/admin/submissions/${s.id}`)}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white bg-redlux-500 hover:bg-redlux-600 transition shadow-lg shadow-red-600/20 border border-red-500/30"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white bg-redlux-500 hover:bg-redlux-600 transition border border-transparent"
                           >
                             <Eye className="w-3.5 h-3.5" />
                             View File
@@ -524,7 +491,7 @@ export default function SubmissionsPage() {
                   type="button"
                   onClick={() => fetchData(pagination.page - 1)}
                   disabled={pagination.page <= 1}
-                  className="p-2 rounded-xl hover:bg-obsidian-900 disabled:opacity-30 transition border border-transparent hover:border-black/10"
+                  className="p-2 rounded-xl hover:bg-white disabled:opacity-30 transition border border-transparent"
                 >
                   <ChevronLeft className="w-4 h-4 text-steel-200" />
                 </button>
@@ -533,7 +500,7 @@ export default function SubmissionsPage() {
                   type="button"
                   onClick={() => fetchData(pagination.page + 1)}
                   disabled={pagination.page >= pagination.totalPages}
-                  className="p-2 rounded-xl hover:bg-obsidian-900 disabled:opacity-30 transition border border-transparent hover:border-black/10"
+                  className="p-2 rounded-xl hover:bg-white disabled:opacity-30 transition border border-transparent"
                 >
                   <ChevronRight className="w-4 h-4 text-steel-200" />
                 </button>
@@ -567,9 +534,9 @@ function StatCard({
   subtext: string;
 }) {
   return (
-    <div className="rounded-2xl border border-black/10 bg-whitebackdrop-blur-xl shadow-sm p-4">
+    <div className="rounded-2xl border border-black/10 bg-white p-4">
       <div className="flex items-start justify-between gap-3">
-        <div className="w-10 h-10 rounded-xl bg-white/5 border border-black/10 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-obsidian-900 border border-black/10 flex items-center justify-center">
           {icon}
         </div>
         <span className="text-[11px] uppercase tracking-wider text-steel-200/45">
