@@ -28,12 +28,6 @@ export const medicalHistorySchema = z.object({
 });
 
 export const consentSchema = z.object({
-  hipaaAcknowledged: z.literal(true, {
-    errorMap: () => ({ message: 'HIPAA acknowledgment is required' }),
-  }),
-  treatmentConsent: z.literal(true, {
-    errorMap: () => ({ message: 'Treatment consent is required' }),
-  }),
   signatureText: z.string().min(2, 'Typed signature is required').max(200),
   signatureDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date'),
 });
