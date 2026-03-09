@@ -169,17 +169,13 @@ export default function IntakePage() {
 
       {/* Header */}
       <header className="sticky top-0 z-20 border-b border-black/10 bg-white/95 backdrop-blur-xl">
-  <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-center gap-3">
-    <div className="w-10 h-10 rounded-xl bg-obsidian-900 border border-black/10 flex items-center justify-center shadow-sm">
-      <ClipboardList className="w-5 h-5 text-steel-50" />
-    </div>
-
+  <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-center">
     <div className="text-center">
       <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
         {CLIENT.name}
       </h1>
       <p className="text-xs text-steel-200/80">
-        Digital Intake Infrastructure | HIPAA-Compliant
+        {CLIENT.intakeTitle}
       </p>
     </div>
   </div>
@@ -610,8 +606,8 @@ function Step3({
                 className={[
                   "w-4 h-4 rounded border cursor-pointer",
                   "border-white/20 bg-obsidian-950",
-                  "accent-red-600",
-                  "focus:outline-none focus:ring-2 focus:ring-redlux-500/30",
+                  "accent-redlux-500",
+"focus:outline-none focus:ring-2 focus:ring-redlux-500/20",
                 ].join(" ")}
               />
               <span className="leading-tight">{c}</span>
