@@ -7,10 +7,10 @@ export const personalInfoSchema = z.object({
   phone: z.string().min(7, 'Phone is required').max(20),
   email: z.string().email('Invalid email').max(255),
   address: z.object({
-    street: z.string().min(1).max(255),
-    city: z.string().min(1).max(100),
-    state: z.string().min(1).max(50),
-    zip: z.string().min(3).max(20),
+    street: z.string().min(1, 'Street is required').max(255),
+    city: z.string().min(1, 'City is required').max(100),
+    state: z.string().min(1, 'State is required').max(50),
+    zip: z.string().min(3, 'ZIP is required').max(20),
   }),
 });
 
@@ -28,6 +28,9 @@ export const medicalHistorySchema = z.object({
 });
 
 export const consentSchema = z.object({
+  // legacy fields kept optional so old/new payloads both pass
+  hipaaAcknowledged: z.boolean().optional(),
+  treatmentConsent: z.boolean().optional(),
   signatureText: z.string().min(2, 'Typed signature is required').max(200),
   signatureDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date'),
 });
