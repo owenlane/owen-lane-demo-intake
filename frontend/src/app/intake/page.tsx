@@ -136,10 +136,8 @@ export default function IntakePage() {
       if (!p.address.zip.trim()) errs['address.zip'] = 'Required';
     }
     if (s === 3) {
-      if (!form.consent.hipaaAcknowledged) errs.hipaaAcknowledged = 'Required';
-      if (!form.consent.treatmentConsent) errs.treatmentConsent = 'Required';
-      if (!form.consent.signatureText.trim()) errs.signatureText = 'Typed signature required';
-    }
+  if (!form.consent.signatureText.trim()) errs.signatureText = 'Typed signature required';
+}
     setErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -167,71 +165,28 @@ export default function IntakePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-neutral-950 to-zinc-900">
-      {/* ambient glow */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[980px] h-[980px] rounded-full bg-red-600/10 blur-3xl opacity-70" />
-        <div className="absolute top-[32%] right-[-180px] w-[760px] h-[760px] rounded-full bg-red-700/10 blur-3xl opacity-60" />
-        <div className="absolute bottom-[-220px] left-[-140px] w-[700px] h-[700px] rounded-full bg-white/[0.03] blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-white">
 
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-obsidian-900/80 backdrop-blur-xl">
-        <div className="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-            <ClipboardList className="w-5 h-5 text-white" />
-          </div>
+      <header className="sticky top-0 z-20 border-b border-black/10 bg-white/95 backdrop-blur-xl">
+  <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-center gap-3">
+    <div className="w-10 h-10 rounded-xl bg-obsidian-900 border border-black/10 flex items-center justify-center shadow-sm">
+      <ClipboardList className="w-5 h-5 text-steel-50" />
+    </div>
 
-          <div>
-            <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
-              {CLIENT.name}
-            </h1>
-            <p className="text-xs text-steel-200/70">{CLIENT.intakeTitle}</p>
-          </div>
-        </div>
-      </header>
+    <div className="text-center">
+      <h1 className="font-display text-lg font-bold text-steel-50 leading-tight">
+        {CLIENT.name}
+      </h1>
+      <p className="text-xs text-steel-200/80">
+        Digital Intake Infrastructure | HIPAA-Compliant
+      </p>
+    </div>
+  </div>
+</header>
 
       <main className="relative max-w-2xl mx-auto px-4 py-6 pb-32">
-        {/* hero trust strip */}
-        <div className="mb-6 rounded-2xl border border-white/10 bg-obsidian-900/55 backdrop-blur-xl shadow-[0_20px_80px_-30px_rgba(0,0,0,0.85)] overflow-hidden">
-          <div className="px-5 py-5 border-b border-white/10 bg-white/[0.03]">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-wider text-steel-200/65 mb-3">
-                  <ShieldCheck className="w-3.5 h-3.5 text-redlux-500" />
-                  Secure Digital Intake
-                </div>
-
-                <h2 className="font-display text-2xl font-bold text-steel-50 leading-tight">
-                  New Patient Submission
-                </h2>
-                <>
-  <p className="mt-2 text-sm text-steel-200/70 max-w-lg">
-    Complete your intake securely online. Your information is sent directly to the office for review.
-  </p>
-  <p className="mt-3 text-[11px] uppercase tracking-wider text-steel-200/45">
-    Powered by {CLIENT.systemProvider}
-  </p>
-</>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-5 py-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
-  <TrustMini
-    icon={<ShieldCheck className="w-4 h-4 text-redlux-500" />}
-    label="HIPAA Aware"
-  />
-  <TrustMini
-    icon={<Lock className="w-4 h-4 text-redlux-500" />}
-    label="Secure Transmission"
-  />
-  <TrustMini
-    icon={<Database className="w-4 h-4 text-redlux-500" />}
-    label="Encrypted Record Handling"
-  />
-</div>
-        </div>
+        
 
         {/* Progress */}
         <div className="mb-8">
@@ -250,12 +205,12 @@ export default function IntakePage() {
                 >
                   <div
                     className={`w-10 h-10 rounded-full flex items-center justify-center transition-all text-sm font-medium ${
-                      isDone
-                        ? 'bg-red-600 text-white'
-                        : isActive
-                        ? 'bg-red-600 text-white ring-4 ring-redlux-500/15'
-                        : 'bg-white/10 text-steel-200'
-                    }`}
+  isDone
+    ? 'bg-redlux-500 text-white'
+    : isActive
+    ? 'bg-redlux-500 text-white ring-4 ring-redlux-500/10'
+    : 'bg-obsidian-900 text-steel-200 border border-black/10'
+}`}
                   >
                     {isDone ? <CheckCircle2 className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                   </div>
@@ -272,21 +227,21 @@ export default function IntakePage() {
             })}
           </div>
 
-          <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-red-600 to-red-700 rounded-full"
+          <div className="h-2 bg-obsidian-800 rounded-full overflow-hidden border border-black/5">
+  <div
+    className="h-full bg-redlux-500 rounded-full"
               style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Form card */}
-        <div className="rounded-3xl border border-white/10 bg-obsidian-900/70 backdrop-blur-2xl shadow-[0_30px_120px_-40px_rgba(0,0,0,0.9)] overflow-hidden">
-          <div className="px-6 md:px-8 py-5 border-b border-white/10 bg-white/[0.03]">
-            <p className="text-xs uppercase tracking-wider text-steel-200/55">
-              Step {step + 1} of {STEPS.length}
-            </p>
-          </div>
+        <div className="rounded-3xl border border-black/10 bg-white shadow-sm overflow-hidden">
+  <div className="px-6 md:px-8 py-5 border-b border-black/10 bg-obsidian-900">
+    <p className="text-xs uppercase tracking-wider text-steel-200/80">
+      Step {step + 1} of {STEPS.length}
+    </p>
+  </div>
 
           <div className="p-6 md:p-8 step-enter">
             {step === 0 && (
@@ -320,54 +275,54 @@ export default function IntakePage() {
       </main>
 
       {/* Bottom nav */}
-      <div className="fixed bottom-0 inset-x-0 bg-obsidian-900/80 backdrop-blur border-t border-white/10 p-4 z-20">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex gap-3">
-            {step > 0 && (
-              <button
-                type="button"
-                onClick={prevStep}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl border border-white/15 text-steel-200 font-medium hover:bg-white/5 transition"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                Back
-              </button>
-            )}
+      <div className="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur border-t border-black/10 p-4 z-20">
+  <div className="max-w-2xl mx-auto">
+    <div className="flex gap-3">
+      {step > 0 && (
+        <button
+          type="button"
+          onClick={prevStep}
+          className="flex items-center gap-2 px-5 py-3 rounded-xl border border-black/10 text-steel-50 font-medium hover:bg-obsidian-900 transition"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Back
+        </button>
+      )}
 
-            {step < 3 ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60"
-              >
-                Continue
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={submitting}
-                className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 transition shadow-lg shadow-red-600/20 disabled:opacity-60 ${
-                  submitting ? "cursor-not-allowed" : ""
-                }`}
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    Submit Form
-                    <CheckCircle2 className="w-5 h-5" />
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      {step < 3 ? (
+        <button
+          type="button"
+          onClick={nextStep}
+          className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-redlux-500 text-white font-semibold hover:bg-redlux-600 transition shadow-sm disabled:opacity-60"
+        >
+          Continue
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting}
+          className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-redlux-500 text-white font-semibold hover:bg-redlux-600 transition shadow-sm disabled:opacity-60 ${
+            submitting ? "cursor-not-allowed" : ""
+          }`}
+        >
+          {submitting ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Submitting...
+            </>
+          ) : (
+            <>
+              Submit Form
+              <CheckCircle2 className="w-5 h-5" />
+            </>
+          )}
+        </button>
+      )}
+    </div>
+  </div>
+</div>
     </div>
   );
 }
@@ -412,7 +367,7 @@ function InputField({
 }) {
   return (
     <div className="space-y-1.5">
-      <label htmlFor={id} className="block text-sm font-medium text-steel-200">
+      <label htmlFor={id} className="block text-sm font-medium text-steel-50">
         {label}
         {required && <span className="text-redlux-500 ml-1">*</span>}
       </label>
@@ -424,13 +379,13 @@ function InputField({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={[
-          "w-full px-4 py-3 rounded-xl border text-[15px] transition",
-          "bg-obsidian-950/60 text-steel-50 placeholder:text-steel-400",
-          "focus:outline-none focus:ring-2",
-          error
-            ? "border-redlux-500/60 focus:ring-redlux-500/25"
-            : "border-white/10 focus:border-white/20 focus:ring-redlux-500/20",
-        ].join(" ")}
+  "w-full px-4 py-3 rounded-xl border text-[15px] transition",
+  "bg-white text-steel-50 placeholder:text-steel-400",
+  "focus:outline-none focus:ring-2",
+  error
+    ? "border-redlux-500/60 focus:ring-redlux-500/20"
+    : "border-black/10 focus:border-redlux-500/40 focus:ring-redlux-500/15",
+].join(" ")}
       />
 
       {error && <p className="text-xs text-redlux-500">{error}</p>}
@@ -737,98 +692,33 @@ function Step4({
           Consent &amp; Authorization
         </h2>
         <p className="text-sm text-steel-200/80 mt-1">
-          Please review and acknowledge the following.
+          Please review and sign below.
         </p>
       </div>
 
-      <div className="rounded-xl border border-white/10 bg-obsidian-950/45 p-4 text-xs leading-relaxed text-steel-200/80">
+      <div className="rounded-xl border border-black/10 bg-obsidian-900 p-4 text-xs leading-relaxed text-steel-200/80">
         <p className="mb-2 text-sm font-semibold text-steel-50">
-          HIPAA Notice of Privacy Practices
+          Notice of Privacy Practices
         </p>
         <div className="max-h-40 overflow-y-auto pr-2">
           <p>
-            This practice is committed to protecting your health information. Under
-            HIPAA, you have the right to access, amend, and request restrictions on
-            the use and disclosure of your protected health information (PHI). Your
-            PHI will only be used for treatment, payment, and healthcare operations
-            unless otherwise authorized by you. We maintain administrative,
-            technical, and physical safeguards to protect the confidentiality,
-            integrity, and availability of your information. By acknowledging
-            below, you confirm that you have been informed of our privacy practices
-            and your rights under HIPAA.
+            This practice is committed to protecting your health information.
+            You have the right to access, amend, and request restrictions on
+            the use and disclosure of your protected health information.
+            Your information will only be used for treatment, payment, and
+            healthcare operations unless otherwise authorized by you.
+            We maintain administrative, technical, and physical safeguards
+            to protect the confidentiality, integrity, and availability of
+            your information.
           </p>
         </div>
       </div>
 
-      <label
-        className={[
-          "flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition",
-          "select-none",
-          errors.hipaaAcknowledged
-            ? "border-redlux-500/55 bg-redlux-500/10"
-            : data.hipaaAcknowledged
-            ? "border-white/15 bg-white/5"
-            : "border-white/10 hover:bg-white/5 hover:border-white/15",
-        ].join(" ")}
-      >
-        <input
-          type="checkbox"
-          checked={data.hipaaAcknowledged}
-          onChange={(e) => updateConsent("hipaaAcknowledged", e.target.checked)}
-          className={[
-            "mt-0.5 h-5 w-5 cursor-pointer rounded border",
-            "border-white/20 bg-obsidian-950",
-            "accent-red-600",
-            "focus:outline-none focus:ring-2 focus:ring-redlux-500/30",
-            "flex-shrink-0",
-          ].join(" ")}
-        />
-        <div>
-          <p className="text-sm font-medium text-steel-50">HIPAA Acknowledgment</p>
-          <p className="text-xs text-steel-200/70 mt-0.5">
-            I acknowledge that I have been informed of the practice&apos;s Notice of
-            Privacy Practices.
-          </p>
-        </div>
-      </label>
-
-      <label
-        className={[
-          "flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition",
-          "select-none",
-          errors.treatmentConsent
-            ? "border-redlux-500/55 bg-redlux-500/10"
-            : data.treatmentConsent
-            ? "border-white/15 bg-white/5"
-            : "border-white/10 hover:bg-white/5 hover:border-white/15",
-        ].join(" ")}
-      >
-        <input
-          type="checkbox"
-          checked={data.treatmentConsent}
-          onChange={(e) => updateConsent("treatmentConsent", e.target.checked)}
-          className={[
-            "mt-0.5 h-5 w-5 cursor-pointer rounded border",
-            "border-white/20 bg-obsidian-950",
-            "accent-red-600",
-            "focus:outline-none focus:ring-2 focus:ring-redlux-500/30",
-            "flex-shrink-0",
-          ].join(" ")}
-        />
-        <div>
-          <p className="text-sm font-medium text-steel-50">Treatment Consent</p>
-          <p className="text-xs text-steel-200/70 mt-0.5">
-            I consent to dental examination and treatment as recommended by the
-            dental team.
-          </p>
-        </div>
-      </label>
-
-      <hr className="border-white/10" />
+      <hr className="border-black/10" />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="sm:col-span-2">
-          <label htmlFor="sig" className="block text-sm font-medium text-steel-200 mb-1.5">
+          <label htmlFor="sig" className="block text-sm font-medium text-steel-50 mb-1.5">
             Typed Signature <span className="text-redlux-500">*</span>
           </label>
 
@@ -840,11 +730,11 @@ function Step4({
             placeholder="Type your full legal name"
             className={[
               "w-full px-4 py-3 rounded-xl border text-sm italic font-serif transition",
-              "bg-obsidian-950/60 text-steel-50 placeholder:text-steel-400",
+              "bg-white text-steel-50 placeholder:text-steel-400",
               "focus:outline-none focus:ring-2",
               errors.signatureText
-                ? "border-redlux-500/60 focus:ring-redlux-500/25"
-                : "border-white/10 focus:border-white/20 focus:ring-redlux-500/20",
+                ? "border-redlux-500/60 focus:ring-redlux-500/20"
+                : "border-black/10 focus:border-redlux-500/40 focus:ring-redlux-500/15",
             ].join(" ")}
           />
 
@@ -854,7 +744,7 @@ function Step4({
         </div>
 
         <div>
-          <label htmlFor="sigDate" className="block text-sm font-medium text-steel-200 mb-1.5">
+          <label htmlFor="sigDate" className="block text-sm font-medium text-steel-50 mb-1.5">
             Date
           </label>
 
@@ -865,8 +755,8 @@ function Step4({
             onChange={(e) => updateConsent("signatureDate", e.target.value)}
             className={[
               "w-full px-4 py-3 rounded-xl border text-sm transition",
-              "bg-obsidian-950/60 text-steel-50",
-              "border-white/10 focus:outline-none focus:ring-2 focus:ring-redlux-500/20 focus:border-white/20",
+              "bg-white text-steel-50",
+              "border-black/10 focus:outline-none focus:ring-2 focus:ring-redlux-500/15 focus:border-redlux-500/40",
             ].join(" ")}
           />
         </div>
