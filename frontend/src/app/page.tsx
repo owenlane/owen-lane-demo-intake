@@ -325,6 +325,7 @@ function DemoForm({ compact = false }: { compact?: boolean }) {
     intake: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const inputStyle: React.CSSProperties = {
     background: "rgba(255,255,255,0.022)",
@@ -338,6 +339,40 @@ function DemoForm({ compact = false }: { compact?: boolean }) {
 
   function updateField<K extends keyof typeof form>(key: K, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    if (!form.name || !form.practice || !form.email || !form.phone || !form.intake) {
+      alert("Fill out all fields.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const res = await fetch("/api/demo-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to send demo request.");
+      }
+
+      setSubmitted(true);
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong. Your request did not send.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   if (submitted) {
@@ -372,7 +407,8 @@ function DemoForm({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div
+    <form
+      onSubmit={handleSubmit}
       className={`${compact ? "p-6 md:p-8" : "p-7 md:p-10"} rounded-2xl`}
       style={{
         background: SURFACE,
@@ -447,9 +483,9 @@ function DemoForm({ compact = false }: { compact?: boolean }) {
         </select>
 
         <button
-          type="button"
-          onClick={() => setSubmitted(true)}
-          className="w-full py-3.5 rounded-xl text-[12.5px] font-medium tracking-[0.03em] transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] mt-1"
+          type="submit"
+          disabled={loading}
+          className="w-full py-3.5 rounded-xl text-[12.5px] font-medium tracking-[0.03em] transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] mt-1 disabled:opacity-60"
           style={{
             background: EMERALD,
             color: BG,
@@ -457,10 +493,10 @@ function DemoForm({ compact = false }: { compact?: boolean }) {
             boxShadow: "0 0 24px rgba(45,212,160,0.10)",
           }}
         >
-          Request Private Demo
+          {loading ? "Sending..." : "Request Private Demo"}
         </button>
       </div>
-    </div>
+    </form>
   );
 }
 
