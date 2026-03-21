@@ -54,7 +54,7 @@ const authLimiter = rateLimit({
 
 // Apply limiters
 app.use("/api", generalLimiter);
-app.use("/api/admin/login", authLimiter);
+app.use('/api/admin', authLimiter);
 
 // Routes
 app.use("/api/intake", intakeRoutes);
