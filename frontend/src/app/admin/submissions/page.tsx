@@ -61,8 +61,14 @@ export default function SubmissionsPage() {
   '';
         const res = await getSubmissions(token, params);
 
-        setSubmissions(res.submissions || res.data || []);
-        setPagination(res.pagination);
+        setSubmissions(res.submissions || []);
+
+setPagination({
+  page,
+  limit: 20,
+  total: res.count || 0,
+  totalPages: Math.ceil((res.count || 0) / 20),
+});
       } catch (err: any) {
         if (
           String(err?.message || '').includes('Authentication') ||
