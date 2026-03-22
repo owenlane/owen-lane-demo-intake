@@ -60,7 +60,7 @@ router.get('/submissions', async (req: Request, res: Response) => {
 
     let query = supabase
       .from('intake_submissions')
-      .select('*, patients(*)', { count: 'exact' });
+      .select('*', { count: 'exact' });
 
     if (status && ['new', 'reviewed', 'completed'].includes(status)) {
       query = query.eq('status', status);
@@ -116,7 +116,7 @@ router.get('/submissions/export/csv', async (req: Request, res: Response) => {
 
     let query = supabase
       .from('intake_submissions')
-      .select('*, patients(*)');
+      .select('*');
 
     if (status && ['new', 'reviewed', 'completed'].includes(status)) {
       query = query.eq('status', status);
@@ -179,7 +179,7 @@ router.get('/submissions/:id', async (req: Request, res: Response) => {
 
     const { data, error } = await supabase
       .from('intake_submissions')
-      .select('*, patients(*)')
+      .select('*')
       .eq('id', id)
       .single();
 
