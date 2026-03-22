@@ -1,10 +1,10 @@
 'use client';
 
 import { CLIENT } from "@/lib/client";
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
-import { getSubmissions, exportCsv } from '@/lib/api';
+import { exportCsv } from "@/lib/api";
 import {
   Search,
   Filter,
@@ -29,6 +29,31 @@ const STATUS_BADGES: Record<string, string> = {
   completed: 'bg-emerald-500/10 border-emerald-500/25 text-steel-50',
 };
 
+async function fetchSubmissionsDirect(
+  token: string,
+  params: Record<string, string> = {}
+) {
+  const qs = new URLSearchParams(params).toString();
+  const url = `https://smilesketchvegas.onrender.com/api/admin/submissions${qs ? `?${qs}` : ''}`;
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok) {
+    const msg = (data && (data.error || data.message)) || `HTTP ${res.status}`;
+    throw new Error(msg);
+  }
+
+  return data;
+}
+
 export default function SubmissionsPage() {
   const router = useRouter();
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -46,35 +71,53 @@ export default function SubmissionsPage() {
   const fetchData = useCallback(
     async (page = 1) => {
       setLoading(true);
+
       try {
         const params: Record<string, string> = {
           page: String(page),
           limit: '20',
           order: sortOrder,
         };
+
         if (search) params.search = search;
         if (statusFilter) params.status = statusFilter;
 
         const token =
-  localStorage.getItem('token') ||
-  localStorage.getItem('admin_token') ||
-  '';
-        const res = await getSubmissions(token, params);
+          localStorage.getItem('token') ||
+          localStorage.getItem('admin_token') ||
+          '';
 
-        setSubmissions(res.submissions || []);
+        if (!token) {
+          router.push('/admin/login');
+          return;
+        }
 
-setPagination({
-  page,
-  limit: 20,
-  total: res.count || 0,
-  totalPages: Math.ceil((res.count || 0) / 20),
-});
+        const res = await fetchSubmissionsDirect(token, params);
+
+        setSubmissions(res?.submissions || []);
+        setPagination({
+          page,
+          limit: 20,
+          total: res?.count || 0,
+          totalPages: Math.ceil((res?.count || 0) / 20),
+        });
       } catch (err: any) {
+        console.error('Failed to fetch submissions:', err);
+
         if (
           String(err?.message || '').includes('Authentication') ||
-          String(err?.message || '').includes('401')
+          String(err?.message || '').includes('401') ||
+          String(err?.message || '').includes('Unauthorized')
         ) {
           router.push('/admin/login');
+        } else {
+          setSubmissions([]);
+          setPagination({
+            page,
+            limit: 20,
+            total: 0,
+            totalPages: 0,
+          });
         }
       } finally {
         setLoading(false);
@@ -84,12 +127,17 @@ setPagination({
   );
 
   useEffect(() => {
-    const token = localStorage.getItem('admin_token');
+    const token =
+      localStorage.getItem('token') ||
+      localStorage.getItem('admin_token') ||
+      '';
+
     if (!token) {
       router.push('/admin/login');
       return;
     }
-    fetchData();
+
+    fetchData(1);
   }, [fetchData, router]);
 
   function handleSearch(e: React.FormEvent) {
@@ -104,9 +152,10 @@ setPagination({
       if (statusFilter) params.status = statusFilter;
 
       const token =
-  localStorage.getItem('token') ||
-  localStorage.getItem('admin_token') ||
-  '';
+        localStorage.getItem('token') ||
+        localStorage.getItem('admin_token') ||
+        '';
+
       const csv = await exportCsv(token, params);
 
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -124,6 +173,7 @@ setPagination({
   }
 
   function handleLogout() {
+    localStorage.removeItem('token');
     localStorage.removeItem('admin_token');
     localStorage.removeItem('admin_user');
     router.push('/admin/login');
@@ -540,7 +590,7 @@ function StatCard({
   value,
   subtext,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
   subtext: string;
