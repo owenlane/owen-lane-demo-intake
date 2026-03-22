@@ -16,21 +16,31 @@ app.set("trust proxy", 1);
 // Security headers
 app.use(helmet());
 
-// CORS (allow your local dev + your deployed frontend)
+// CORS
 const allowedOrigins = [
-  process.env.FRONTEND_URL,          // e.g. https://your-frontend.vercel.app
+  process.env.FRONTEND_URL,
   "http://localhost:3000",
+  "https://smilesketchvegas-final.vercel.app",
+  "https://smilesketchvegas-final-git-main-owenlanes-projects.vercel.app",
 ].filter(Boolean) as string[];
 
-app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://smilesketchvegas-final.vercel.app"
-    ],
-    credentials: true,
-  })
-);
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+app.options("*", cors(corsOptions));
 
 // Body parsing
 app.use(express.json({ limit: "1mb" }));
@@ -54,7 +64,7 @@ const authLimiter = rateLimit({
 
 // Apply limiters
 app.use("/api", generalLimiter);
-app.use('/api/admin', authLimiter);
+app.use("/api/admin", authLimiter);
 
 // Routes
 app.use("/api/intake", intakeRoutes);
