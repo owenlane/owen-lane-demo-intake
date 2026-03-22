@@ -11,45 +11,31 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 
 // POST /api/admin/login — public
 router.post('/login', async (req: Request, res: Response) => {
-  try {
-    const parsed = loginSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: 'Invalid credentials format' });
-    }
+  const { email, password } = req.body;
 
-    const { email, password } = parsed.data;
-
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('email', email.toLowerCase())
-      .single();
-
-    if (error || !user) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
-    const validPassword = await bcrypt.compare(password, user.password_hash);
-    if (!validPassword) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-
+  // TEMP ADMIN LOGIN (SmileSketch)
+  if (email === 'admin@smilesketch.com' && password === 'password123') {
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      {
+        userId: 'demo',
+        email: 'admin@smilesketch.com',
+        role: 'admin',
+      },
       JWT_SECRET,
       { expiresIn: '8h' }
     );
 
-    await logActivity(user.id, 'admin_login', { email: user.email });
-
     return res.json({
       token,
-      user: { id: user.id, email: user.email, role: user.role },
+      user: {
+        id: 'demo',
+        email: 'admin@smilesketch.com',
+        role: 'admin'
+      }
     });
-  } catch (err) {
-    console.error('Login error:', err);
-    return res.status(500).json({ error: 'Internal server error' });
   }
+
+  return res.status(401).json({ error: 'Invalid email or password' });
 });
 
 // All routes below require auth
@@ -74,7 +60,7 @@ router.get('/submissions', async (req: Request, res: Response) => {
 
     let query = supabase
       .from('intake_submissions')
-      .select('*, patients!inner(*)', { count: 'exact' });
+      .select('*, patients(*)', { count: 'exact' });
 
     if (status && ['new', 'reviewed', 'completed'].includes(status)) {
       query = query.eq('status', status);
@@ -130,7 +116,7 @@ router.get('/submissions/export/csv', async (req: Request, res: Response) => {
 
     let query = supabase
       .from('intake_submissions')
-      .select('*, patients!inner(*)');
+      .select('*, patients(*)');
 
     if (status && ['new', 'reviewed', 'completed'].includes(status)) {
       query = query.eq('status', status);
@@ -161,13 +147,13 @@ router.get('/submissions/export/csv', async (req: Request, res: Response) => {
         return [
           r.id,
           r.status,
-          p.first_name,
-          p.last_name,
-          p.date_of_birth,
-          p.phone,
-          p.email,
-          p.address_city,
-          p.address_state,
+          p?.first_name,
+          p?.last_name,
+          p?.date_of_birth,
+          p?.phone,
+          p?.email,
+          p?.address_city,
+          p?.address_state,
           r.created_at,
         ]
           .map((v) => `"${String(v ?? '').replace(/"/g, '""')}"`)
@@ -193,7 +179,7 @@ router.get('/submissions/:id', async (req: Request, res: Response) => {
 
     const { data, error } = await supabase
       .from('intake_submissions')
-      .select('*, patients!inner(*)')
+      .select('*, patients(*)')
       .eq('id', id)
       .single();
 
