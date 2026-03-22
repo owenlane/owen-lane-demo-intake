@@ -55,7 +55,10 @@ export default function SubmissionsPage() {
         if (search) params.search = search;
         if (statusFilter) params.status = statusFilter;
 
-        const token = localStorage.getItem('admin_token') || '';
+        const token =
+  localStorage.getItem('token') ||
+  localStorage.getItem('admin_token') ||
+  '';
         const res = await getSubmissions(token, params);
 
         setSubmissions(res.submissions || res.data || []);
@@ -94,7 +97,10 @@ export default function SubmissionsPage() {
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
 
-      const token = localStorage.getItem('admin_token') || '';
+      const token =
+  localStorage.getItem('token') ||
+  localStorage.getItem('admin_token') ||
+  '';
       const csv = await exportCsv(token, params);
 
       const blob = new Blob([csv], { type: 'text/csv' });
