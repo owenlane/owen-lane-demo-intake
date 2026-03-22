@@ -5,6 +5,7 @@ const BASE = "https://smilesketchvegas.onrender.com";
 // Generic JSON helper
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const url = `${BASE}${path}`;
+  console.log("API REQUEST URL:", url);
 
   const res = await fetch(url, {
     ...options,
