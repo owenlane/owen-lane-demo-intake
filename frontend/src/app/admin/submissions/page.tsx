@@ -56,6 +56,7 @@ async function fetchSubmissionsDirect(
 
 export default function SubmissionsPage() {
   const router = useRouter();
+
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
     page: 1,
@@ -67,6 +68,7 @@ export default function SubmissionsPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [loading, setLoading] = useState(true);
+  const [intakeUrl, setIntakeUrl] = useState('');
 
   const fetchData = useCallback(
     async (page = 1) => {
@@ -94,12 +96,22 @@ export default function SubmissionsPage() {
 
         const res = await fetchSubmissionsDirect(token, params);
 
-        setSubmissions(res?.submissions || []);
-        setPagination({
+        console.log('API RESPONSE:', res);
+
+        const nextSubmissions = Array.isArray(res?.submissions) ? res.submissions : [];
+        const nextPagination = res?.pagination || {
           page,
           limit: 20,
-          total: res?.count || 0,
-          totalPages: Math.ceil((res?.count || 0) / 20),
+          total: typeof res?.count === 'number' ? res.count : 0,
+          totalPages: typeof res?.count === 'number' ? Math.ceil(res.count / 20) : 0,
+        };
+
+        setSubmissions(nextSubmissions);
+        setPagination({
+          page: Number(nextPagination.page) || page,
+          limit: Number(nextPagination.limit) || 20,
+          total: Number(nextPagination.total) || 0,
+          totalPages: Number(nextPagination.totalPages) || 0,
         });
       } catch (err: any) {
         console.error('Failed to fetch submissions:', err);
@@ -139,6 +151,10 @@ export default function SubmissionsPage() {
 
     fetchData(1);
   }, [fetchData, router]);
+
+  useEffect(() => {
+    setIntakeUrl(`${window.location.origin}/intake`);
+  }, []);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -180,22 +196,23 @@ export default function SubmissionsPage() {
   }
 
   const stats = useMemo(() => {
-    const totalLoaded = submissions.length;
-    const newCount = submissions.filter(
+    const safeSubmissions = Array.isArray(submissions) ? submissions : [];
+
+    const totalLoaded = safeSubmissions.length;
+    const newCount = safeSubmissions.filter(
       (s) => String(s.status || '').toLowerCase() === 'new'
     ).length;
-    const reviewedCount = submissions.filter(
+    const reviewedCount = safeSubmissions.filter(
       (s) => String(s.status || '').toLowerCase() === 'reviewed'
     ).length;
-    const completedCount = submissions.filter(
+    const completedCount = safeSubmissions.filter(
       (s) => String(s.status || '').toLowerCase() === 'completed'
     ).length;
 
     return { totalLoaded, newCount, reviewedCount, completedCount };
   }, [submissions]);
 
-  const intakeUrl =
-    typeof window !== 'undefined' ? `${window.location.origin}/intake` : '';
+  const safeSubmissions = Array.isArray(submissions) ? submissions : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -476,14 +493,14 @@ export default function SubmissionsPage() {
                       Loading...
                     </td>
                   </tr>
-                ) : submissions.length === 0 ? (
+                ) : safeSubmissions.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="text-center py-20 text-steel-400">
                       No submissions found
                     </td>
                   </tr>
                 ) : (
-                  submissions.map((s, index) => {
+                  safeSubmissions.map((s, index) => {
                     const fullName =
                       `${s.patients?.first_name || ''} ${s.patients?.last_name || ''}`.trim() || '—';
                     const email = s.patients?.email || '—';
