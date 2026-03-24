@@ -1,6 +1,6 @@
 // frontend/src/lib/api.ts
 
-const BASE = "https://smilesketchvegas.onrender.com";
+const BASE = process.env.NEXT_PUBLIC_API_URL!;;
 
 // Generic JSON helper
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {

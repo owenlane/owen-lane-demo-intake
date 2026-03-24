@@ -34,7 +34,7 @@ async function fetchSubmissionsDirect(
   params: Record<string, string> = {}
 ) {
   const qs = new URLSearchParams(params).toString();
-  const url = `https://smilesketchvegas.onrender.com/api/admin/submissions${qs ? `?${qs}` : ''}`;
+const url = `${process.env.NEXT_PUBLIC_API_URL}/api/admin/submissions${qs ? `?${qs}` : ''}`;
 
   const res = await fetch(url, {
     method: 'GET',
