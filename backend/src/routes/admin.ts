@@ -74,6 +74,17 @@ router.get("/submissions", async (_req: Request, res: Response) => {
         last_name: personalInfo.lastName || "",
         email: personalInfo.email || "",
         json_payload: payload,
+        patients: {
+          first_name: personalInfo.firstName || "",
+          last_name: personalInfo.lastName || "",
+          email: personalInfo.email || "",
+          phone: personalInfo.phone || "",
+          date_of_birth: personalInfo.dob || "",
+          address_street: personalInfo.address || "",
+          address_city: "",
+          address_state: "",
+          address_zip: "",
+        },
       };
     });
 
@@ -116,6 +127,17 @@ router.get("/submissions/:id", async (req: Request, res: Response) => {
       last_name: personalInfo.lastName || "",
       email: personalInfo.email || "",
       json_payload: payload,
+      patients: {
+        first_name: personalInfo.firstName || "",
+        last_name: personalInfo.lastName || "",
+        email: personalInfo.email || "",
+        phone: personalInfo.phone || "",
+        date_of_birth: personalInfo.dob || "",
+        address_street: personalInfo.address || "",
+        address_city: "",
+        address_state: "",
+        address_zip: "",
+      },
     });
   } catch (err) {
     console.error("GET ONE ERROR:", err);
