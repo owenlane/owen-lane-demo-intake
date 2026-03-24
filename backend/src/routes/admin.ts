@@ -19,7 +19,10 @@ router.post("/login", async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    if (email === "admin@smilesketch.com" && password === "password123") {
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
       const token = jwt.sign(
         { userId: "demo", email, role: "admin" },
         JWT_SECRET,
@@ -60,17 +63,16 @@ router.get("/submissions", async (_req: Request, res: Response) => {
 
     const submissions = (data || []).map((row: any) => {
       const payload = row.json_payload || {};
-      const personal = payload.personal || {};
-      const contact = payload.contact || {};
+      const personalInfo = payload.personalInfo || payload.personal || {};
 
       return {
         id: row.id,
         patient_id: row.patient_id,
         status: row.status,
         created_at: row.created_at,
-        first_name: personal.firstName || "",
-        last_name: personal.lastName || "",
-        email: contact.email || "",
+        first_name: personalInfo.firstName || "",
+        last_name: personalInfo.lastName || "",
+        email: personalInfo.email || "",
         json_payload: payload,
       };
     });
@@ -86,7 +88,7 @@ router.get("/submissions", async (_req: Request, res: Response) => {
 });
 
 // ==========================
-// GET SINGLE SUBMISSION (FIX)
+// GET SINGLE SUBMISSION
 // ==========================
 router.get("/submissions/:id", async (req: Request, res: Response) => {
   try {
@@ -103,17 +105,16 @@ router.get("/submissions/:id", async (req: Request, res: Response) => {
     }
 
     const payload = data.json_payload || {};
-    const personal = payload.personal || {};
-    const contact = payload.contact || {};
+    const personalInfo = payload.personalInfo || payload.personal || {};
 
     return res.json({
       id: data.id,
       patient_id: data.patient_id,
       status: data.status,
       created_at: data.created_at,
-      first_name: personal.firstName || "",
-      last_name: personal.lastName || "",
-      email: contact.email || "",
+      first_name: personalInfo.firstName || "",
+      last_name: personalInfo.lastName || "",
+      email: personalInfo.email || "",
       json_payload: payload,
     });
   } catch (err) {
