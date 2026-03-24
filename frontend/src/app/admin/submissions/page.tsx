@@ -24,9 +24,9 @@ import {
 } from 'lucide-react';
 
 const STATUS_BADGES: Record<string, string> = {
-  new: 'bg-redlux-500/10 border-redlux-500/25 text-steel-50',
-  reviewed: 'bg-obsidian-900 border-black/10 text-steel-50',
-  completed: 'bg-emerald-500/10 border-emerald-500/25 text-steel-50',
+  new: 'bg-blue-50 border-blue-200 text-blue-700',
+  reviewed: 'bg-amber-50 border-amber-200 text-amber-700',
+  completed: 'bg-emerald-50 border-emerald-200 text-emerald-700',
 };
 
 async function fetchSubmissionsDirect(

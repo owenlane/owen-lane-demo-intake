@@ -26,24 +26,24 @@ const STATUS_META: Record<
 > = {
   new: {
     label: 'New',
-    pill: 'border-redlux-500/25 bg-redlux-500/10 text-steel-50',
-    dot: 'bg-redlux-500',
-    activeBtn: 'bg-redlux-500 text-white border-redlux-500',
-    idleBtn: 'bg-white text-steel-200 border-black/10 hover:bg-obsidian-900',
+    pill: 'border-blue-200 bg-blue-50 text-blue-700',
+    dot: 'bg-blue-500',
+    activeBtn: 'bg-blue-600 text-white border-blue-600',
+    idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
   },
   reviewed: {
     label: 'Reviewed',
-    pill: 'border-black/10 bg-obsidian-900 text-steel-50',
-    dot: 'bg-amber-400',
-    activeBtn: 'bg-obsidian-900 text-steel-50 border-black/10',
-    idleBtn: 'bg-white text-steel-200 border-black/10 hover:bg-obsidian-900',
+    pill: 'border-amber-200 bg-amber-50 text-amber-700',
+    dot: 'bg-amber-500',
+    activeBtn: 'bg-amber-500 text-white border-amber-500',
+    idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
   },
   completed: {
     label: 'Completed',
-    pill: 'border-emerald-500/25 bg-emerald-500/10 text-steel-50',
-    dot: 'bg-emerald-400',
-    activeBtn: 'bg-emerald-500/15 text-steel-50 border-emerald-500/25',
-    idleBtn: 'bg-white text-steel-200 border-black/10 hover:bg-obsidian-900',
+    pill: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    dot: 'bg-emerald-500',
+    activeBtn: 'bg-emerald-600 text-white border-emerald-600',
+    idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
   },
 };
 

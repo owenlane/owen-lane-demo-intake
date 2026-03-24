@@ -145,4 +145,65 @@ router.get("/submissions/:id", async (req: Request, res: Response) => {
   }
 });
 
+// ==========================
+// UPDATE SUBMISSION STATUS
+// ==========================
+router.patch("/submissions/:id/status", async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const allowedStatuses = ["new", "reviewed", "completed"];
+
+    if (!allowedStatuses.includes(String(status).toLowerCase())) {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
+    const normalizedStatus = String(status).toLowerCase();
+
+    const { data, error } = await supabase
+      .from("intake_submissions")
+      .update({ status: normalizedStatus })
+      .eq("id", id)
+      .select("*")
+      .single();
+
+    if (error || !data) {
+      console.error("STATUS UPDATE ERROR:", error);
+      return res.status(500).json({ error: "Failed to update submission status" });
+    }
+
+    const payload = data.json_payload || {};
+    const personalInfo = payload.personalInfo || payload.personal || {};
+
+    return res.json({
+      success: true,
+      submission: {
+        id: data.id,
+        patient_id: data.patient_id,
+        status: data.status,
+        created_at: data.created_at,
+        first_name: personalInfo.firstName || "",
+        last_name: personalInfo.lastName || "",
+        email: personalInfo.email || "",
+        json_payload: payload,
+        patients: {
+          first_name: personalInfo.firstName || "",
+          last_name: personalInfo.lastName || "",
+          email: personalInfo.email || "",
+          phone: personalInfo.phone || "",
+          date_of_birth: personalInfo.dob || "",
+          address_street: personalInfo.address || "",
+          address_city: "",
+          address_state: "",
+          address_zip: "",
+        },
+      },
+    });
+  } catch (err) {
+    console.error("PATCH STATUS ERROR:", err);
+    return res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 export default router;
