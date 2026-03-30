@@ -20,7 +20,6 @@ const transporter = nodemailer.createTransport({
 // POST /api/intake/submit
 router.post('/submit', async (req: Request, res: Response) => {
   try {
-    // Validate
     const parsed = intakeSubmissionSchema.safeParse(req.body);
     if (!parsed.success) {
       return res.status(400).json({
@@ -31,50 +30,88 @@ router.post('/submit', async (req: Request, res: Response) => {
 
     const data = sanitizeObject(
       parsed.data as unknown as Record<string, unknown>
-    ) as unknown as typeof parsed.data;
+    ) as typeof parsed.data;
 
-    // Create patient record
-    const patientId = uuidv4();
-    const { error: patientError } = await supabase.from('patients').insert({
-      id: patientId,
-      first_name: data.personalInfo.firstName,
-      last_name: data.personalInfo.lastName,
-      date_of_birth: data.personalInfo.dateOfBirth,
-      phone: data.personalInfo.phone,
-      email: data.personalInfo.email,
-      address_street: data.personalInfo.address.street,
-      address_city: data.personalInfo.address.city,
-      address_state: data.personalInfo.address.state,
-      address_zip: data.personalInfo.address.zip,
-    });
+    const {
+      firstName,
+      lastName,
+      dateOfBirth,
+      phone,
+      email,
+      address,
+    } = data.personalInfo;
 
-    if (patientError) {
-      console.error('Patient insert error:', patientError);
-      return res.status(500).json({ error: 'Failed to save patient data' });
+    // ===== PATIENT LINKING (FIXED CORE LOGIC) =====
+
+    // 1. Try find existing patient by email
+    const { data: existingPatient, error: findError } = await supabase
+      .from('patients')
+      .select('*')
+      .eq('email', email)
+      .maybeSingle();
+
+    if (findError) {
+      console.error('Find patient error:', findError);
+      return res.status(500).json({ error: 'Failed to check existing patient' });
     }
 
-    // Create submission
+    let patientId = existingPatient?.id;
+
+    // 2. If NOT found → create new patient
+    if (!patientId) {
+      const newId = uuidv4();
+
+      const { data: newPatient, error: createError } = await supabase
+        .from('patients')
+        .insert({
+          id: newId,
+          first_name: firstName,
+          last_name: lastName,
+          date_of_birth: dateOfBirth,
+          phone,
+          email,
+          address_street: address?.street,
+          address_city: address?.city,
+          address_state: address?.state,
+          address_zip: address?.zip,
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Create patient error:', createError);
+        return res.status(500).json({ error: 'Failed to create patient' });
+      }
+
+      patientId = newPatient.id;
+    }
+
+    // ===== CREATE SUBMISSION =====
+
     const submissionId = uuidv4();
-    const { error: subError } = await supabase.from('intake_submissions').insert({
-      id: submissionId,
-      patient_id: patientId,
-      json_payload: data,
-      status: 'new',
-    });
+
+    const { error: subError } = await supabase
+      .from('intake_submissions')
+      .insert({
+        id: submissionId,
+        patient_id: patientId,
+        json_payload: data,
+        status: 'new',
+      });
 
     if (subError) {
       console.error('Submission insert error:', subError);
       return res.status(500).json({ error: 'Failed to save submission' });
     }
 
-    // Send office notification email
+    // ===== EMAIL NOTIFICATION =====
+
     try {
       const officeEmail =
         process.env.OFFICE_NOTIFICATION_EMAIL || process.env.SMTP_USER || '';
-      const dashboardUrl =
-        process.env.ADMIN_DASHBOARD_URL || '';
+      const dashboardUrl = process.env.ADMIN_DASHBOARD_URL || '';
 
-      const patientName = `${data.personalInfo.firstName} ${data.personalInfo.lastName}`.trim();
+      const patientName = `${firstName} ${lastName}`.trim();
       const submittedAt = new Date().toLocaleString('en-US', {
         year: 'numeric',
         month: 'long',
@@ -92,8 +129,8 @@ router.post('/submit', async (req: Request, res: Response) => {
 New Patient Intake Submitted
 
 Patient: ${patientName}
-Phone: ${data.personalInfo.phone}
-Email: ${data.personalInfo.email}
+Phone: ${phone}
+Email: ${email}
 Submitted: ${submittedAt}
 Submission ID: ${submissionId}
 
@@ -102,39 +139,28 @@ ${dashboardUrl}
           `.trim(),
           html: `
             <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111;">
-              <h2 style="margin-bottom: 12px;">New Patient Intake Submitted</h2>
-
+              <h2>New Patient Intake Submitted</h2>
               <p><strong>Patient:</strong> ${patientName}</p>
-              <p><strong>Phone:</strong> ${data.personalInfo.phone}</p>
-              <p><strong>Email:</strong> ${data.personalInfo.email}</p>
+              <p><strong>Phone:</strong> ${phone}</p>
+              <p><strong>Email:</strong> ${email}</p>
               <p><strong>Submitted:</strong> ${submittedAt}</p>
               <p><strong>Submission ID:</strong> ${submissionId}</p>
-
               ${
                 dashboardUrl
-                  ? `<p style="margin-top: 20px;">
-                      <a href="${dashboardUrl}" style="display: inline-block; padding: 10px 14px; background: #111; color: #fff; text-decoration: none; border-radius: 8px;">
-                        Open Admin Dashboard
-                      </a>
-                    </p>`
+                  ? `<p><a href="${dashboardUrl}" style="padding:10px 14px;background:#111;color:#fff;text-decoration:none;border-radius:8px;">Open Admin Dashboard</a></p>`
                   : ''
               }
-
-              <hr style="margin: 24px 0; border: none; border-top: 1px solid #ddd;" />
-              <p style="font-size: 12px; color: #666;">Secure Intake Infrastructure — Lane Campos Group</p>
             </div>
           `,
         });
       }
     } catch (emailErr) {
       console.error('Notification email error:', emailErr);
-      // Do NOT fail the intake submission if email notification fails
     }
 
     return res.status(201).json({
       message: 'Intake form submitted successfully',
       id: submissionId,
-      submissionId,
     });
   } catch (err) {
     console.error('Intake submit error:', err);

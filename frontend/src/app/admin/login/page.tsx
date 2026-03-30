@@ -20,7 +20,7 @@ export default function AdminLoginPage() {
     try {
       const res = await adminLogin(email, password);
       localStorage.setItem('admin_token', res.token);
-      router.push('/admin/submissions');
+      router.push('/admin');
     } catch (err: any) {
       setError(err.message || 'Login failed');
     } finally {

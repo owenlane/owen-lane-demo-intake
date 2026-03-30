@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { CLIENT } from "@/lib/client";
+import { CLIENT } from '@/lib/client';
 import { getSubmissionById, updateSubmissionStatus } from '@/lib/api';
 import {
   ArrowLeft,
@@ -18,6 +18,8 @@ import {
   ShieldCheck,
   HeartPulse,
   Printer,
+  FileText,
+  History,
 } from 'lucide-react';
 
 const STATUS_META: Record<
@@ -31,11 +33,25 @@ const STATUS_META: Record<
     activeBtn: 'bg-blue-600 text-white border-blue-600',
     idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
   },
-  reviewed: {
-    label: 'Reviewed',
-    pill: 'border-amber-200 bg-amber-50 text-amber-700',
-    dot: 'bg-amber-500',
-    activeBtn: 'bg-amber-500 text-white border-amber-500',
+  contacted: {
+    label: 'Contacted',
+    pill: 'border-violet-200 bg-violet-50 text-violet-700',
+    dot: 'bg-violet-500',
+    activeBtn: 'bg-violet-600 text-white border-violet-600',
+    idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
+  },
+  scheduled: {
+    label: 'Scheduled',
+    pill: 'border-cyan-200 bg-cyan-50 text-cyan-700',
+    dot: 'bg-cyan-500',
+    activeBtn: 'bg-cyan-600 text-white border-cyan-600',
+    idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
+  },
+  checked_in: {
+    label: 'Checked In',
+    pill: 'border-indigo-200 bg-indigo-50 text-indigo-700',
+    dot: 'bg-indigo-500',
+    activeBtn: 'bg-indigo-600 text-white border-indigo-600',
     idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
   },
   completed: {
@@ -45,21 +61,147 @@ const STATUS_META: Record<
     activeBtn: 'bg-emerald-600 text-white border-emerald-600',
     idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
   },
+  no_show: {
+    label: 'No Show',
+    pill: 'border-rose-200 bg-rose-50 text-rose-700',
+    dot: 'bg-rose-500',
+    activeBtn: 'bg-rose-600 text-white border-rose-600',
+    idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    pill: 'border-slate-300 bg-slate-100 text-slate-700',
+    dot: 'bg-slate-500',
+    activeBtn: 'bg-slate-700 text-white border-slate-700',
+    idleBtn: 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50',
+  },
 };
+
+const WORKFLOW_ORDER = [
+  'new',
+  'contacted',
+  'scheduled',
+  'checked_in',
+  'completed',
+  'no_show',
+  'cancelled',
+] as const;
+
+type WorkflowStatus = (typeof WORKFLOW_ORDER)[number];
+
+function normalizeId(value: unknown): string {
+  if (typeof value === 'string') return value;
+  if (Array.isArray(value) && typeof value[0] === 'string') return value[0];
+  return '';
+}
+
+function safeText(value: unknown): string {
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (typeof value === 'number') return String(value);
+  return '';
+}
+
+function resolveAddress(patient: any, payload: any): string {
+  const directPatientAddress = [
+    safeText(patient?.address_street),
+    safeText(patient?.address_city),
+    safeText(patient?.address_state),
+    safeText(patient?.address_zip),
+  ].filter(Boolean);
+
+  if (directPatientAddress.length > 0) {
+    return directPatientAddress.join(', ');
+  }
+
+  if (patient?.address && typeof patient.address === 'object') {
+    const nestedPatientAddress = [
+      safeText(patient.address.street),
+      safeText(patient.address.city),
+      safeText(patient.address.state),
+      safeText(patient.address.zip),
+    ].filter(Boolean);
+
+    if (nestedPatientAddress.length > 0) {
+      return nestedPatientAddress.join(', ');
+    }
+  }
+
+  if (typeof patient?.address === 'string' && patient.address.trim()) {
+    return patient.address.trim();
+  }
+
+  const payloadAddress = payload?.personalInfo?.address;
+
+  if (payloadAddress && typeof payloadAddress === 'object') {
+    const nestedPayloadAddress = [
+      safeText(payloadAddress.street),
+      safeText(payloadAddress.city),
+      safeText(payloadAddress.state),
+      safeText(payloadAddress.zip),
+    ].filter(Boolean);
+
+    if (nestedPayloadAddress.length > 0) {
+      return nestedPayloadAddress.join(', ');
+    }
+  }
+
+  if (typeof payloadAddress === 'string' && payloadAddress.trim()) {
+    return payloadAddress.trim();
+  }
+
+  return '—';
+}
+
+function buildApiUrl(path: string) {
+  const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+  return `${base}${path}`;
+}
+
+function formatActionLabel(action: string) {
+  switch (action) {
+    case 'note_created':
+      return 'Internal Note Added';
+    case 'status_updated':
+      return 'Status Updated';
+    default:
+      return action.replace(/_/g, ' ');
+  }
+}
+
+function formatStatusLabel(status: string) {
+  return STATUS_META[status]?.label || status.replace(/_/g, ' ');
+}
 
 export default function SubmissionDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const id = params?.id as string;
+  const id = normalizeId(params?.id);
 
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  const [notes, setNotes] = useState<any[]>([]);
+  const [notesLoading, setNotesLoading] = useState(false);
+  const [notesError, setNotesError] = useState('');
+  const [newNote, setNewNote] = useState('');
+  const [addingNote, setAddingNote] = useState(false);
+
+  const [activityLogs, setActivityLogs] = useState<any[]>([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+  const [activityError, setActivityError] = useState('');
+
   async function fetchOne() {
+    if (!id) {
+      setError('Invalid submission ID');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     setError('');
+
     try {
       const token = localStorage.getItem('admin_token') || '';
       const res = await getSubmissionById(token, id);
@@ -76,23 +218,102 @@ export default function SubmissionDetailPage() {
     }
   }
 
+  async function fetchNotes(submissionId: string) {
+    setNotesLoading(true);
+    setNotesError('');
+
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch(
+        buildApiUrl(`/api/admin/notes?submission_id=${encodeURIComponent(submissionId)}`),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.error || 'Failed to fetch notes');
+      }
+
+      setNotes(Array.isArray(json) ? json : []);
+    } catch (err: any) {
+      setNotesError(err?.message || 'Failed to fetch notes');
+    } finally {
+      setNotesLoading(false);
+    }
+  }
+
+  async function fetchActivityLogs(submissionId: string) {
+    setActivityLoading(true);
+    setActivityError('');
+
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch(
+        buildApiUrl(`/api/admin/activity-logs?submission_id=${encodeURIComponent(submissionId)}`),
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.error || 'Failed to fetch activity logs');
+      }
+
+      setActivityLogs(Array.isArray(json) ? json : []);
+    } catch (err: any) {
+      setActivityError(err?.message || 'Failed to fetch activity logs');
+    } finally {
+      setActivityLoading(false);
+    }
+  }
+
+  async function refreshSupportPanels(submissionId: string) {
+    await Promise.all([fetchNotes(submissionId), fetchActivityLogs(submissionId)]);
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
     if (!token) {
       router.push('/admin/login');
       return;
     }
-    if (id) fetchOne();
-  }, [id]);
 
-  async function setStatus(status: 'new' | 'reviewed' | 'completed') {
+    if (id) {
+      fetchOne();
+    } else {
+      setLoading(false);
+      setError('Invalid submission ID');
+    }
+  }, [id, router]);
+
+  useEffect(() => {
+    if (data?.id) {
+      refreshSupportPanels(data.id);
+    }
+  }, [data?.id]);
+
+  async function setStatus(status: WorkflowStatus) {
     if (!data?.id) return;
+
     setSaving(true);
     setError('');
+
     try {
       const token = localStorage.getItem('admin_token') || '';
       const res = await updateSubmissionStatus(token, data.id, status);
       setData((prev: any) => ({ ...prev, ...res.submission }));
+      await fetchActivityLogs(data.id);
     } catch (err: any) {
       setError(err?.message || 'Failed to update status');
     } finally {
@@ -100,10 +321,48 @@ export default function SubmissionDetailPage() {
     }
   }
 
+  async function handleAddNote() {
+    if (!newNote.trim() || !data?.id) return;
+
+    setAddingNote(true);
+    setNotesError('');
+
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch(buildApiUrl('/api/admin/notes'), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          submission_id: data.id,
+          patient_id: data.patient_id || data?.patients?.id || null,
+          note: newNote.trim(),
+        }),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) {
+        throw new Error(json?.error || 'Failed to create note');
+      }
+
+      setNewNote('');
+      await refreshSupportPanels(data.id);
+    } catch (err: any) {
+      setNotesError(err?.message || 'Failed to create note');
+    } finally {
+      setAddingNote(false);
+    }
+  }
+
   const p = data?.patients;
   const payload = data?.json_payload;
-  const currentStatus = (data?.status || 'new') as 'new' | 'reviewed' | 'completed';
+
+  const currentStatus = (data?.status || 'new') as WorkflowStatus;
   const statusMeta = STATUS_META[currentStatus] || STATUS_META.new;
+
   const submittedAt = data?.created_at
     ? new Date(data.created_at).toLocaleString([], {
         year: 'numeric',
@@ -113,6 +372,20 @@ export default function SubmissionDetailPage() {
         minute: '2-digit',
       })
     : '—';
+
+  const patientName = useMemo(() => {
+    return (
+      `${safeText(p?.first_name) || safeText(payload?.personalInfo?.firstName)} ${
+        safeText(p?.last_name) || safeText(payload?.personalInfo?.lastName)
+      }`.trim() || '—'
+    );
+  }, [p, payload]);
+
+  const patientEmail = safeText(p?.email) || safeText(payload?.personalInfo?.email) || '—';
+  const patientPhone = safeText(p?.phone) || safeText(payload?.personalInfo?.phone) || '—';
+  const patientDob =
+    safeText(p?.date_of_birth) || safeText(payload?.personalInfo?.dateOfBirth) || '—';
+  const patientAddress = resolveAddress(p, payload);
 
   return (
     <div className="min-h-screen bg-white">
@@ -215,7 +488,9 @@ export default function SubmissionDetailPage() {
                 <div className="border-b border-black/10 bg-obsidian-900 px-6 py-5 flex items-center justify-between">
                   <div>
                     <h2 className="font-display text-xl font-bold text-steel-50">Patient</h2>
-                    <p className="text-sm text-steel-200/65 mt-1">Primary contact and intake identity</p>
+                    <p className="text-sm text-steel-200/65 mt-1">
+                      Primary contact and intake identity
+                    </p>
                   </div>
 
                   <div className="hidden sm:flex items-center gap-2 rounded-full border border-black/10 bg-white px-3 py-1.5 text-xs text-steel-200/70">
@@ -229,93 +504,230 @@ export default function SubmissionDetailPage() {
                     <InfoTile
                       icon={<User className="w-5 h-5 text-steel-200/40 mt-0.5" />}
                       label="Name"
-                      value={`${p?.first_name || ''} ${p?.last_name || ''}`.trim() || '—'}
+                      value={patientName}
                     />
                     <InfoTile
                       icon={<Mail className="w-5 h-5 text-steel-200/40 mt-0.5" />}
                       label="Email"
-                      value={p?.email || '—'}
+                      value={patientEmail}
                       breakWords
                     />
                     <InfoTile
                       icon={<Phone className="w-5 h-5 text-steel-200/40 mt-0.5" />}
                       label="Phone"
-                      value={p?.phone || '—'}
+                      value={patientPhone}
                     />
                     <InfoTile
                       icon={<Calendar className="w-5 h-5 text-steel-200/40 mt-0.5" />}
                       label="DOB"
-                      value={p?.date_of_birth || '—'}
+                      value={patientDob}
                     />
                     <div className="sm:col-span-2">
                       <InfoTile
                         icon={<MapPin className="w-5 h-5 text-steel-200/40 mt-0.5" />}
                         label="Address"
-                        value={
-                          [
-                            p?.address_street,
-                            p?.address_city,
-                            p?.address_state,
-                            p?.address_zip,
-                          ]
-                            .filter(Boolean)
-                            .join(', ') || '—'
-                        }
+                        value={patientAddress}
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-black/10 bg-white overflow-hidden print:hidden">
-                <div className="border-b border-black/10 bg-obsidian-900 px-6 py-5">
-                  <h2 className="font-display text-xl font-bold text-steel-50">Workflow</h2>
-                  <p className="text-sm text-steel-200/65 mt-1">
-                    Move this submission through your internal review process.
-                  </p>
+              <div className="space-y-6">
+                <div className="rounded-3xl border border-black/10 bg-white overflow-hidden print:hidden">
+                  <div className="border-b border-black/10 bg-obsidian-900 px-6 py-5">
+                    <h2 className="font-display text-xl font-bold text-steel-50">Workflow</h2>
+                    <p className="text-sm text-steel-200/65 mt-1">
+                      Move this submission through your internal review process.
+                    </p>
+                  </div>
+
+                  <div className="p-6 space-y-5">
+                    <div className="rounded-2xl border border-black/10 bg-obsidian-900 p-4">
+                      <p className="text-xs uppercase tracking-wider text-steel-200/55 mb-2">
+                        Current Status
+                      </p>
+                      <div className="inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-black/10 bg-white text-sm font-semibold text-steel-50">
+                        <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
+                        {statusMeta.label}
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-xs uppercase tracking-wider text-steel-200/55 mb-3">
+                        Update Status
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {WORKFLOW_ORDER.map((s) => {
+                          const meta = STATUS_META[s] || STATUS_META.new;
+                          const isActive = data.status === s;
+
+                          return (
+                            <button
+                              key={s}
+                              type="button"
+                              onClick={() => setStatus(s)}
+                              disabled={saving || isActive}
+                              className={[
+                                'px-4 py-2.5 rounded-2xl text-sm font-semibold transition border',
+                                isActive ? meta.activeBtn : meta.idleBtn,
+                                saving ? 'opacity-70' : '',
+                              ].join(' ')}
+                            >
+                              {saving && !isActive ? 'Updating...' : meta.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {saving && (
+                      <div className="text-sm text-steel-200/70 flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Saving status...
+                      </div>
+                    )}
+                  </div>
                 </div>
 
-                <div className="p-6 space-y-5">
-                  <div className="rounded-2xl border border-black/10 bg-obsidian-900 p-4">
-                    <p className="text-xs uppercase tracking-wider text-steel-200/55 mb-2">Current Status</p>
-                    <div className="inline-flex items-center gap-2 px-3 py-2 rounded-2xl border border-black/10 bg-white text-sm font-semibold text-steel-50">
-                      <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
-                      {statusMeta.label}
+                <div className="rounded-3xl border border-black/10 bg-white overflow-hidden print:hidden">
+                  <div className="border-b border-black/10 bg-obsidian-900 px-6 py-5 flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-steel-50" />
+                    <div>
+                      <h2 className="font-display text-xl font-bold text-steel-50">Internal Notes</h2>
+                      <p className="text-sm text-steel-200/65 mt-1">
+                        Private staff notes tied to this submission.
+                      </p>
                     </div>
                   </div>
 
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-steel-200/55 mb-3">Update Status</p>
-                    <div className="flex flex-wrap gap-2">
-                      {(['new', 'reviewed', 'completed'] as const).map((s) => {
-                        const meta = STATUS_META[s] || STATUS_META.new;
-                        const isActive = data.status === s;
+                  <div className="p-6 space-y-4">
+                    <textarea
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                      placeholder="Write internal note..."
+                      className="w-full min-h-[120px] rounded-2xl border border-black/10 bg-white p-4 text-sm text-steel-50 placeholder:text-steel-200/45 focus:outline-none focus:ring-2 focus:ring-redlux-500/20"
+                    />
 
-                        return (
-                          <button
-                            key={s}
-                            type="button"
-                            onClick={() => setStatus(s)}
-                            disabled={saving || isActive}
-                            className={[
-                              'px-4 py-2.5 rounded-2xl text-sm font-semibold transition border',
-                              isActive ? meta.activeBtn : meta.idleBtn,
-                              saving ? 'opacity-70' : '',
-                            ].join(' ')}
-                          >
-                            {saving && !isActive ? 'Updating...' : meta.label}
-                          </button>
-                        );
-                      })}
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={handleAddNote}
+                        disabled={addingNote || !newNote.trim()}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-obsidian-900 text-white text-sm font-semibold disabled:opacity-60"
+                      >
+                        {addingNote ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                        {addingNote ? 'Adding Note...' : 'Add Note'}
+                      </button>
+
+                      {notesLoading ? (
+                        <span className="text-sm text-steel-200/65 flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Loading notes...
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {notesError ? (
+                      <div className="rounded-2xl border border-redlux-500/30 bg-redlux-500/10 p-4 text-sm text-redlux-500">
+                        {notesError}
+                      </div>
+                    ) : null}
+
+                    <div className="space-y-3">
+                      {notes.length === 0 && !notesLoading ? (
+                        <div className="rounded-2xl border border-dashed border-black/10 bg-white p-4 text-sm text-steel-200/65">
+                          No notes yet.
+                        </div>
+                      ) : null}
+
+                      {notes.map((note) => (
+                        <div
+                          key={note.id}
+                          className="rounded-2xl border border-black/10 bg-white p-4"
+                        >
+                          <p className="text-sm text-steel-50 whitespace-pre-wrap break-words">
+                            {note.note}
+                          </p>
+                          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-steel-200/60">
+                            <span>{note.created_by || 'admin'}</span>
+                            <span>•</span>
+                            <span>
+                              {note.created_at ? new Date(note.created_at).toLocaleString() : '—'}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-3xl border border-black/10 bg-white overflow-hidden print:hidden">
+                  <div className="border-b border-black/10 bg-obsidian-900 px-6 py-5 flex items-center gap-2">
+                    <History className="w-5 h-5 text-steel-50" />
+                    <div>
+                      <h2 className="font-display text-xl font-bold text-steel-50">
+                        Activity Timeline
+                      </h2>
+                      <p className="text-sm text-steel-200/65 mt-1">
+                        Full action history tied to this submission.
+                      </p>
                     </div>
                   </div>
 
-                  {saving && (
-                    <div className="text-sm text-steel-200/70 flex items-center gap-2">
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Saving status...
-                    </div>
-                  )}
+                  <div className="p-6 space-y-3">
+                    {activityLoading ? (
+                      <div className="text-sm text-steel-200/65 flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading activity...
+                      </div>
+                    ) : null}
+
+                    {activityError ? (
+                      <div className="rounded-2xl border border-redlux-500/30 bg-redlux-500/10 p-4 text-sm text-redlux-500">
+                        {activityError}
+                      </div>
+                    ) : null}
+
+                    {activityLogs.length === 0 && !activityLoading ? (
+                      <div className="rounded-2xl border border-dashed border-black/10 bg-white p-4 text-sm text-steel-200/65">
+                        No activity yet.
+                      </div>
+                    ) : null}
+
+                    {activityLogs.map((log) => (
+                      <div
+                        key={log.id}
+                        className="rounded-2xl border border-black/10 bg-white p-4"
+                      >
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-sm font-semibold text-steel-50 capitalize">
+                            {formatActionLabel(log.action)}
+                          </span>
+                          {log.metadata?.new_status ? (
+                            <span
+                              className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                                STATUS_META[log.metadata.new_status]?.pill ||
+                                'border-slate-200 bg-slate-50 text-slate-700'
+                              }`}
+                            >
+                              {formatStatusLabel(log.metadata.new_status)}
+                            </span>
+                          ) : null}
+                        </div>
+
+                        {log.metadata?.note ? (
+                          <p className="mt-2 text-sm text-steel-200/80 whitespace-pre-wrap break-words">
+                            {log.metadata.note}
+                          </p>
+                        ) : null}
+
+                        <p className="mt-3 text-xs text-steel-200/60">
+                          {log.created_at ? new Date(log.created_at).toLocaleString() : '—'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -353,10 +765,7 @@ export default function SubmissionDetailPage() {
                       value={payload?.consent?.treatmentConsent ? 'Yes' : 'No'}
                       positive={!!payload?.consent?.treatmentConsent}
                     />
-                    <SummaryTextRow
-                      label="Signature"
-                      value={payload?.consent?.signatureText || '—'}
-                    />
+                    <SummaryTextRow label="Signature" value={payload?.consent?.signatureText || '—'} />
                     <SummaryTextRow
                       label="Signature date"
                       value={payload?.consent?.signatureDate || '—'}
@@ -415,7 +824,7 @@ export default function SubmissionDetailPage() {
                     View raw JSON
                   </summary>
                   <pre className="mt-3 text-xs rounded-2xl border border-black/10 bg-obsidian-900 p-4 overflow-auto text-steel-200">
-{JSON.stringify(payload, null, 2)}
+                    {JSON.stringify(payload, null, 2)}
                   </pre>
                 </details>
               </div>
@@ -425,9 +834,7 @@ export default function SubmissionDetailPage() {
               <p className="text-[11px] uppercase tracking-wider text-steel-200/35">
                 {CLIENT.systemProvider}
               </p>
-              <p className="text-[11px] text-steel-200/25">
-                {CLIENT.systemTagline}
-              </p>
+              <p className="text-[11px] text-steel-200/25">{CLIENT.systemTagline}</p>
             </div>
           </>
         )}
@@ -442,7 +849,7 @@ function InfoTile({
   value,
   breakWords = false,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
   breakWords?: boolean;
@@ -453,7 +860,7 @@ function InfoTile({
       <div className="min-w-0">
         <div className="text-steel-200/60 text-xs mb-1">{label}</div>
         <div className={`font-semibold text-steel-50 ${breakWords ? 'break-all' : ''}`}>
-          {value}
+          {value || '—'}
         </div>
       </div>
     </div>

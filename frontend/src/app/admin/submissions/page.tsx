@@ -1,10 +1,10 @@
 'use client';
 
-import { CLIENT } from "@/lib/client";
+import { CLIENT } from '@/lib/client';
 import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { QRCodeSVG } from 'qrcode.react';
-import { exportCsv } from "@/lib/api";
+import { exportCsv } from '@/lib/api';
 import {
   Search,
   Filter,
@@ -21,20 +21,78 @@ import {
   Activity,
   QrCode,
   ExternalLink,
+  CalendarCheck2,
+  UserRoundCheck,
+  XCircle,
+  Ban,
 } from 'lucide-react';
 
-const STATUS_BADGES: Record<string, string> = {
-  new: 'bg-blue-50 border-blue-200 text-blue-700',
-  reviewed: 'bg-amber-50 border-amber-200 text-amber-700',
-  completed: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+const STATUS_META: Record<
+  string,
+  {
+    label: string;
+    badge: string;
+    statLabel: string;
+  }
+> = {
+  new: {
+    label: 'New',
+    badge: 'bg-blue-50 border-blue-200 text-blue-700',
+    statLabel: 'New',
+  },
+  contacted: {
+    label: 'Contacted',
+    badge: 'bg-violet-50 border-violet-200 text-violet-700',
+    statLabel: 'Contacted',
+  },
+  scheduled: {
+    label: 'Scheduled',
+    badge: 'bg-cyan-50 border-cyan-200 text-cyan-700',
+    statLabel: 'Scheduled',
+  },
+  checked_in: {
+    label: 'Checked In',
+    badge: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+    statLabel: 'Checked In',
+  },
+  completed: {
+    label: 'Completed',
+    badge: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+    statLabel: 'Completed',
+  },
+  no_show: {
+    label: 'No Show',
+    badge: 'bg-rose-50 border-rose-200 text-rose-700',
+    statLabel: 'No Show',
+  },
+  cancelled: {
+    label: 'Cancelled',
+    badge: 'bg-slate-100 border-slate-300 text-slate-700',
+    statLabel: 'Cancelled',
+  },
 };
+
+const STATUS_OPTIONS = [
+  'new',
+  'contacted',
+  'scheduled',
+  'checked_in',
+  'completed',
+  'no_show',
+  'cancelled',
+] as const;
+
+function formatStatusLabel(status: string) {
+  return STATUS_META[status]?.label || status.replace(/_/g, ' ');
+}
 
 async function fetchSubmissionsDirect(
   token: string,
   params: Record<string, string> = {}
 ) {
   const qs = new URLSearchParams(params).toString();
-const url = `${process.env.NEXT_PUBLIC_API_URL}/api/admin/submissions${qs ? `?${qs}` : ''}`;
+  const base = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+  const url = `${base}/api/admin/submissions${qs ? `?${qs}` : ''}`;
 
   const res = await fetch(url, {
     method: 'GET',
@@ -69,10 +127,12 @@ export default function SubmissionsPage() {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [loading, setLoading] = useState(true);
   const [intakeUrl, setIntakeUrl] = useState('');
+  const [pageError, setPageError] = useState('');
 
   const fetchData = useCallback(
     async (page = 1) => {
       setLoading(true);
+      setPageError('');
 
       try {
         const params: Record<string, string> = {
@@ -81,7 +141,7 @@ export default function SubmissionsPage() {
           order: sortOrder,
         };
 
-        if (search) params.search = search;
+        if (search.trim()) params.search = search.trim();
         if (statusFilter) params.status = statusFilter;
 
         const token =
@@ -96,14 +156,19 @@ export default function SubmissionsPage() {
 
         const res = await fetchSubmissionsDirect(token, params);
 
-        console.log('API RESPONSE:', res);
-
         const nextSubmissions = Array.isArray(res?.submissions) ? res.submissions : [];
+        const count =
+          typeof res?.count === 'number'
+            ? res.count
+            : Array.isArray(nextSubmissions)
+            ? nextSubmissions.length
+            : 0;
+
         const nextPagination = res?.pagination || {
           page,
           limit: 20,
-          total: typeof res?.count === 'number' ? res.count : 0,
-          totalPages: typeof res?.count === 'number' ? Math.ceil(res.count / 20) : 0,
+          total: count,
+          totalPages: Math.max(1, Math.ceil(count / 20)),
         };
 
         setSubmissions(nextSubmissions);
@@ -111,18 +176,21 @@ export default function SubmissionsPage() {
           page: Number(nextPagination.page) || page,
           limit: Number(nextPagination.limit) || 20,
           total: Number(nextPagination.total) || 0,
-          totalPages: Number(nextPagination.totalPages) || 0,
+          totalPages: Number(nextPagination.totalPages) || Math.max(1, Math.ceil(count / 20)),
         });
       } catch (err: any) {
         console.error('Failed to fetch submissions:', err);
 
+        const message = String(err?.message || '');
+
         if (
-          String(err?.message || '').includes('Authentication') ||
-          String(err?.message || '').includes('401') ||
-          String(err?.message || '').includes('Unauthorized')
+          message.includes('Authentication') ||
+          message.includes('401') ||
+          message.includes('Unauthorized')
         ) {
           router.push('/admin/login');
         } else {
+          setPageError(message || 'Failed to load submissions');
           setSubmissions([]);
           setPagination({
             page,
@@ -153,7 +221,9 @@ export default function SubmissionsPage() {
   }, [fetchData, router]);
 
   useEffect(() => {
-    setIntakeUrl(`${window.location.origin}/intake`);
+    if (typeof window !== 'undefined') {
+      setIntakeUrl(`${window.location.origin}/intake`);
+    }
   }, []);
 
   function handleSearch(e: React.FormEvent) {
@@ -164,7 +234,7 @@ export default function SubmissionsPage() {
   async function handleExport() {
     try {
       const params: Record<string, string> = {};
-      if (search) params.search = search;
+      if (search.trim()) params.search = search.trim();
       if (statusFilter) params.status = statusFilter;
 
       const token =
@@ -198,18 +268,19 @@ export default function SubmissionsPage() {
   const stats = useMemo(() => {
     const safeSubmissions = Array.isArray(submissions) ? submissions : [];
 
-    const totalLoaded = safeSubmissions.length;
-    const newCount = safeSubmissions.filter(
-      (s) => String(s.status || '').toLowerCase() === 'new'
-    ).length;
-    const reviewedCount = safeSubmissions.filter(
-      (s) => String(s.status || '').toLowerCase() === 'reviewed'
-    ).length;
-    const completedCount = safeSubmissions.filter(
-      (s) => String(s.status || '').toLowerCase() === 'completed'
-    ).length;
+    const countFor = (status: string) =>
+      safeSubmissions.filter((s) => String(s.status || '').toLowerCase() === status).length;
 
-    return { totalLoaded, newCount, reviewedCount, completedCount };
+    return {
+      totalLoaded: safeSubmissions.length,
+      newCount: countFor('new'),
+      contactedCount: countFor('contacted'),
+      scheduledCount: countFor('scheduled'),
+      checkedInCount: countFor('checked_in'),
+      completedCount: countFor('completed'),
+      noShowCount: countFor('no_show'),
+      cancelledCount: countFor('cancelled'),
+    };
   }, [submissions]);
 
   const safeSubmissions = Array.isArray(submissions) ? submissions : [];
@@ -223,9 +294,7 @@ export default function SubmissionsPage() {
               Submission Command Center
             </h1>
             <div className="space-y-1">
-              <p className="text-xs text-steel-200/65 tracking-wide">
-                {CLIENT.name}
-              </p>
+              <p className="text-xs text-steel-200/65 tracking-wide">{CLIENT.name}</p>
               <p className="text-[11px] uppercase tracking-wider text-steel-200/40">
                 {CLIENT.systemProvider}
               </p>
@@ -300,22 +369,46 @@ export default function SubmissionsPage() {
             subtext="Current page"
           />
           <StatCard
-            icon={<Activity className="w-5 h-5 text-redlux-500" />}
+            icon={<Activity className="w-5 h-5 text-blue-500" />}
             label="New"
             value={String(stats.newCount)}
-            subtext="Needs review"
+            subtext="Needs first touch"
           />
           <StatCard
-            icon={<Clock3 className="w-5 h-5 text-steel-50" />}
-            label="Reviewed"
-            value={String(stats.reviewedCount)}
-            subtext="In workflow"
+            icon={<UserRoundCheck className="w-5 h-5 text-violet-500" />}
+            label="Contacted"
+            value={String(stats.contactedCount)}
+            subtext="Reached by staff"
+          />
+          <StatCard
+            icon={<CalendarCheck2 className="w-5 h-5 text-cyan-500" />}
+            label="Scheduled"
+            value={String(stats.scheduledCount)}
+            subtext="Appointment booked"
+          />
+          <StatCard
+            icon={<Clock3 className="w-5 h-5 text-indigo-500" />}
+            label="Checked In"
+            value={String(stats.checkedInCount)}
+            subtext="Arrived at office"
           />
           <StatCard
             icon={<CheckCircle2 className="w-5 h-5 text-emerald-500" />}
             label="Completed"
             value={String(stats.completedCount)}
             subtext="Closed out"
+          />
+          <StatCard
+            icon={<XCircle className="w-5 h-5 text-rose-500" />}
+            label="No Show"
+            value={String(stats.noShowCount)}
+            subtext="Did not arrive"
+          />
+          <StatCard
+            icon={<Ban className="w-5 h-5 text-slate-500" />}
+            label="Cancelled"
+            value={String(stats.cancelledCount)}
+            subtext="Removed from flow"
           />
         </div>
 
@@ -416,9 +509,11 @@ export default function SubmissionsPage() {
                   className="pl-10 pr-10 py-3 rounded-xl border border-black/10 text-sm transition appearance-none bg-white text-steel-50 focus:outline-none focus:ring-2 focus:ring-redlux-500/15 focus:border-redlux-500/30"
                 >
                   <option value="">All Status</option>
-                  <option value="new">New</option>
-                  <option value="reviewed">Reviewed</option>
-                  <option value="completed">Completed</option>
+                  {STATUS_OPTIONS.map((status) => (
+                    <option key={status} value={status}>
+                      {formatStatusLabel(status)}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -474,14 +569,24 @@ export default function SubmissionsPage() {
             </div>
           </div>
 
+          {pageError ? (
+            <div className="m-5 rounded-2xl border border-redlux-500/30 bg-redlux-500/10 p-4 text-sm text-redlux-500">
+              {pageError}
+            </div>
+          ) : null}
+
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-black/10 bg-obsidian-900">
                   <th className="text-left px-5 py-4 font-medium text-steel-200/80">Patient</th>
-                  <th className="text-left px-5 py-4 font-medium text-steel-200/80 hidden sm:table-cell">Email</th>
+                  <th className="text-left px-5 py-4 font-medium text-steel-200/80 hidden sm:table-cell">
+                    Email
+                  </th>
                   <th className="text-left px-5 py-4 font-medium text-steel-200/80">Status</th>
-                  <th className="text-left px-5 py-4 font-medium text-steel-200/80 hidden md:table-cell">Submitted</th>
+                  <th className="text-left px-5 py-4 font-medium text-steel-200/80 hidden md:table-cell">
+                    Submitted
+                  </th>
                   <th className="text-right px-5 py-4 font-medium text-steel-200/80">Action</th>
                 </tr>
               </thead>
@@ -502,11 +607,14 @@ export default function SubmissionsPage() {
                 ) : (
                   safeSubmissions.map((s, index) => {
                     const fullName =
-                      `${s.patients?.first_name || ''} ${s.patients?.last_name || ''}`.trim() || '—';
-                    const email = s.patients?.email || '—';
+                      `${s.patients?.first_name || s.first_name || ''} ${
+                        s.patients?.last_name || s.last_name || ''
+                      }`.trim() || '—';
+                    const email = s.patients?.email || s.email || '—';
+                    const statusKey = String(s.status || '').toLowerCase();
+                    const statusMeta = STATUS_META[statusKey];
                     const statusClass =
-                      STATUS_BADGES[String(s.status || '').toLowerCase()] ||
-                      'bg-obsidian-900 border-black/10 text-steel-200';
+                      statusMeta?.badge || 'bg-obsidian-900 border-black/10 text-steel-200';
 
                     return (
                       <tr
@@ -529,11 +637,11 @@ export default function SubmissionsPage() {
                         <td className="px-5 py-4 border-b border-black/10">
                           <span
                             className={[
-                              'inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold capitalize border',
+                              'inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold border',
                               statusClass,
                             ].join(' ')}
                           >
-                            {s.status || 'unknown'}
+                            {formatStatusLabel(statusKey || 'unknown')}
                           </span>
                         </td>
 
@@ -592,9 +700,7 @@ export default function SubmissionsPage() {
           <p className="text-[11px] uppercase tracking-wider text-steel-200/35">
             {CLIENT.systemProvider}
           </p>
-          <p className="text-[11px] text-steel-200/25">
-            {CLIENT.systemTagline}
-          </p>
+          <p className="text-[11px] text-steel-200/25">{CLIENT.systemTagline}</p>
         </div>
       </main>
     </div>

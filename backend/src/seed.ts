@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import { createClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,30 +15,60 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-async function seed() {
-  console.log('Seeding database...');
+async function upsertAdminUser() {
+  const adminEmail = 'admin@demo.com';
+  const adminPassword = 'DemoPass123!';
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
 
-  // 1. Admin user
-  const passwordHash = await bcrypt.hash('DemoPass123!', 12);
-  const adminId = uuidv4();
+  const { data: existingUser, error: findUserError } = await supabase
+    .from('users')
+    .select('id,email')
+    .eq('email', adminEmail)
+    .maybeSingle();
 
-  const { error: userErr } = await supabase.from('users').upsert(
-    {
-      id: adminId,
-      email: 'admin@demo.com',
-      password_hash: passwordHash,
-      role: 'admin',
-    },
-    { onConflict: 'email' }
-  );
-  if (userErr) console.error('User seed error:', userErr);
-  else console.log('Admin user created: admin@demo.com / DemoPass123!');
+  if (findUserError) {
+    console.error('Find admin user error:', findUserError);
+    return;
+  }
 
-  // 2. Sample patients + submissions
+  if (existingUser) {
+    const { error: updateUserError } = await supabase
+      .from('users')
+      .update({
+        password_hash: passwordHash,
+        role: 'admin',
+      })
+      .eq('email', adminEmail);
+
+    if (updateUserError) {
+      console.error('Admin update error:', updateUserError);
+      return;
+    }
+
+    console.log('Admin user password reset: admin@demo.com / DemoPass123!');
+    return;
+  }
+
+  const { error: insertUserError } = await supabase.from('users').insert({
+    id: uuidv4(),
+    email: adminEmail,
+    password_hash: passwordHash,
+    role: 'admin',
+  });
+
+  if (insertUserError) {
+    console.error('Admin insert error:', insertUserError);
+    return;
+  }
+
+  console.log('Admin user created: admin@demo.com / DemoPass123!');
+}
+
+async function insertSamplePatientsAndSubmissions() {
   const patient1Id = uuidv4();
   const patient2Id = uuidv4();
 
-  await supabase.from('patients').insert([
+  const { error: patientErr } = await supabase.from('patients').insert([
     {
       id: patient1Id,
       first_name: 'Jane',
@@ -64,7 +95,12 @@ async function seed() {
     },
   ]);
 
-  await supabase.from('intake_submissions').insert([
+  if (patientErr) {
+    console.error('Patient seed error:', patientErr);
+    return;
+  }
+
+  const { error: submissionErr } = await supabase.from('intake_submissions').insert([
     {
       id: uuidv4(),
       patient_id: patient1Id,
@@ -75,9 +111,18 @@ async function seed() {
           dateOfBirth: '1988-03-15',
           phone: '(555) 123-4567',
           email: 'jane.smith@example.com',
-          address: { street: '123 Oak Avenue', city: 'Springfield', state: 'IL', zip: '62701' },
+          address: {
+            street: '123 Oak Avenue',
+            city: 'Springfield',
+            state: 'IL',
+            zip: '62701',
+          },
         },
-        insuranceInfo: { provider: 'Delta Dental', memberId: 'DD-998877', groupNumber: 'GRP-100' },
+        insuranceInfo: {
+          provider: 'Delta Dental',
+          memberId: 'DD-998877',
+          groupNumber: 'GRP-100',
+        },
         medicalHistory: {
           conditions: ['High Blood Pressure', 'Diabetes'],
           medications: 'Lisinopril 10mg daily, Metformin 500mg twice daily',
@@ -103,9 +148,18 @@ async function seed() {
           dateOfBirth: '1975-11-22',
           phone: '(555) 987-6543',
           email: 'rjohnson@example.com',
-          address: { street: '456 Maple Drive', city: 'Portland', state: 'OR', zip: '97201' },
+          address: {
+            street: '456 Maple Drive',
+            city: 'Portland',
+            state: 'OR',
+            zip: '97201',
+          },
         },
-        insuranceInfo: { provider: 'Cigna', memberId: 'CIG-112233', groupNumber: 'GRP-200' },
+        insuranceInfo: {
+          provider: 'Cigna',
+          memberId: 'CIG-112233',
+          groupNumber: 'GRP-200',
+        },
         medicalHistory: {
           conditions: ['Asthma'],
           medications: 'Albuterol inhaler as needed',
@@ -123,8 +177,22 @@ async function seed() {
     },
   ]);
 
+  if (submissionErr) {
+    console.error('Submission seed error:', submissionErr);
+    return;
+  }
+
   console.log('2 sample submissions created');
+}
+
+async function seed() {
+  console.log('Seeding database...');
+  await upsertAdminUser();
+  await insertSamplePatientsAndSubmissions();
   console.log('Seed complete!');
 }
 
-seed().catch(console.error);
+seed().catch((error) => {
+  console.error('Seed failed:', error);
+  process.exit(1);
+});
