@@ -1,44 +1,155 @@
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+function pickString(...values: unknown[]) {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
+function pickArray(...values: unknown[]) {
+  for (const value of values) {
+    if (Array.isArray(value) && value.length) return value;
+  }
+  return [];
+}
 
 export async function POST(req: Request) {
   try {
-    const { name, practice, email, phone, intake } = await req.json();
+    const body = await req.json();
+    console.log("demo-request received body:", body);
 
-    if (!name || !practice || !email || !phone || !intake) {
+    const contactName = pickString(
+      body.name,
+      body.contactName,
+      body.fullName,
+      body.ownerName,
+      body.fd?.name,
+      body.fd?.contactName,
+      body.fd?.fullName,
+      body.fd?.ownerName
+    );
+
+    const practiceName = pickString(
+      body.practice,
+      body.practiceName,
+      body.officeName,
+      body.company,
+      body.fd?.practice,
+      body.fd?.practiceName,
+      body.fd?.officeName,
+      body.fd?.company
+    );
+
+    const email = pickString(
+      body.email,
+      body.contactEmail,
+      body.fd?.email,
+      body.fd?.contactEmail
+    );
+
+    const phone = pickString(
+      body.phone,
+      body.contactPhone,
+      body.fd?.phone,
+      body.fd?.contactPhone
+    );
+
+    const doctorName = pickString(
+      body.doctorName,
+      body.doctor,
+      body.fd?.doctorName,
+      body.fd?.doctor
+    ) || "Dr. Persky";
+
+    const buildType = pickString(
+      body.buildType,
+      body.projectType,
+      body.fd?.buildType,
+      body.fd?.projectType
+    ) || "POI Build";
+
+    const intakeSelections = pickArray(
+      body.intake,
+      body.intakeNeeds,
+      body.goals,
+      body.features,
+      body.fd?.intake,
+      body.fd?.intakeNeeds,
+      body.fd?.goals,
+      body.fd?.features
+    );
+
+    const notes = pickString(
+      body.notes,
+      body.message,
+      body.description,
+      body.details,
+      body.fd?.notes,
+      body.fd?.message,
+      body.fd?.description,
+      body.fd?.details
+    );
+
+    const intakeText =
+      typeof body.intake === "string"
+        ? body.intake
+        : intakeSelections.length
+        ? intakeSelections.join(", ")
+        : notes || "No additional intake details provided.";
+
+    if (!contactName || !practiceName || !email || !phone) {
       return NextResponse.json(
-        { success: false, error: "Missing required fields." },
+        {
+          success: false,
+          error: "Missing required fields.",
+          debug: {
+            receivedKeys: Object.keys(body || {}),
+            contactName,
+            practiceName,
+            email,
+            phone,
+          },
+        },
         { status: 400 }
       );
     }
 
-    if (!resend) return NextResponse.json({ success: true });
-const { error } = await resend.emails.send({
-      from: "Lane Campos Group <demo@lanecamposgroup.com>",
-      to: "lanecamposgroup@gmail.com",
-      subject: "New Demo Request",
-      replyTo: email,
-      html: `
-        <h2>New Demo Request</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Practice:</strong> ${practice}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Intake:</strong> ${intake}</p>
-      `,
+    const response = await fetch(`${BACKEND_URL}/api/build-submission`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        practiceName,
+        doctorName,
+        contactName,
+        email,
+        phone,
+        buildType,
+        notes: intakeText,
+      }),
     });
 
-    if (error) {
+    const data = await response.json();
+
+    if (!response.ok) {
       return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
+        {
+          success: false,
+          error: data?.error || "Failed to send build submission.",
+          backend: data,
+        },
+        { status: response.status }
       );
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("Demo request route error:", error);
+
     return NextResponse.json(
       { success: false, error: "Server error." },
       { status: 500 }

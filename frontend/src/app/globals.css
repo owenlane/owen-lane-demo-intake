@@ -2,14 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&display=swap');
-
 :root {
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: "Libre Franklin", system-ui, sans-serif;
+  --font-display: "Libre Caslon Display", Georgia, serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html {
+  height: 100%;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -17,43 +23,23 @@ html {
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden;
   font-family: var(--font-sans);
-  background: #040404;
+  background: #070707;
   color: #ffffff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth progress bar */
-.progress-fill {
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+input::placeholder,
+textarea::placeholder {
+  color: #2c2b28;
 }
 
-/* Step wizard transitions */
-.step-enter {
-  animation: stepIn 0.3s ease-out forwards;
-}
-
-@keyframes stepIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Checkbox custom styling */
-input[type='checkbox']:checked {
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-}
-
-/* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 3px;
+  height: 3px;
 }
 
 ::-webkit-scrollbar-track {
@@ -61,188 +47,6 @@ input[type='checkbox']:checked {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-/* PRINT SYSTEM */
-@media print {
-  @page {
-    size: auto;
-    margin: 0.5in;
-  }
-
-  html,
-  body {
-    background: #ffffff !important;
-    color: #000000 !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-size: 12px !important;
-    line-height: 1.4 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  *,
-  *::before,
-  *::after {
-    color: #000000 !important;
-    background: transparent !important;
-    background-image: none !important;
-    text-shadow: none !important;
-    box-shadow: none !important;
-    filter: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-  }
-
-  /* kill app chrome / visual effects */
-  .print\:hidden {
-    display: none !important;
-  }
-
-  button,
-  details,
-  summary {
-    display: none !important;
-  }
-
-  /* structural elements become plain white paper */
-  body,
-  main,
-  section,
-  article,
-  aside,
-  nav,
-  header,
-  footer,
-  div {
-    background: #ffffff !important;
-  }
-
-  /* keep borders light and printable */
-  .border,
-  [class*='border-'] {
-    border-color: rgba(0, 0, 0, 0.15) !important;
-  }
-
-  /* typography */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6,
-  p,
-  span,
-  strong,
-  small,
-  label,
-  li,
-  td,
-  th {
-    color: #000000 !important;
-  }
-
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    page-break-after: avoid;
-    break-after: avoid;
-  }
-
-  p,
-  li,
-  tr,
-  td,
-  th {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  /* links should print as black text */
-  a,
-  a:visited {
-    color: #000000 !important;
-    text-decoration: none !important;
-  }
-
-  /* forms should remain readable */
-  input,
-  textarea,
-  select {
-    color: #000000 !important;
-    background: #ffffff !important;
-    border: 1px solid rgba(0, 0, 0, 0.2) !important;
-    box-shadow: none !important;
-    outline: none !important;
-  }
-
-  /* table behavior */
-  table {
-    width: 100% !important;
-    border-collapse: collapse !important;
-  }
-
-  thead {
-    display: table-header-group !important;
-  }
-
-  tr,
-  img {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
-  /* common dark-ui utility cleanup */
-  [class*='bg-obsidian'],
-  [class*='bg-redlux'],
-  [class*='bg-slate'],
-  [class*='bg-zinc'],
-  [class*='bg-neutral'],
-  [class*='from-black'],
-  [class*='via-neutral'],
-  [class*='to-zinc'],
-  [class*='text-steel'],
-  [class*='text-redlux'],
-  [class*='shadow-'],
-  [class*='backdrop-blur'] {
-    background: #ffffff !important;
-    color: #000000 !important;
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-  }
-
-  /* keep badges readable if any remain visible */
-  [class*='rounded-full'],
-  [class*='rounded-2xl'],
-  [class*='rounded-3xl'],
-  [class*='rounded-xl'],
-  [class*='rounded-lg'] {
-    box-shadow: none !important;
-  }
-
-  /* avoid awkward clipping */
-  .overflow-hidden,
-  .overflow-auto,
-  .overflow-x-auto,
-  .overflow-y-auto {
-    overflow: visible !important;
-  }
-
-  /* prevent giant empty decorative areas */
-  .min-h-screen,
-  .h-screen {
-    min-height: auto !important;
-    height: auto !important;
-  }
+  background: #2c2b28;
+  border-radius: 2px;
 }
