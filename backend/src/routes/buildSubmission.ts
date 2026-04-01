@@ -8,8 +8,8 @@ const directSchema = z.object({
   practiceName: z.string().min(1, "Practice name is required"),
   doctorName: z.string().min(1, "Doctor name is required"),
   contactName: z.string().min(1, "Contact name is required"),
-  email: z.string().email("Valid email is required"),
-  phone: z.string().min(1, "Phone is required"),
+  email: z.string().optional(),
+  phone: z.string().optional(),
   buildType: z.string().min(1, "Build type is required"),
   notes: z.string().min(1, "Notes are required"),
 });
@@ -63,7 +63,7 @@ function normalizeLegacyPayload(body: any) {
     doctorName: "Dr. Persky",
     contactName: typeof body.cn === "string" ? body.cn.trim() : "",
     email: typeof body.em === "string" ? body.em.trim() : "",
-    phone: typeof body.ph === "string" ? body.ph.trim() : "",
+phone: typeof body.ph === "string" ? body.ph.trim() : "",
     buildType: "POI Build",
     notes: notesParts.join("\n\n") || "No additional notes provided.",
   };

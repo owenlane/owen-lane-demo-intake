@@ -36,7 +36,7 @@ ${data.notes}
   await transporter.sendMail({
     from: `"LCG Build Intake" <${process.env.EMAIL_USER}>`,
     to: process.env.EMAIL_USER,
-    replyTo: data.email,
+    replyTo: data.email || process.env.EMAIL_USER,
     subject,
     text,
   });
