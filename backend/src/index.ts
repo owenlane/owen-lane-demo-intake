@@ -8,6 +8,7 @@ import intakeRoutes from "./routes/intake";
 import adminRoutes from "./routes/admin";
 import bookingRoutes from "./routes/bookings";
 import patientRoutes from "./routes/patients";
+import buildSubmissionRoutes from "./routes/buildSubmission";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 5000;
@@ -21,6 +22,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://smilesketchvegas-final.vercel.app",
   "https://smilesketchvegas-final-git-main-owenlanes-projects.vercel.app",
+  "https://demo.lanecamposgroup.com",
 ].filter(Boolean) as string[];
 
 const corsOptions: cors.CorsOptions = {
@@ -69,6 +71,7 @@ app.use("/api/intake", intakeRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/patients", patientRoutes);
+app.use("/api/build-submission", buildSubmissionRoutes);
 
 // ==========================
 // HEALTH CHECK
@@ -88,7 +91,12 @@ app.use((_req, res) => {
 // GLOBAL ERROR HANDLER
 // ==========================
 app.use(
-  (err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  (
+    err: any,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction
+  ) => {
     console.error("Unhandled error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
