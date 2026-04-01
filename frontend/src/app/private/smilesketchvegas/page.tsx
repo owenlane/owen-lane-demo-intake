@@ -16,7 +16,7 @@ import {
 // ═══════════════════════════════════════════════════════════
 
 const ACCESS_CODE = "SMILESKETCH2026";
-const FORM_ENDPOINT = "http://localhost:5000/api/build-submission";
+const FORM_ENDPOINT = "https://owen-lane-demo-intake.onrender.com/api/build-submission";
 
 const C = {
   bg: "#070707",
