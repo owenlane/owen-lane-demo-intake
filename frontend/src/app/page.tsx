@@ -906,16 +906,22 @@ function EngageForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name || !form.org || !form.email || !form.phone || !form.context) {
-      alert("All fields required.");
-      return;
-    }
+    if (!form.name?.trim() || !form.org?.trim() || !form.email?.trim() || !form.phone?.trim() || !form.context?.trim()) {
+  alert("All fields required.");
+  return;
+}
     try {
       setLoading(true);
       const res = await fetch("/api/demo-request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+  contactName: form.name,
+  org: form.org,
+  email: form.email,
+  phone: form.phone,
+  context: form.context,
+}),
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.error || "Request failed.");
