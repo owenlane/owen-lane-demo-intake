@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 function pickString(...values: unknown[]) {
   for (const value of values) {
@@ -22,21 +23,25 @@ export async function POST(req: Request) {
     console.log("demo-request received body:", body);
 
     const contactName = pickString(
-      body.name,
       body.contactName,
+      body.name,
       body.fullName,
       body.ownerName,
-      body.fd?.name,
       body.fd?.contactName,
+      body.fd?.name,
       body.fd?.fullName,
       body.fd?.ownerName
     );
 
     const practiceName = pickString(
+      body.org,
+      body.organization,
       body.practice,
       body.practiceName,
       body.officeName,
       body.company,
+      body.fd?.org,
+      body.fd?.organization,
       body.fd?.practice,
       body.fd?.practiceName,
       body.fd?.officeName,
@@ -57,19 +62,21 @@ export async function POST(req: Request) {
       body.fd?.contactPhone
     );
 
-    const doctorName = pickString(
-      body.doctorName,
-      body.doctor,
-      body.fd?.doctorName,
-      body.fd?.doctor
-    ) || "Dr. Persky";
+    const doctorName =
+      pickString(
+        body.doctorName,
+        body.doctor,
+        body.fd?.doctorName,
+        body.fd?.doctor
+      ) || "Dr. Persky";
 
-    const buildType = pickString(
-      body.buildType,
-      body.projectType,
-      body.fd?.buildType,
-      body.fd?.projectType
-    ) || "POI Build";
+    const buildType =
+      pickString(
+        body.buildType,
+        body.projectType,
+        body.fd?.buildType,
+        body.fd?.projectType
+      ) || "POI Build";
 
     const intakeSelections = pickArray(
       body.intake,
@@ -83,10 +90,12 @@ export async function POST(req: Request) {
     );
 
     const notes = pickString(
+      body.context,
       body.notes,
       body.message,
       body.description,
       body.details,
+      body.fd?.context,
       body.fd?.notes,
       body.fd?.message,
       body.fd?.description,
@@ -94,8 +103,10 @@ export async function POST(req: Request) {
     );
 
     const intakeText =
-      typeof body.intake === "string"
-        ? body.intake
+      typeof body.context === "string" && body.context.trim()
+        ? body.context.trim()
+        : typeof body.intake === "string" && body.intake.trim()
+        ? body.intake.trim()
         : intakeSelections.length
         ? intakeSelections.join(", ")
         : notes || "No additional intake details provided.";
@@ -111,6 +122,7 @@ export async function POST(req: Request) {
             practiceName,
             email,
             phone,
+            intakeText,
           },
         },
         { status: 400 }
@@ -133,7 +145,14 @@ export async function POST(req: Request) {
       }),
     });
 
-    const data = await response.json();
+    const raw = await response.text();
+    let data: any = null;
+
+    try {
+      data = raw ? JSON.parse(raw) : null;
+    } catch {
+      data = { raw };
+    }
 
     if (!response.ok) {
       return NextResponse.json(
@@ -146,12 +165,15 @@ export async function POST(req: Request) {
       );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, backend: data });
   } catch (error) {
     console.error("Demo request route error:", error);
 
     return NextResponse.json(
-      { success: false, error: "Server error." },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Server error.",
+      },
       { status: 500 }
     );
   }
