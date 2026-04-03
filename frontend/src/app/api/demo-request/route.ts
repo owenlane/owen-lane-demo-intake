@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  process.env.BACKEND_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "";
 
 function pickString(...values: unknown[]) {
   for (const value of values) {
@@ -129,7 +131,21 @@ export async function POST(req: Request) {
       );
     }
 
-    const response = await fetch(`${BACKEND_URL}/api/build-submission`, {
+    if (!BACKEND_URL) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "BACKEND_URL is not configured in Vercel.",
+        },
+        { status: 500 }
+      );
+    }
+
+    const targetUrl = `${BACKEND_URL.replace(/\/$/, "")}/api/build-submission`;
+
+    console.log("Forwarding demo request to:", targetUrl);
+
+    const response = await fetch(targetUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -155,17 +171,28 @@ export async function POST(req: Request) {
     }
 
     if (!response.ok) {
+      console.error("Backend build-submission failed:", {
+        status: response.status,
+        data,
+      });
+
       return NextResponse.json(
         {
           success: false,
           error: data?.error || "Failed to send build submission.",
+          backendStatus: response.status,
           backend: data,
+          targetUrl,
         },
         { status: response.status }
       );
     }
 
-    return NextResponse.json({ success: true, backend: data });
+    return NextResponse.json({
+      success: true,
+      backend: data,
+      targetUrl,
+    });
   } catch (error) {
     console.error("Demo request route error:", error);
 
