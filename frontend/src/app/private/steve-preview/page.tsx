@@ -188,30 +188,59 @@ const StatusDot = ({ status }) => {
   return <span style={{ width: 7, height: 7, borderRadius: "50%", background: colors[status] || C.textSecondary, display: "inline-block", marginRight: 6 }} />;
 };
 
-const Button = ({ children, variant = "primary", size = "md", icon, onClick, style: customStyle }) => {
-  const base = {
-    display: "inline-flex", alignItems: "center", gap: 6, border: "none", cursor: "pointer",
-    fontFamily: font.body, fontWeight: 500, borderRadius: radius.md, transition: "all 0.15s",
-    lineHeight: 1, whiteSpace: "nowrap",
+const Button = ({
+  children,
+  variant = "primary",
+  size = "md",
+  icon,
+  onClick,
+  style: customStyle,
+}: {
+  children: React.ReactNode;
+  variant?: "primary" | "accent" | "outline" | "ghost" | "danger";
+  size?: "sm" | "md" | "lg";
+  icon?: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  style?: React.CSSProperties;
+}) => {
+  const base: React.CSSProperties = {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    border: "none",
+    cursor: "pointer",
+    fontFamily: font.body,
+    fontWeight: 500,
+    borderRadius: radius.md,
+    transition: "all 0.15s",
+    lineHeight: 1,
+    whiteSpace: "nowrap",
   };
-  const sizes = {
+
+  const sizes: Record<"sm" | "md" | "lg", React.CSSProperties & { fontSize: number }> = {
     sm: { padding: "7px 12px", fontSize: 12 },
     md: { padding: "9px 16px", fontSize: 13 },
     lg: { padding: "11px 20px", fontSize: 14 },
   };
-  const variants = {
+
+  const variants: Record<"primary" | "accent" | "outline" | "ghost" | "danger", React.CSSProperties & { color: string }> = {
     primary: { background: C.primary, color: C.white },
     accent: { background: C.accent, color: C.white },
     outline: { background: "transparent", color: C.primary, border: `1px solid ${C.line}` },
     ghost: { background: "transparent", color: C.textSecondary },
     danger: { background: C.primary, color: C.white },
   };
+
   return (
     <button
       onClick={onClick}
       style={{ ...base, ...sizes[size], ...variants[variant], ...customStyle }}
-      onMouseEnter={e => { e.currentTarget.style.opacity = "0.88"; }}
-      onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.opacity = "0.88";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.opacity = "1";
+      }}
     >
       {icon && <Icon name={icon} size={sizes[size].fontSize} color={variants[variant].color} />}
       {children}
