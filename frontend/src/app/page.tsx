@@ -208,7 +208,7 @@ function Navbar() {
         }}
       >
         <div className="max-w-[1200px] mx-auto px-6 md:px-10 h-[70px] flex items-center justify-between">
-          <a href="#" className="flex items-center gap-3.5 group">
+          <a href="/" className="flex items-center gap-3.5 group">
             <div
               className="w-[30px] h-[30px] rounded-[6px] flex items-center justify-center transition-all duration-500"
               style={{ border: `1px solid rgba(200,184,154,0.35)` }}
