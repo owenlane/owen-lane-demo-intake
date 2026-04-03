@@ -13,28 +13,48 @@
   box-sizing: border-box;
 }
 
-html {
-  height: 100%;
-  overflow: hidden;
+html,
+body {
+  min-height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
   font-family: var(--font-sans);
   background: #070707;
   color: #ffffff;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
 }
 
 input::placeholder,
 textarea::placeholder {
   color: #2c2b28;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
 ::-webkit-scrollbar {
@@ -49,4 +69,8 @@ textarea::placeholder {
 ::-webkit-scrollbar-thumb {
   background: #2c2b28;
   border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3935;
 }
