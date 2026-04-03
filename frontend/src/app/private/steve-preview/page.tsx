@@ -369,7 +369,7 @@ const DashboardScreen = () => (
         <h1 style={{ fontSize: 22, fontWeight: 700, color: C.primary, fontFamily: font.body }}>Good morning, Dr. Wilson</h1>
         <p style={{ fontSize: 13, color: C.textMuted, marginTop: 2 }}>Monday, March 31, 2026 · 8 patients scheduled today</p>
       </div>
-      <Button variant="accent" icon="plus">New Appointment</Button>
+      <Button variant="accent">New Appointment</Button>
     </div>
 
     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: sp.lg, marginBottom: sp.xxl }}>
@@ -624,7 +624,7 @@ const SchedulingScreen = () => {
         </div>
         <div style={{ display: "flex", gap: sp.sm }}>
           <Button variant="outline" size="sm">Week View</Button>
-          <Button variant="accent" icon="plus">New Appointment</Button>
+          <Button variant="accent">New Appointment</Button>
         </div>
       </div>
       <Card padding={0}>
