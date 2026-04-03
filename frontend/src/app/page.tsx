@@ -1773,14 +1773,33 @@ function EngageForm() {
           context: form.context,
         }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.success)
-        throw new Error(data.error || "Request failed.");
-      setSubmitted(true);
+      let data: any = {};
+try {
+  data = await res.json();
+} catch (_) {
+  data = {};
+}
+
+if (!res.ok || !data.success) {
+  throw new Error(data?.error || "Request failed.");
+}
+
+setSubmitted(true);
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong. Please try again.");
-    } finally {
+  console.error("Demo request failed:", err);
+
+  const subject = encodeURIComponent(`LCG Demo Request — ${form.org}`);
+  const body = encodeURIComponent(
+    `New demo request submitted.\n\n` +
+    `Name: ${form.name}\n` +
+    `Organization: ${form.org}\n` +
+    `Email: ${form.email}\n` +
+    `Phone: ${form.phone}\n` +
+    `Operating Condition: ${form.context}\n`
+  );
+
+  window.location.href = `mailto:lanecamposgroup@gmail.com?subject=${subject}&body=${body}`;
+} finally {
       setLoading(false);
     }
   }
