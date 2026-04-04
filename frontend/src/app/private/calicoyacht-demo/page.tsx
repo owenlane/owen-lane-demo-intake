@@ -5,9 +5,12 @@ import {
   useMemo,
   useCallback,
   useEffect,
-  type CSSProperties,
-  type ReactNode,
-  type ChangeEvent,
+} from "react";
+
+import type {
+  CSSProperties,
+  ReactNode,
+  ChangeEvent,
 } from "react";
 
 // ═══════════════════════════════════════════════════════════
