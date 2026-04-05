@@ -1367,26 +1367,14 @@ function SPeak({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: vp.isTablet
-            ? "1fr"
-            : "minmax(0, 1.08fr) minmax(0, .92fr)",
+          gridTemplateColumns: "1fr",
           gap: vp.isMobile ? 22 : 30,
           alignItems: "stretch",
+          maxWidth: 760,
+          margin: "0 auto",
         }}
       >
-        <div>
-          <ImgPanel
-            src="/demo-assets/03-schedule.png"
-            alt="Calico Yacht Charters future-state schedule"
-            cap="The operation at full clarity"
-            onOpen={open}
-            vp={vp}
-            aspect={vp.isMobile ? "4/3" : "16/9"}
-            elevated
-            noBorder
-            darken={0.34}
-          />
-        </div>
+        
 
         <div
           style={{
