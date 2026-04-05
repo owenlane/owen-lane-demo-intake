@@ -1514,6 +1514,7 @@ function SScope({ vp }: { vp: ViewportInfo }) {
             ["Initial Authorization", "$10,000"],
             ["Completion Balance", "$10,000"],
             ["Delivery Window", "20 Days"],
+            ["Hosting", "$199/month (2 months complimentary)"],
           ].map(([k, v], i) => (
             <div key={i}>
               <div
@@ -2762,7 +2763,7 @@ export default function Page() {
                     <Fi
                       vp={vp}
                       label="Target Budget (Optional)"
-                      ph="If different from baseline, include target here..."
+                      ph="If you have a target investment range, include it here..."
                       ta
                       value={fd.sp}
                       onChange={(e) => u("sp", e.target.value)}
@@ -2807,7 +2808,7 @@ export default function Page() {
                       "Review within 24 hours of submission.",
                       "Confirmation email with scope and timeline.",
                       "Wire transfer invoice and authorization documents to follow.",
-                      "$100,000 baseline — $20,000 to authorize — $80,000 upon completion — 20-day delivery.",
+                      "$20,000 baseline — $10,000 to authorize — $10,000 upon completion — 20-day delivery. Hosting is $199/month strictly for system upkeep only — First 2 months of hosting are complementary, on us.",
                       "System can be scaled up or down. Pricing adjusts based on final build configuration.",
                     ].map((x, i) => (
                       <div
