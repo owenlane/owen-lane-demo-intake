@@ -739,7 +739,7 @@ function SThresh({
           }}
           vp={vp}
         >
-          Prepared for Calico Yacht Charters
+          Prepared for  Yacht Charters
         </L>
         <Ru w={32} s={{ margin: `0 auto ${vp.isMobile ? 26 : 36}px` }} />
         <h1
@@ -809,7 +809,7 @@ function SGap({
   ];
 
   return (
-    <SceneShell vp={vp} max={1180}>
+    <SceneShell vp={vp} max={920}>
       <div
         style={{
           display: "grid",
@@ -870,18 +870,6 @@ function SGap({
           </div>
         </div>
 
-        <div>
-          <ImgPanel
-            src="/demo-assets/02-bookings.png"
-            alt="Calico Yacht Charters bookings preview"
-            cap="Without unified infrastructure"
-            onOpen={open}
-            vp={vp}
-            aspect={vp.isMobile ? "4/3" : "1/1.02"}
-            elevated
-            darken={0.38}
-          />
-        </div>
       </div>
     </SceneShell>
   );
@@ -1127,9 +1115,7 @@ function SScreen({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: vp.isTablet
-              ? "1fr"
-              : "minmax(0, 1.18fr) minmax(0, .82fr)",
+            gridTemplateColumns: "1fr",
             gap: vp.isMobile ? 20 : 34,
             alignItems: "center",
           }}
@@ -1823,7 +1809,7 @@ const SCREENS: ScreenItem[] = [
     label: "Frontend — Booking Experience",
     title: "The client-facing layer feels premium before the yacht even leaves the dock.",
     text: "Vessel selection, date, duration, charter type, guest count, and add-ons presented in a clean luxury flow built to convert.",
-    src: "/demo-assets/10-frontend-booking.png",
+    src: "/demo-assets/02-frontend-booking.png",
     alt: "Calico Yacht Charters frontend booking screen",
     cap: "Frontend Booking Flow",
     kind: "overlay",
@@ -1835,7 +1821,7 @@ const SCREENS: ScreenItem[] = [
     label: "Backend — Financial Layer",
     title: "Revenue is visible while the business is moving.",
     text: "Deposits, balances, add-ons, transaction notes, and QuickBooks-integrated accounting stay connected to the actual charter workflow.",
-    src: "/demo-assets/08-revenue.png",
+    src: "/demo-assets/03-revenue.png",
     alt: "Calico Yacht Charters revenue screen",
     cap: "Revenue & QuickBooks",
     kind: "metrics",
@@ -1847,7 +1833,7 @@ const SCREENS: ScreenItem[] = [
     label: "Backend — Booking Engine",
     title: "Every charter lives inside one controlled pipeline.",
     text: "Inquiry to completion, with status, vessel assignment, deposit state, crew allocation, and special requests surfaced in one view.",
-    src: "/demo-assets/02-bookings.png",
+    src: "/demo-assets/04-bookings.png",
     alt: "Calico Yacht Charters bookings screen",
     cap: "Bookings Pipeline",
     kind: "split",
@@ -1858,7 +1844,7 @@ const SCREENS: ScreenItem[] = [
     label: "Backend — Scheduling Layer",
     title: "The week stops living in separate calendars, calls, and memory.",
     text: "Day, week, and month views with vessel logic, buffer windows, crew placement, and charter timing all visible at once.",
-    src: "/demo-assets/03-schedule.png",
+    src: "/demo-assets/05-schedule.png",
     alt: "Calico Yacht Charters schedule screen",
     cap: "Schedule",
     kind: "stacked",
@@ -1869,7 +1855,7 @@ const SCREENS: ScreenItem[] = [
     label: "Backend — Client Intelligence",
     title: "One client. One record. One deeper memory of the relationship.",
     text: "Contact data, booking history, preferences, spend, event type, communication log, and referral source stay attached to the client — not hidden across tools.",
-    src: "/demo-assets/04-clients.png",
+    src: "/demo-assets/06-clients.png",
     alt: "Calico Yacht Charters clients screen",
     cap: "Client Profiles",
     kind: "split",
@@ -1877,55 +1863,21 @@ const SCREENS: ScreenItem[] = [
   },
   {
     num: "07",
-    label: "Backend — Client Detail",
-    title: "Repeat business gets smarter with every charter.",
-    text: "Timeline, notes, booking history, financial context, and preference data deepen the relationship instead of resetting it each time.",
-    src: "/demo-assets/05-client-detail.png",
-    alt: "Calico Yacht Charters client detail screen",
-    cap: "Client Detail",
-    kind: "overlay",
-    eyebrow: "The record becomes operationally useful",
-  },
-  {
-    num: "08",
     label: "Backend — Event Configuration",
     title: "Every charter type carries its own execution logic.",
     text: "Proposals, birthdays, sunset cruises, Catalina trips, and private events all move with structured setup instead of last-minute improvisation.",
-    src: "/demo-assets/06-charter-setup.png",
+    src: "/demo-assets/07-charter-setup.png",
     alt: "Calico Yacht Charters event configuration screen",
     cap: "Charter Configuration",
     kind: "split",
     eyebrow: "Consistency under pressure",
   },
   {
-    num: "09",
-    label: "Backend — Vessel & Crew Operations",
-    title: "The physical business runs with the same precision as the digital one.",
-    text: "Captain assignment, crew scheduling, availability, turnaround buffers, maintenance blocks, and dock instructions stay connected.",
-    src: "/demo-assets/07-fleet-ops.png",
-    alt: "Calico Yacht Charters fleet operations screen",
-    cap: "Fleet Operations",
-    kind: "metrics",
-    eyebrow: "Real operational control",
-    stat: "Crew + vessel precision",
-  },
-  {
-    num: "10",
-    label: "Backend — Reporting",
-    title: "Performance becomes visible enough to act on.",
-    text: "Revenue by vessel, charter type, month, balances, conversion rates, and repeat-client metrics make the operation measurable.",
-    src: "/demo-assets/09-reports.png",
-    alt: "Calico Yacht Charters reports screen",
-    cap: "Executive Reports",
-    kind: "stacked",
-    eyebrow: "Self-awareness at the business level",
-  },
-  {
-    num: "11",
+    num: "08",
     label: "Frontend — Brand Experience",
     title: "The presentation layer earns trust before the sales conversation begins.",
     text: "Mobile-first performance, visual storytelling, clear vessel choice, trust signals, and a direct path into booking.",
-    src: "/demo-assets/11-frontend-brand.png",
+    src: "/demo-assets/08-frontend-brand.png",
     alt: "Calico Yacht Charters frontend brand experience screen",
     cap: "Frontend Brand Layer",
     kind: "hero",
@@ -1933,11 +1885,11 @@ const SCREENS: ScreenItem[] = [
     stat: "Luxury presentation with direct conversion logic",
   },
   {
-    num: "12",
+    num: "09",
     label: "Backend — Communications",
     title: "The business keeps moving even when nobody is manually chasing details.",
     text: "Inquiry acknowledgment, quote follow-up, deposit confirmation, reminders, pre-charter instructions, review requests, and repeat-booking prompts — automated and branded.",
-    src: "/demo-assets/12-comms.png",
+    src: "/demo-assets/09-comms.png",
     alt: "Calico Yacht Charters communications screen",
     cap: "Communication Engine",
     kind: "overlay",
