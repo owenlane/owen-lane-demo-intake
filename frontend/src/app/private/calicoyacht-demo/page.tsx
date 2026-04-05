@@ -1510,9 +1510,9 @@ function SScope({ vp }: { vp: ViewportInfo }) {
           }}
         >
           {[
-            ["Baseline Investment", "$100,000"],
-            ["Initial Authorization", "$20,000"],
-            ["Completion Balance", "$80,000"],
+            ["Baseline Investment", "$20,000"],
+            ["Initial Authorization", "$10,000"],
+            ["Completion Balance", "$10,000"],
             ["Delivery Window", "20 Days"],
           ].map(([k, v], i) => (
             <div key={i}>
