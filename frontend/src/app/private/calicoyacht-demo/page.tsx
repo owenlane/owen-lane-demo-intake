@@ -18,7 +18,7 @@ import type {
 // V2 — Image-First / Sales-Weighted / Next.js App Router Safe
 // ═══════════════════════════════════════════════════════════
 
-const ACCESS_CODE = "CALICO2026";
+const ACCESS_CODE = "DISABLED_TEMP_LOCK_8392";
 const FORM_ENDPOINT =
   "https://owen-lane-demo-intake.onrender.com/api/build-submission";
 
