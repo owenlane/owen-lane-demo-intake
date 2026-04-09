@@ -256,26 +256,6 @@ function P({
   );
 }
 
-function Ru({
-  w = 36,
-  s = {},
-}: {
-  w?: number;
-  s?: CSSProperties;
-}) {
-  return (
-    <div
-      style={{
-        width: w,
-        height: 1,
-        background: C.g,
-        opacity: 0.18,
-        ...s,
-      }}
-    />
-  );
-}
-
 function Fi({
   label,
   ph,
@@ -878,16 +858,18 @@ function FinalStatement({
   label,
   title,
   text,
+  extra,
   vp,
 }: {
   num: string;
   label: string;
   title: string;
   text: string;
+  extra?: string;
   vp: ViewportInfo;
 }) {
   return (
-    <SceneShell vp={vp} max={860}>
+    <SceneShell vp={vp} max={900}>
       <div style={{ textAlign: "center" }}>
         <div
           style={{
@@ -919,11 +901,23 @@ function FinalStatement({
           s={{
             textAlign: "center",
             margin: "0 auto",
-            maxWidth: 620,
+            maxWidth: 720,
           }}
         >
           {text}
         </P>
+        {extra ? (
+          <P
+            vp={vp}
+            s={{
+              textAlign: "center",
+              margin: `${vp.isMobile ? 14 : 16}px auto 0`,
+              maxWidth: 760,
+            }}
+          >
+            {extra}
+          </P>
+        ) : null}
       </div>
     </SceneShell>
   );
@@ -948,19 +942,20 @@ function FinalAction({
           Begin Build
         </L>
         <H z={52} s={{ marginBottom: 16 }} vp={vp}>
-          This is the operating standard.
+          The operating standard.
         </H>
         <P
           vp={vp}
           s={{
             textAlign: "center",
             margin: `0 auto ${vp.isMobile ? 22 : 28}px`,
-            maxWidth: 560,
+            maxWidth: 700,
           }}
         >
           The walkthrough explains the structure. The next step is moving into
-          configuration and building the actual operating surface around the
-          business.
+          configuration. From there, you will build your exact order, read &
+          review investment details, and receive simple instructions upon order
+          completion.
         </P>
 
         <div
@@ -972,6 +967,8 @@ function FinalAction({
         >
           <a
             href="/private/ui-preview"
+            target="_blank"
+            rel="noreferrer"
             style={{
               ...buttonBase(vp),
               display: "inline-flex",
@@ -1031,6 +1028,223 @@ function SDone({ vp }: { vp: ViewportInfo }) {
   );
 }
 
+function InvestmentPanel({ vp }: { vp: ViewportInfo }) {
+  const cellStyle: CSSProperties = {
+    padding: vp.isMobile ? "14px 14px" : "16px 18px",
+    border: "1px solid rgba(160,139,92,.10)",
+    background: "rgba(255,255,255,.015)",
+  };
+
+  const valueStyle: CSSProperties = {
+    fontFamily: SE,
+    fontSize: vp.isMobile ? 24 : 28,
+    color: C.cr,
+    letterSpacing: "-.02em",
+    lineHeight: 1.05,
+    marginBottom: 6,
+  };
+
+  const smallStyle: CSSProperties = {
+    fontFamily: SA,
+    fontSize: vp.isMobile ? 12 : 12.5,
+    lineHeight: 1.75,
+    color: C.sa,
+    letterSpacing: ".01em",
+  };
+
+  return (
+    <div
+      style={{
+        border: "1px solid rgba(160,139,92,.12)",
+        background: "rgba(8,8,8,.46)",
+        backdropFilter: "blur(18px)",
+        WebkitBackdropFilter: "blur(18px)",
+        padding: vp.isMobile ? 18 : 22,
+      }}
+    >
+      <L s={{ marginBottom: 12 }} vp={vp}>
+        Investment Details
+      </L>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: vp.isTablet ? "1fr" : "repeat(3, 1fr)",
+          gap: vp.isMobile ? 10 : 12,
+          marginBottom: vp.isMobile ? 18 : 20,
+        }}
+      >
+        <div style={cellStyle}>
+          <div
+            style={{
+              fontFamily: SA,
+              fontSize: vp.isMobile ? 8 : 8.5,
+              fontWeight: 500,
+              letterSpacing: vp.isMobile ? 2.1 : 2.5,
+              textTransform: "uppercase",
+              color: C.m,
+              marginBottom: 10,
+            }}
+          >
+            Total Investment
+          </div>
+          <div style={valueStyle}>$20,000</div>
+        </div>
+
+        <div style={cellStyle}>
+          <div
+            style={{
+              fontFamily: SA,
+              fontSize: vp.isMobile ? 8 : 8.5,
+              fontWeight: 500,
+              letterSpacing: vp.isMobile ? 2.1 : 2.5,
+              textTransform: "uppercase",
+              color: C.m,
+              marginBottom: 10,
+            }}
+          >
+            Build Authorization
+          </div>
+          <div style={valueStyle}>$10,000</div>
+          <div style={smallStyle}>(required to begin)</div>
+        </div>
+
+        <div style={cellStyle}>
+          <div
+            style={{
+              fontFamily: SA,
+              fontSize: vp.isMobile ? 8 : 8.5,
+              fontWeight: 500,
+              letterSpacing: vp.isMobile ? 2.1 : 2.5,
+              textTransform: "uppercase",
+              color: C.m,
+              marginBottom: 10,
+            }}
+          >
+            Completion Balance
+          </div>
+          <div style={valueStyle}>$10,000</div>
+          <div style={smallStyle}>(due upon completion)</div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          borderTop: "1px solid rgba(160,139,92,.10)",
+          paddingTop: vp.isMobile ? 16 : 18,
+          marginBottom: vp.isMobile ? 16 : 18,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: SA,
+            fontSize: vp.isMobile ? 8 : 8.5,
+            fontWeight: 500,
+            letterSpacing: vp.isMobile ? 2.1 : 2.5,
+            textTransform: "uppercase",
+            color: C.m,
+            marginBottom: 10,
+          }}
+        >
+          Infrastructure Hosting
+        </div>
+        <div
+          style={{
+            fontFamily: SE,
+            fontSize: vp.isMobile ? 24 : 26,
+            color: C.cr,
+            letterSpacing: "-.02em",
+            lineHeight: 1.05,
+            marginBottom: 8,
+          }}
+        >
+          Starting at $299/month
+        </div>
+        <div style={smallStyle}>
+          Final rate varies based on system configuration
+        </div>
+      </div>
+
+      <div
+        style={{
+          borderTop: "1px solid rgba(160,139,92,.10)",
+          paddingTop: vp.isMobile ? 16 : 18,
+          marginBottom: vp.isMobile ? 16 : 18,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: SA,
+            fontSize: vp.isMobile ? 8 : 8.5,
+            fontWeight: 500,
+            letterSpacing: vp.isMobile ? 2.1 : 2.5,
+            textTransform: "uppercase",
+            color: C.m,
+            marginBottom: 10,
+          }}
+        >
+          After submission, a confirmation email will be issued containing:
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gap: 8,
+          }}
+        >
+          {[
+            "Payment invoice for authorization",
+            "System onboarding instructions",
+            "Next-step coordination details",
+          ].map((item) => (
+            <div
+              key={item}
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 10,
+                ...smallStyle,
+              }}
+            >
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  marginTop: 8,
+                  borderRadius: "50%",
+                  background: "rgba(160,139,92,.45)",
+                  flexShrink: 0,
+                }}
+              />
+              <span>{item}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div
+        style={{
+          borderTop: "1px solid rgba(160,139,92,.10)",
+          paddingTop: vp.isMobile ? 14 : 16,
+        }}
+      >
+        <div
+          style={{
+            fontFamily: SA,
+            fontSize: vp.isMobile ? 11 : 11.5,
+            lineHeight: 1.8,
+            color: C.q,
+            letterSpacing: ".01em",
+          }}
+        >
+          Build timeline is defined based on system configuration scope.
+          <br />
+          Typical delivery range: 3–5 weeks.
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Page() {
   const vp = useViewport();
 
@@ -1087,7 +1301,7 @@ export default function Page() {
             num="01"
             label="Opening"
             title="To Be Elite Requires Full Attention"
-            text="Your current business structure shouldn't rely on fragmented tools, when an autonomous, unified option exists."
+            text="Your business cannot rely on fragmented tools when an autonomous, unified option exists."
           />
         ),
       },
@@ -1097,30 +1311,9 @@ export default function Page() {
           <Statement
             vp={vp}
             num="02"
-            label="Operational reality"
-            title="Communications. Scheduling. Books. These should never fail."
-            text="When these functions are fragmented, the business runs on hidden labor. The cost is missed clarity, slower response, avoidable error, and unnecessary owner involvement."
-          />
-        ),
-      },
-      {
-        id: "03-home",
-        render: () => (
-          <VisualSlide
-            vp={vp}
-            open={openLightbox}
-            num="03"
-            label="Frontend Home"
-            eyebrow="Entry point"
-            title="The outside layer should make the business feel precise before anyone speaks to you."
-            text="The public-facing surface introduces the fleet, destination, and booking path without noise. It creates trust before any conversation begins."
-            cards={[
-              {
-                src: "/demo-assets/00-frontend-home.png",
-                alt: "Calico Yacht Charters front-end home screen",
-                cap: "Frontend Home",
-              },
-            ]}
+            label="Operational Reality"
+            title="Communications. Scheduling. Books."
+            text="The past 150 years business structure has fundamentally remained the same. The next 15 years and Ai will complete revamping not just business, but society as we know it. Us pioneers are building the next wave of innovation that’ll effectively change exactly how businesses exist. Take a look."
           />
         ),
       },
@@ -1175,7 +1368,7 @@ export default function Page() {
             num="06"
             label="Bookings + Calendar"
             eyebrow="Acquisition to scheduling flow"
-            title="Sales flow and operational placement should function as one chain."
+            title="Sales & operational function as one chain"
             text="Inquiry status, charter dates, vessel allocation, and timing pressure should never live in separate systems that force manual reconciliation."
             cards={[
               {
@@ -1201,7 +1394,7 @@ export default function Page() {
             num="07"
             label="Clients"
             eyebrow="Relational memory"
-            title="One client record should replace scattered memory across the business."
+            title="Client records exist in a home designed for accessibility & security."
             text="Booking history, spend, preferences, communication context, and attached documents belong in one place so repeat service becomes structured instead of improvised."
             cards={[
               {
@@ -1222,7 +1415,7 @@ export default function Page() {
             num="08"
             label="Fleet + Crew"
             eyebrow="Asset and personnel coordination"
-            title="Vessels and people should not be tracked as separate problems."
+            title="Vessels & people are properly tracked."
             text="Availability, crew load, certifications, incidents, and maintenance should stay attached to the operating asset so the business can place real service capacity."
             cards={[
               {
@@ -1248,7 +1441,7 @@ export default function Page() {
             num="09"
             label="Revenue + Documents"
             eyebrow="Money visibility and records"
-            title="Revenue and compliance should not live in cleanup mode."
+            title="Revenue & compliance."
             text="Invoices, totals, waivers, contracts, and attached records should remain linked to the actual booking and client instead of drifting into separate admin silos."
             cards={[
               {
@@ -1274,7 +1467,7 @@ export default function Page() {
             num="10"
             label="Messages + Marketing"
             eyebrow="Communication and demand"
-            title="Communication and growth need to live inside the same operating spine."
+            title="Communication & growth need to live inside the same operating spine."
             text="Client messages should stay attached to bookings while marketing data should stay attached to revenue movement. Service detail and demand generation both belong inside the system."
             cards={[
               {
@@ -1300,7 +1493,7 @@ export default function Page() {
             num="11"
             label="Reviews + Notes"
             eyebrow="Trust and internal memory"
-            title="Reputation outside and context inside should both be retained structurally."
+            title="Reputation outside and context inside to both be retained structurally."
             text="Reviews show how the market experiences the brand. Internal notes preserve what the team learns. Both should remain attached to the business, not float around externally."
             cards={[
               {
@@ -1326,7 +1519,7 @@ export default function Page() {
             num="12"
             label="Incidents + Settings"
             eyebrow="Control layer"
-            title="Issues and system behavior should both be managed intentionally."
+            title="Issues & systems."
             text="Incident tracking preserves accountability. Settings define automation, integrations, default behavior, and AI control. That is where the system becomes infrastructure instead of software."
             cards={[
               {
@@ -1349,9 +1542,9 @@ export default function Page() {
           <FinalStatement
             vp={vp}
             num="13"
-            label="System unification"
-            title="Every function should operate inside one environment."
-            text="Bookings, clients, fleet, crew, records, communication, revenue, and system behavior should stop acting like separate subscriptions and start operating like one business."
+            label="System Unification"
+            title="Every function, on both front & backend, inside one environment"
+            text="Bookings, clients, fleet, crew, records, communication, revenue, and system behavior no longer need to be spread apart & reliant on manual labor."
           />
         ),
       },
@@ -1362,8 +1555,9 @@ export default function Page() {
             vp={vp}
             num="14"
             label="Infrastructure"
-            title="A Digital Spine."
-            text="This is not a collection of tools. It is a unified operating layer that gives the business structural control, visibility, and continuity."
+            title="Your own custom POI"
+            text="Our true purpose in building Private Operating Infrastructures is to create something elite businesses can make their digital home. A home requiring minimal time & effort to operate. A home custom designed to the exact detail of your wishes."
+            extra="This is a custom job, we take our core and build upon it function by function until we’ve designed your exact one you plan to depend on for the next 2,000 years. (this assuming we’re all cyborgs in some multi-planatary galactic universe lol)"
           />
         ),
       },
@@ -1558,7 +1752,7 @@ export default function Page() {
       "Coordination",
       "Priorities",
       "Build Notes",
-      "Review",
+      "INVESTMENT & REVIEW",
     ];
 
     return (
@@ -1914,11 +2108,11 @@ export default function Page() {
                 }}
               >
                 <P vp={vp} s={{ maxWidth: "100%" }}>
-                  Review the configuration surface, then submit. This intake is
-                  built to define the charter operation across bookings, fleet,
-                  crew, clients, revenue, documents, communication, scheduling,
-                  and issue handling.
+                  Review your configuration, then submit. This intake is built
+                  to define operations across the platform
                 </P>
+
+                <InvestmentPanel vp={vp} />
               </div>
             )}
 
