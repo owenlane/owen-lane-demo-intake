@@ -1482,7 +1482,7 @@ export default function Page() {
     });
 
     r.push({
-      id: "pre-1",
+  id: "pre-1",
   r: () => (
     <Statement
       vp={vp}
@@ -1492,7 +1492,7 @@ export default function Page() {
       text="Your current business structure shouldn't rely on fragmented tools, when an autonomous, unified option exists."
     />
   ),
-},);
+});
 
     r.push({
       id: "pre-2",
