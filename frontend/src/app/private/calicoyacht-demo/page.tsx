@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import type { CSSProperties, ReactNode, ChangeEvent } from "react";
 
-const ACCESS_CODE = "DISABLED_TEMP_LOCK_8392";
+const ACCESS_CODE = "CALICOTEST";
 const FORM_ENDPOINT =
   "https://owen-lane-demo-intake.onrender.com/api/build-submission";
 
@@ -68,11 +68,6 @@ type FormDataShape = {
   ad: string;
 };
 
-type Slide = {
-  id: string;
-  r: () => ReactNode;
-};
-
 type ViewportInfo = {
   w: number;
   isMobile: boolean;
@@ -81,38 +76,22 @@ type ViewportInfo = {
   isNarrow: boolean;
 };
 
-type SingleImageScene = {
-  kind: "single";
-  num: string;
-  label: string;
-  eyebrow?: string;
-  title: string;
-  text: string;
-  changed: string;
-  eliminated: string;
+type LightboxState = {
+  open: boolean;
+  src: string;
+  alt: string;
+};
+
+type FixedSlide = {
+  id: string;
+  render: () => ReactNode;
+};
+
+type ImageCard = {
   src: string;
   alt: string;
   cap: string;
 };
-
-type DualImageScene = {
-  kind: "dual";
-  num: string;
-  label: string;
-  eyebrow?: string;
-  title: string;
-  text: string;
-  changed: string;
-  eliminated: string;
-  srcA: string;
-  altA: string;
-  capA: string;
-  srcB: string;
-  altB: string;
-  capB: string;
-};
-
-type SceneItem = SingleImageScene | DualImageScene;
 
 const INITIAL_FORM: FormDataShape = {
   pn: "",
@@ -784,45 +763,131 @@ function Statement({
   );
 }
 
-function FunctionSlide({
-  item,
-  variant,
+function VisualSlide({
+  num,
+  label,
+  eyebrow,
+  title,
+  text,
+  cards,
+  open,
   vp,
 }: {
-  item: SceneItem;
-  variant: "introduce" | "replace" | "changed" | "eliminated";
+  num: string;
+  label: string;
+  eyebrow?: string;
+  title: string;
+  text: string;
+  cards: ImageCard[];
+  open: (src: string, alt: string) => void;
   vp: ViewportInfo;
 }) {
-  const map = {
-    introduce: {
-      title: item.title,
-      body: item.text,
-      eyebrow: item.eyebrow ?? item.label,
-    },
-    replace: {
-      title: "What this replaces manually.",
-      body:
-        item.kind === "single"
-          ? `Without this layer, ${item.label.toLowerCase()} lives across memory, text threads, email chains, calendar checking, manual follow-up, and constant owner involvement.`
-          : `Without this layer, ${item.label.toLowerCase()} gets split across separate tools, back-and-forth confirmations, re-entry, and somebody manually holding the whole chain together.`,
-      eyebrow: "Manual load",
-    },
-    changed: {
-      title: "What changed in the business.",
-      body: item.changed,
-      eyebrow: "Operational result",
-    },
-    eliminated: {
-      title: "What is now eliminated.",
-      body: item.eliminated,
-      eyebrow: "Removed drag",
-    },
-  } as const;
-
-  const current = map[variant];
+  const isSingle = cards.length === 1;
 
   return (
-    <SceneShell vp={vp} max={840}>
+    <SceneShell vp={vp} max={1280}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: vp.isTablet
+            ? "1fr"
+            : isSingle
+            ? "minmax(0,.9fr) minmax(0,1.1fr)"
+            : "minmax(0,.85fr) minmax(0,1.15fr)",
+          gap: vp.isMobile ? 22 : 34,
+          alignItems: "center",
+        }}
+      >
+        <div style={{ order: vp.isTablet ? 2 : 1 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: vp.isMobile ? 10 : 12,
+              marginBottom: 10,
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: SE,
+                fontSize: vp.isMobile ? 16 : 18,
+                color: C.g,
+                opacity: 0.22,
+              }}
+            >
+              {num}
+            </span>
+            <L vp={vp}>{label}</L>
+          </div>
+
+          {eyebrow && (
+            <div
+              style={{
+                fontFamily: SA,
+                fontSize: vp.isMobile ? 8 : 8.5,
+                fontWeight: 500,
+                letterSpacing: vp.isMobile ? 2.6 : 3,
+                textTransform: "uppercase",
+                color: C.g,
+                opacity: 0.9,
+                marginBottom: 10,
+              }}
+            >
+              {eyebrow}
+            </div>
+          )}
+
+          <H z={38} s={{ marginBottom: 14, maxWidth: 590 }} vp={vp}>
+            {title}
+          </H>
+          <P vp={vp} s={{ maxWidth: 560 }}>
+            {text}
+          </P>
+        </div>
+
+        <div
+          style={{
+            order: vp.isTablet ? 1 : 2,
+            display: "grid",
+            gridTemplateColumns: cards.length === 1 ? "1fr" : "1fr",
+            gap: vp.isMobile ? 14 : 18,
+          }}
+        >
+          {cards.map((card, idx) => (
+            <ImgPanel
+              key={`${card.src}-${idx}`}
+              src={card.src}
+              alt={card.alt}
+              cap={card.cap}
+              onOpen={open}
+              vp={vp}
+              aspect={vp.isMobile ? "4/3" : cards.length === 1 ? "16/9" : "16/8.7"}
+              elevated
+              darken={0.22}
+            />
+          ))}
+        </div>
+      </div>
+    </SceneShell>
+  );
+}
+
+function FinalStatement({
+  num,
+  label,
+  title,
+  text,
+  vp,
+}: {
+  num: string;
+  label: string;
+  title: string;
+  text: string;
+  vp: ViewportInfo;
+}) {
+  return (
+    <SceneShell vp={vp} max={860}>
       <div style={{ textAlign: "center" }}>
         <div
           style={{
@@ -842,307 +907,29 @@ function FunctionSlide({
               opacity: 0.22,
             }}
           >
-            {item.num}
+            {num}
           </span>
-          <L vp={vp}>{current.eyebrow}</L>
+          <L vp={vp}>{label}</L>
         </div>
-        <H z={46} s={{ marginBottom: 16 }} vp={vp}>
-          {current.title}
+        <H z={48} s={{ marginBottom: 16 }} vp={vp}>
+          {title}
         </H>
         <P
           vp={vp}
           s={{
             textAlign: "center",
             margin: "0 auto",
-            maxWidth: vp.isNarrow ? 300 : vp.isMobile ? 350 : 620,
+            maxWidth: 620,
           }}
         >
-          {current.body}
+          {text}
         </P>
       </div>
     </SceneShell>
   );
 }
 
-function SingleImageSlide({
-  item,
-  open,
-  vp,
-}: {
-  item: SingleImageScene;
-  open: (src: string, alt: string) => void;
-  vp: ViewportInfo;
-}) {
-  return (
-    <SceneShell vp={vp} max={1260}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: vp.isTablet
-            ? "1fr"
-            : "minmax(0,.9fr) minmax(0,1.1fr)",
-          gap: vp.isMobile ? 22 : 34,
-          alignItems: "center",
-        }}
-      >
-        <div style={{ order: vp.isTablet ? 2 : 1 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: vp.isMobile ? 10 : 12,
-              marginBottom: 10,
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: SE,
-                fontSize: vp.isMobile ? 16 : 18,
-                color: C.g,
-                opacity: 0.22,
-              }}
-            >
-              {item.num}
-            </span>
-            <L vp={vp}>{item.label}</L>
-          </div>
-
-          {item.eyebrow && (
-            <div
-              style={{
-                fontFamily: SA,
-                fontSize: vp.isMobile ? 8 : 8.5,
-                fontWeight: 500,
-                letterSpacing: vp.isMobile ? 2.6 : 3,
-                textTransform: "uppercase",
-                color: C.g,
-                opacity: 0.9,
-                marginBottom: 10,
-              }}
-            >
-              {item.eyebrow}
-            </div>
-          )}
-
-          <H z={38} s={{ marginBottom: 14, maxWidth: 560 }} vp={vp}>
-            {item.title}
-          </H>
-          <P vp={vp} s={{ marginBottom: 18, maxWidth: 540 }}>
-            {item.text}
-          </P>
-          <P
-            vp={vp}
-            s={{
-              fontSize: vp.isMobile ? 11.5 : 12,
-              lineHeight: 1.72,
-              color: C.m,
-            }}
-          >
-            {item.changed}
-          </P>
-        </div>
-
-        <div style={{ order: vp.isTablet ? 1 : 2 }}>
-          <ImgPanel
-            src={item.src}
-            alt={item.alt}
-            cap={item.cap}
-            onOpen={open}
-            vp={vp}
-            aspect={vp.isMobile ? "4/3" : "16/9"}
-            elevated
-            darken={0.22}
-          />
-        </div>
-      </div>
-    </SceneShell>
-  );
-}
-
-function DualImageSlide({
-  item,
-  open,
-  vp,
-}: {
-  item: DualImageScene;
-  open: (src: string, alt: string) => void;
-  vp: ViewportInfo;
-}) {
-  return (
-    <SceneShell vp={vp} max={1280}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: vp.isTablet
-            ? "1fr"
-            : "minmax(0,.9fr) minmax(0,1.1fr)",
-          gap: vp.isMobile ? 22 : 34,
-          alignItems: "center",
-        }}
-      >
-        <div style={{ order: vp.isTablet ? 2 : 1 }}>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "baseline",
-              gap: vp.isMobile ? 10 : 12,
-              marginBottom: 10,
-              flexWrap: "wrap",
-            }}
-          >
-            <span
-              style={{
-                fontFamily: SE,
-                fontSize: vp.isMobile ? 16 : 18,
-                color: C.g,
-                opacity: 0.22,
-              }}
-            >
-              {item.num}
-            </span>
-            <L vp={vp}>{item.label}</L>
-          </div>
-
-          {item.eyebrow && (
-            <div
-              style={{
-                fontFamily: SA,
-                fontSize: vp.isMobile ? 8 : 8.5,
-                fontWeight: 500,
-                letterSpacing: vp.isMobile ? 2.6 : 3,
-                textTransform: "uppercase",
-                color: C.g,
-                opacity: 0.9,
-                marginBottom: 10,
-              }}
-            >
-              {item.eyebrow}
-            </div>
-          )}
-
-          <H z={38} s={{ marginBottom: 14, maxWidth: 580 }} vp={vp}>
-            {item.title}
-          </H>
-          <P vp={vp} s={{ marginBottom: 18, maxWidth: 550 }}>
-            {item.text}
-          </P>
-          <P
-            vp={vp}
-            s={{
-              fontSize: vp.isMobile ? 11.5 : 12,
-              lineHeight: 1.72,
-              color: C.m,
-            }}
-          >
-            {item.changed}
-          </P>
-        </div>
-
-        <div
-          style={{
-            order: vp.isTablet ? 1 : 2,
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: vp.isMobile ? 14 : 18,
-          }}
-        >
-          <ImgPanel
-            src={item.srcA}
-            alt={item.altA}
-            cap={item.capA}
-            onOpen={open}
-            vp={vp}
-            aspect={vp.isMobile ? "4/3" : "16/8.7"}
-            elevated
-            darken={0.22}
-          />
-          <ImgPanel
-            src={item.srcB}
-            alt={item.altB}
-            cap={item.capB}
-            onOpen={open}
-            vp={vp}
-            aspect={vp.isMobile ? "4/3" : "16/8.7"}
-            elevated
-            darken={0.22}
-          />
-        </div>
-      </div>
-    </SceneShell>
-  );
-}
-
-function SIntro({
-  open,
-  vp,
-}: {
-  open: (src: string, alt: string) => void;
-  vp: ViewportInfo;
-}) {
-  return (
-    <SceneShell vp={vp} max={1240}>
-      <div style={{ textAlign: "center", marginBottom: vp.isMobile ? 26 : 34 }}>
-        <L
-          s={{
-            marginBottom: vp.isMobile ? 22 : 28,
-            letterSpacing: vp.isNarrow ? 3.5 : vp.isMobile ? 4.2 : 5.5,
-          }}
-          vp={vp}
-        >
-          Prepared for Calico Yacht Charters
-        </L>
-        <Ru w={32} s={{ margin: `0 auto ${vp.isMobile ? 26 : 36}px` }} />
-        <h1
-          style={{
-            fontFamily: SE,
-            fontSize: vp.isNarrow
-              ? 32
-              : vp.isMobile
-              ? 36
-              : vp.isTablet
-              ? 52
-              : 66,
-            fontWeight: 400,
-            color: C.cr,
-            lineHeight: vp.isMobile ? 1.02 : 1.04,
-            letterSpacing: "-.024em",
-            marginBottom: vp.isMobile ? 14 : 18,
-          }}
-        >
-          Private Operating
-          <br />
-          Infrastructure
-        </h1>
-        <P
-          vp={vp}
-          s={{
-            margin: `0 auto ${vp.isMobile ? 26 : 38}px`,
-            textAlign: "center",
-            maxWidth: vp.isNarrow ? 292 : vp.isMobile ? 340 : 540,
-            fontSize: vp.isMobile ? 13 : 14.5,
-          }}
-        >
-          A walkthrough of the operating layer behind the charter business.
-        </P>
-      </div>
-
-      <ImgPanel
-        src="/demo-assets/00-frontend-home.png"
-        alt="Calico Yacht Charters front-end home screen"
-        cap="Frontend Home"
-        onOpen={open}
-        vp={vp}
-        aspect={vp.isMobile ? "4/3" : "16/8.6"}
-        elevated
-        noBorder
-        darken={0.34}
-      />
-    </SceneShell>
-  );
-}
-
-function SFinal({
+function FinalAction({
   vp,
   go,
 }: {
@@ -1158,32 +945,33 @@ function SFinal({
         }}
       >
         <L s={{ marginBottom: 20 }} vp={vp}>
-          Live Environment
+          Begin Build
         </L>
         <H z={52} s={{ marginBottom: 16 }} vp={vp}>
-          The walkthrough is only the explanation.
+          This is the operating standard.
         </H>
         <P
           vp={vp}
           s={{
             textAlign: "center",
             margin: `0 auto ${vp.isMobile ? 22 : 28}px`,
-            maxWidth: 520,
+            maxWidth: 560,
           }}
         >
-          The interface can now be explored directly. Access the live
-          environment below, then begin configuration when ready.
+          The walkthrough explains the structure. The next step is moving into
+          configuration and building the actual operating surface around the
+          business.
         </P>
 
         <div
           style={{
             display: "flex",
             justifyContent: "center",
-            marginBottom: vp.isMobile ? 24 : 30,
+            marginBottom: vp.isMobile ? 20 : 26,
           }}
         >
           <a
-            href="/ui-preview"
+            href="/private/ui-preview"
             style={{
               ...buttonBase(vp),
               display: "inline-flex",
@@ -1198,19 +986,18 @@ function SFinal({
           </a>
         </div>
 
-        <div style={{ marginTop: vp.isMobile ? 8 : 14 }}>
+        <div>
           <button
             type="button"
             onClick={go}
             style={{
-              ...buttonBase(vp),
-              padding: vp.isMobile ? "15px 24px" : "17px 54px",
+              ...solidButton(vp),
               minWidth: vp.isMobile ? "100%" : 290,
               maxWidth: vp.isMobile ? 340 : undefined,
               width: vp.isMobile ? "100%" : undefined,
             }}
           >
-            Begin Configuration
+            Begin Build
           </button>
         </div>
       </div>
@@ -1244,189 +1031,6 @@ function SDone({ vp }: { vp: ViewportInfo }) {
   );
 }
 
-const SCENES: SceneItem[] = [
-  {
-    kind: "single",
-    num: "01",
-    label: "Frontend Home Page",
-    eyebrow: "Entry point",
-    title: "The outside layer should make the business feel precise before anyone speaks to you.",
-    text: "The public-facing surface introduces the fleet, destinations, and booking path without noise. It sets expectation, trust, and pace before the first inquiry.",
-    changed:
-      "The business starts from a controlled first impression instead of a thin brochure site that forces the back office to compensate later.",
-    eliminated:
-      "No vague landing page. No weak handoff from brand to booking. No dependence on manual explanation to create clarity.",
-    src: "/demo-assets/00-frontend-home.png",
-    alt: "Calico Yacht Charters frontend home page",
-    cap: "Frontend Home",
-  },
-  {
-    kind: "single",
-    num: "02",
-    label: "Dashboard",
-    eyebrow: "Operating view",
-    title: "Your only concern should ever be closing deals.",
-    text: "The dashboard is the first operating surface. Revenue, active charters, fleet status, pending issues, and what needs attention are visible immediately.",
-    changed:
-      "The owner stops opening five tabs just to understand the day. The business opens with clarity, not recovery.",
-    eliminated:
-      "No guessing. No status hunting. No invisible problems waiting inside messages, waivers, or invoices.",
-    src: "/demo-assets/01-dashboard.png",
-    alt: "Calico Yacht Charters dashboard screen",
-    cap: "Command Center Dashboard",
-  },
-  {
-    kind: "single",
-    num: "03",
-    label: "AI Command",
-    eyebrow: "Execution layer",
-    title: "Every tool connected. Every step autonomous.",
-    text: "The command surface turns instructions into actions across bookings, invoices, maintenance, client communication, and reporting from one place.",
-    changed:
-      "Work moves from clicking through systems to directing the operation at the system level.",
-    eliminated:
-      "No repetitive admin motion. No re-entry. No operator acting as middleware between disconnected tools.",
-    src: "/demo-assets/02-ai-command.png",
-    alt: "Calico Yacht Charters AI command screen",
-    cap: "AI Command Center",
-  },
-  {
-    kind: "dual",
-    num: "04",
-    label: "Bookings + Calendar",
-    eyebrow: "Acquisition to scheduling flow",
-    title: "Communications. Scheduling. Books. These should never fail.",
-    text: "The booking pipeline and calendar function as one operational chain. Inquiry status, charter dates, vessel allocation, and timing pressure stay connected.",
-    changed:
-      "The business sees demand and capacity in the same system. Sales flow and operational placement stop fighting each other.",
-    eliminated:
-      "No separate calendar checking. No double-booking guesswork. No status drift between inquiry, confirmation, and actual vessel placement.",
-    srcA: "/demo-assets/03-bookings.png",
-    altA: "Calico Yacht Charters bookings pipeline",
-    capA: "Bookings Pipeline",
-    srcB: "/demo-assets/04-calendar.png",
-    altB: "Calico Yacht Charters charter calendar",
-    capB: "Charter Calendar",
-  },
-  {
-    kind: "single",
-    num: "05",
-    label: "Clients",
-    eyebrow: "Relational memory",
-    title: "One client record replaces scattered memory across the business.",
-    text: "Profiles carry booking history, spend, preferences, communication context, and attached documents so repeat service becomes structured instead of improvised.",
-    changed:
-      "Client quality becomes repeatable because the business remembers the relationship the same way every time.",
-    eliminated:
-      "No hidden preferences. No lost context. No owner-only memory acting as the CRM.",
-    src: "/demo-assets/05-clients.png",
-    alt: "Calico Yacht Charters clients screen",
-    cap: "Client Profiles",
-  },
-  {
-    kind: "dual",
-    num: "06",
-    label: "Fleet + Crew",
-    eyebrow: "Asset and personnel coordination",
-    title: "Vessels and people stop being tracked as separate problems.",
-    text: "Fleet status and crew allocation work together. Availability, crew load, costs, certs, incidents, and next maintenance all stay attached to the operating asset.",
-    changed:
-      "The business can place real service capacity, not just vessel availability.",
-    eliminated:
-      "No detached crew planning. No asset blind spots. No expensive surprises from maintenance or staffing gaps.",
-    srcA: "/demo-assets/06-fleet.png",
-    altA: "Calico Yacht Charters fleet management screen",
-    capA: "Fleet Management",
-    srcB: "/demo-assets/07-crew.png",
-    altB: "Calico Yacht Charters crew management screen",
-    capB: "Crew Management",
-  },
-  {
-    kind: "dual",
-    num: "07",
-    label: "Revenue + Documents",
-    eyebrow: "Money visibility and business records",
-    title: "Revenue and compliance stop living in cleanup mode.",
-    text: "Invoices, totals, payment status, waivers, contracts, and yacht documents remain linked to the actual booking and client instead of drifting into separate admin folders.",
-    changed:
-      "Money and records are visible while the business is moving, not reconstructed after the fact.",
-    eliminated:
-      "No invoice fog. No missing waivers. No document chasing right before departure.",
-    srcA: "/demo-assets/08-revenue.png",
-    altA: "Calico Yacht Charters revenue reporting screen",
-    capA: "Revenue & Reporting",
-    srcB: "/demo-assets/09-documents.png",
-    altB: "Calico Yacht Charters documents and waivers screen",
-    capB: "Documents & Waivers",
-  },
-  {
-    kind: "single",
-    num: "08",
-    label: "Messages",
-    eyebrow: "Unified communication",
-    title: "The communication layer belongs inside the operation, not outside it.",
-    text: "Client messages stay linked to bookings and clients so requests, updates, and service details move with the charter instead of sitting in isolated threads.",
-    changed:
-      "Service communication becomes operational data, not loose conversation.",
-    eliminated:
-      "No message hunting. No missed detail. No split between what the client asked for and what the team is actually executing.",
-    src: "/demo-assets/10-messages.png",
-    alt: "Calico Yacht Charters communications hub screen",
-    cap: "Communications Hub",
-  },
-  {
-    kind: "dual",
-    num: "09",
-    label: "Marketing + Reviews",
-    eyebrow: "Demand generation and trust layer",
-    title: "Demand and reputation become visible operating surfaces.",
-    text: "Leads, campaign spend, conversion movement, featured reviews, and social proof can be managed as part of growth instead of being left outside the core system.",
-    changed:
-      "The business sees how attention becomes revenue and how reputation feeds the next booking cycle.",
-    eliminated:
-      "No blind ad spend. No detached lead lists. No reviews floating outside the revenue chain.",
-    srcA: "/demo-assets/11-marketing.png",
-    altA: "Calico Yacht Charters marketing pipeline screen",
-    capA: "Marketing Pipeline",
-    srcB: "/demo-assets/12-reviews.png",
-    altB: "Calico Yacht Charters reviews and testimonials screen",
-    capB: "Reviews & Testimonials",
-  },
-  {
-    kind: "dual",
-    num: "10",
-    label: "Notes + Incidents",
-    eyebrow: "Operational memory and issue handling",
-    title: "The business keeps its own memory and tracks its own problems inside one spine.",
-    text: "Internal notes preserve context. Incident tracking preserves accountability. Together they turn operational friction into visible, managed process.",
-    changed:
-      "Context survives staff changes, busy weeks, and edge cases because the system retains what the business learns.",
-    eliminated:
-      "No forgotten prep details. No issue buried in text. No recurring problem because nothing was structurally recorded.",
-    srcA: "/demo-assets/13-notes.png",
-    altA: "Calico Yacht Charters notes and logs screen",
-    capA: "Notes & Logs",
-    srcB: "/demo-assets/14-incidents.png",
-    altB: "Calico Yacht Charters incident tracking screen",
-    capB: "Incident Tracking",
-  },
-  {
-    kind: "single",
-    num: "11",
-    label: "Settings / AI Customization",
-    eyebrow: "System behavior",
-    title: "A Digital Spine.",
-    text: "Configuration controls behavior across automation, integrations, review flow, waivers, defaults, and how the AI operates inside the business.",
-    changed:
-      "The system behaves like infrastructure because the business defines the rules instead of adapting itself to generic software limits.",
-    eliminated:
-      "No fragmented configuration. No hidden automation logic. No dependence on patched tools that were never built to act as one system.",
-    src: "/demo-assets/15-settings.png",
-    alt: "Calico Yacht Charters settings screen",
-    cap: "Settings & AI Configuration",
-  },
-];
-
 export default function Page() {
   const vp = useViewport();
 
@@ -1440,7 +1044,7 @@ export default function Page() {
   const [is, setIs] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [fd, setFd] = useState<FormDataShape>(INITIAL_FORM);
-  const [lb, setLb] = useState<{ open: boolean; src: string; alt: string }>({
+  const [lb, setLb] = useState<LightboxState>({
     open: false,
     src: "",
     alt: "",
@@ -1473,108 +1077,311 @@ export default function Page() {
     []
   );
 
-  const slides = useMemo<Slide[]>(() => {
-    const r: Slide[] = [];
+  const slides = useMemo<FixedSlide[]>(() => {
+    const fixedSlides: FixedSlide[] = [
+      {
+        id: "01-opening",
+        render: () => (
+          <Statement
+            vp={vp}
+            num="01"
+            label="Opening"
+            title="To Be Elite Requires Full Attention"
+            text="Your current business structure shouldn't rely on fragmented tools, when an autonomous, unified option exists."
+          />
+        ),
+      },
+      {
+        id: "02-operational-reality",
+        render: () => (
+          <Statement
+            vp={vp}
+            num="02"
+            label="Operational reality"
+            title="Communications. Scheduling. Books. These should never fail."
+            text="When these functions are fragmented, the business runs on hidden labor. The cost is missed clarity, slower response, avoidable error, and unnecessary owner involvement."
+          />
+        ),
+      },
+      {
+        id: "03-home",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="03"
+            label="Frontend Home"
+            eyebrow="Entry point"
+            title="The outside layer should make the business feel precise before anyone speaks to you."
+            text="The public-facing surface introduces the fleet, destination, and booking path without noise. It creates trust before any conversation begins."
+            cards={[
+              {
+                src: "/demo-assets/00-frontend-home.png",
+                alt: "Calico Yacht Charters front-end home screen",
+                cap: "Frontend Home",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "04-dashboard",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="04"
+            label="Dashboard"
+            eyebrow="Operating view"
+            title="Your only concern should ever be closing deals."
+            text="Revenue, active charters, fleet status, and immediate priorities should be visible on one screen. The day should begin with clarity, not recovery."
+            cards={[
+              {
+                src: "/demo-assets/01-dashboard.png",
+                alt: "Calico Yacht Charters dashboard screen",
+                cap: "Command Center Dashboard",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "05-ai-command",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="05"
+            label="AI Command"
+            eyebrow="Execution layer"
+            title="Every tool connected. Every step autonomous."
+            text="The command surface turns one instruction into action across bookings, invoices, maintenance, communication, and reporting from one operating layer."
+            cards={[
+              {
+                src: "/demo-assets/02-ai-command.png",
+                alt: "Calico Yacht Charters AI command screen",
+                cap: "AI Command Center",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "06-bookings-calendar",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="06"
+            label="Bookings + Calendar"
+            eyebrow="Acquisition to scheduling flow"
+            title="Sales flow and operational placement should function as one chain."
+            text="Inquiry status, charter dates, vessel allocation, and timing pressure should never live in separate systems that force manual reconciliation."
+            cards={[
+              {
+                src: "/demo-assets/03-bookings.png",
+                alt: "Calico Yacht Charters bookings pipeline",
+                cap: "Bookings Pipeline",
+              },
+              {
+                src: "/demo-assets/04-calendar.png",
+                alt: "Calico Yacht Charters charter calendar",
+                cap: "Charter Calendar",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "07-clients",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="07"
+            label="Clients"
+            eyebrow="Relational memory"
+            title="One client record should replace scattered memory across the business."
+            text="Booking history, spend, preferences, communication context, and attached documents belong in one place so repeat service becomes structured instead of improvised."
+            cards={[
+              {
+                src: "/demo-assets/05-clients.png",
+                alt: "Calico Yacht Charters clients screen",
+                cap: "Client Profiles",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "08-fleet-crew",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="08"
+            label="Fleet + Crew"
+            eyebrow="Asset and personnel coordination"
+            title="Vessels and people should not be tracked as separate problems."
+            text="Availability, crew load, certifications, incidents, and maintenance should stay attached to the operating asset so the business can place real service capacity."
+            cards={[
+              {
+                src: "/demo-assets/06-fleet.png",
+                alt: "Calico Yacht Charters fleet management screen",
+                cap: "Fleet Management",
+              },
+              {
+                src: "/demo-assets/07-crew.png",
+                alt: "Calico Yacht Charters crew management screen",
+                cap: "Crew Management",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "09-revenue-documents",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="09"
+            label="Revenue + Documents"
+            eyebrow="Money visibility and records"
+            title="Revenue and compliance should not live in cleanup mode."
+            text="Invoices, totals, waivers, contracts, and attached records should remain linked to the actual booking and client instead of drifting into separate admin silos."
+            cards={[
+              {
+                src: "/demo-assets/08-revenue.png",
+                alt: "Calico Yacht Charters revenue reporting screen",
+                cap: "Revenue & Reporting",
+              },
+              {
+                src: "/demo-assets/09-documents.png",
+                alt: "Calico Yacht Charters documents and waivers screen",
+                cap: "Documents & Waivers",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "10-messages-marketing",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="10"
+            label="Messages + Marketing"
+            eyebrow="Communication and demand"
+            title="Communication and growth need to live inside the same operating spine."
+            text="Client messages should stay attached to bookings while marketing data should stay attached to revenue movement. Service detail and demand generation both belong inside the system."
+            cards={[
+              {
+                src: "/demo-assets/10-messages.png",
+                alt: "Calico Yacht Charters communications hub screen",
+                cap: "Communications Hub",
+              },
+              {
+                src: "/demo-assets/11-marketing.png",
+                alt: "Calico Yacht Charters marketing pipeline screen",
+                cap: "Marketing Pipeline",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "11-reviews-notes",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="11"
+            label="Reviews + Notes"
+            eyebrow="Trust and internal memory"
+            title="Reputation outside and context inside should both be retained structurally."
+            text="Reviews show how the market experiences the brand. Internal notes preserve what the team learns. Both should remain attached to the business, not float around externally."
+            cards={[
+              {
+                src: "/demo-assets/12-reviews.png",
+                alt: "Calico Yacht Charters reviews and testimonials screen",
+                cap: "Reviews & Testimonials",
+              },
+              {
+                src: "/demo-assets/13-notes.png",
+                alt: "Calico Yacht Charters notes and logs screen",
+                cap: "Notes & Logs",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "12-incidents-settings",
+        render: () => (
+          <VisualSlide
+            vp={vp}
+            open={openLightbox}
+            num="12"
+            label="Incidents + Settings"
+            eyebrow="Control layer"
+            title="Issues and system behavior should both be managed intentionally."
+            text="Incident tracking preserves accountability. Settings define automation, integrations, default behavior, and AI control. That is where the system becomes infrastructure instead of software."
+            cards={[
+              {
+                src: "/demo-assets/14-incidents.png",
+                alt: "Calico Yacht Charters incident tracking screen",
+                cap: "Incident Tracking",
+              },
+              {
+                src: "/demo-assets/15-settings.png",
+                alt: "Calico Yacht Charters settings screen",
+                cap: "Settings & AI Configuration",
+              },
+            ]}
+          />
+        ),
+      },
+      {
+        id: "13-post-1",
+        render: () => (
+          <FinalStatement
+            vp={vp}
+            num="13"
+            label="System unification"
+            title="Every function should operate inside one environment."
+            text="Bookings, clients, fleet, crew, records, communication, revenue, and system behavior should stop acting like separate subscriptions and start operating like one business."
+          />
+        ),
+      },
+      {
+        id: "14-post-2",
+        render: () => (
+          <FinalStatement
+            vp={vp}
+            num="14"
+            label="Infrastructure"
+            title="A Digital Spine."
+            text="This is not a collection of tools. It is a unified operating layer that gives the business structural control, visibility, and continuity."
+          />
+        ),
+      },
+      {
+        id: "15-final",
+        render: () => (
+          <FinalAction
+            vp={vp}
+            go={() => {
+              setMode("intake");
+              setIs(1);
+            }}
+          />
+        ),
+      },
+    ];
 
-    r.push({
-      id: "cover",
-      r: () => <SIntro open={openLightbox} vp={vp} />,
-    });
-
-    r.push({
-  id: "pre-1",
-  r: () => (
-    <Statement
-      vp={vp}
-      num="P1"
-      label="Opening"
-      title="To Be Elite Requires Full Attention"
-      text="Your current business structure shouldn't rely on fragmented tools, when an autonomous, unified option exists."
-    />
-  ),
-});
-
-    r.push({
-      id: "pre-2",
-      r: () => (
-        <Statement
-          vp={vp}
-          num="P2"
-          label="Operational reality"
-          title="Communications. Scheduling. Books. These should never fail."
-          text="When these functions are fragmented, the business runs on hidden labor. The cost is not just inefficiency. It is missed clarity, slower response, avoidable error, and unnecessary owner involvement."
-        />
-      ),
-    });
-
-    SCENES.forEach((item) => {
-      r.push({
-        id: `${item.num}-a`,
-        r: () => <FunctionSlide item={item} variant="introduce" vp={vp} />,
-      });
-      r.push({
-        id: `${item.num}-b`,
-        r: () => <FunctionSlide item={item} variant="replace" vp={vp} />,
-      });
-      r.push({
-        id: `${item.num}-img`,
-        r: () =>
-          item.kind === "single" ? (
-            <SingleImageSlide item={item} open={openLightbox} vp={vp} />
-          ) : (
-            <DualImageSlide item={item} open={openLightbox} vp={vp} />
-          ),
-      });
-      r.push({
-        id: `${item.num}-c`,
-        r: () => <FunctionSlide item={item} variant="changed" vp={vp} />,
-      });
-      r.push({
-        id: `${item.num}-d`,
-        r: () => <FunctionSlide item={item} variant="eliminated" vp={vp} />,
-      });
-    });
-
-    r.push({
-      id: "post-1",
-      r: () => (
-        <Statement
-          vp={vp}
-          num="PX1"
-          label="System unification"
-          title="Every tool connected. Every step autonomous."
-          text="Bookings, clients, fleet, crew, waivers, messages, reviews, revenue, and AI behavior stop acting like separate software purchases. They become one operating environment with one logic chain behind them."
-        />
-      ),
-    });
-
-    r.push({
-      id: "post-2",
-      r: () => (
-        <Statement
-          vp={vp}
-          num="PX2"
-          label="Infrastructure"
-          title="A Digital Spine."
-          text="This is the layer that unifies the charter business instead of forcing it to patch together disconnected tools. The value is not just software. The value is structural control."
-        />
-      ),
-    });
-
-    r.push({
-      id: "final",
-      r: () => (
-        <SFinal
-          vp={vp}
-          go={() => {
-            setMode("intake");
-            setIs(1);
-          }}
-        />
-      ),
-    });
-
-    return r;
+    return fixedSlides;
   }, [openLightbox, vp]);
 
   const tot = slides.length;
@@ -2308,7 +2115,7 @@ export default function Page() {
             padding: vp.isMobile ? "22px 16px" : "30px 24px",
           }}
         >
-          {slides[sl].r()}
+          {slides[sl].render()}
         </div>
       </div>
 
