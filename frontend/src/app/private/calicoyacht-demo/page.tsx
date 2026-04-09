@@ -942,7 +942,7 @@ function FinalAction({
           Begin Build
         </L>
         <H z={52} s={{ marginBottom: 16 }} vp={vp}>
-          The operating standard.
+          The operating standard
         </H>
         <P
           vp={vp}
@@ -1543,7 +1543,7 @@ export default function Page() {
             vp={vp}
             num="13"
             label="System Unification"
-            title="Every function, on both front & backend, inside one environment"
+            title="Every function, both front & backend, inside one environment"
             text="Bookings, clients, fleet, crew, records, communication, revenue, and system behavior no longer need to be spread apart & reliant on manual labor."
           />
         ),
@@ -1557,7 +1557,9 @@ export default function Page() {
             label="Infrastructure"
             title="Your own custom POI"
             text="Our true purpose in building Private Operating Infrastructures is to create something elite businesses can make their digital home. A home requiring minimal time & effort to operate. A home custom designed to the exact detail of your wishes."
-            extra="This is a custom job, we take our core and build upon it function by function until we’ve designed your exact one you plan to depend on for the next 2,000 years. (this assuming we’re all cyborgs in some multi-planatary galactic universe lol)"
+            extra="This is a custom job, we take our core and build upon it. Function by function until we’ve designed your exact POI you plan to depend on for the next 2,000 years.
+
+(this assuming we’re all cyborgs in some multi-planetary galactic universe lol)"
           />
         ),
       },
