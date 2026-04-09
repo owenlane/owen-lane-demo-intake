@@ -1,22 +1,7 @@
 "use client";
 
-import {
-  useState,
-  useMemo,
-  useCallback,
-  useEffect,
-} from "react";
-
-import type {
-  CSSProperties,
-  ReactNode,
-  ChangeEvent,
-} from "react";
-
-// ═══════════════════════════════════════════════════════════
-// CALICO YACHT CHARTERS — PRIVATE INFRASTRUCTURE WALKTHROUGH
-// V2 — Image-First / Sales-Weighted / Next.js App Router Safe
-// ═══════════════════════════════════════════════════════════
+import { useState, useMemo, useCallback, useEffect } from "react";
+import type { CSSProperties, ReactNode, ChangeEvent } from "react";
 
 const ACCESS_CODE = "DISABLED_TEMP_LOCK_8392";
 const FORM_ENDPOINT =
@@ -52,11 +37,11 @@ html,body{margin:0;padding:0;background:${C.bg};}
 body{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 ::selection{background:${C.g};color:${C.bg}}
 input::placeholder,textarea::placeholder{color:${C.st}}
+a{text-decoration:none}
 @keyframes si{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fi{from{opacity:0}to{opacity:1}}
 @keyframes zi{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
 @keyframes sli{from{opacity:0;transform:translateY(26px) scale(.992)}to{opacity:1;transform:translateY(0) scale(1)}}
-@keyframes glowPulse{0%{box-shadow:0 0 0 rgba(160,139,92,0)}50%{box-shadow:0 0 100px rgba(160,139,92,.06)}100%{box-shadow:0 0 0 rgba(160,139,92,0)}}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:${C.st};border-radius:2px}`;
@@ -96,21 +81,38 @@ type ViewportInfo = {
   isNarrow: boolean;
 };
 
-type SceneKind = "hero" | "overlay" | "split" | "stacked" | "metrics";
-
-type ScreenItem = {
+type SingleImageScene = {
+  kind: "single";
   num: string;
   label: string;
+  eyebrow?: string;
   title: string;
   text: string;
+  changed: string;
+  eliminated: string;
   src: string;
   alt: string;
   cap: string;
-  kind: SceneKind;
-  eyebrow?: string;
-  stat?: string;
-  kicker?: string;
 };
+
+type DualImageScene = {
+  kind: "dual";
+  num: string;
+  label: string;
+  eyebrow?: string;
+  title: string;
+  text: string;
+  changed: string;
+  eliminated: string;
+  srcA: string;
+  altA: string;
+  capA: string;
+  srcB: string;
+  altB: string;
+  capB: string;
+};
+
+type SceneItem = SingleImageScene | DualImageScene;
 
 const INITIAL_FORM: FormDataShape = {
   pn: "",
@@ -722,7 +724,356 @@ function SceneShell({
   );
 }
 
-function SThresh({
+function Statement({
+  num,
+  label,
+  title,
+  text,
+  vp,
+}: {
+  num?: string;
+  label?: string;
+  title: ReactNode;
+  text: ReactNode;
+  vp: ViewportInfo;
+}) {
+  return (
+    <SceneShell vp={vp} max={840}>
+      <div style={{ textAlign: "center" }}>
+        {label && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "center",
+              gap: vp.isMobile ? 10 : 12,
+              marginBottom: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            {num && (
+              <span
+                style={{
+                  fontFamily: SE,
+                  fontSize: vp.isMobile ? 16 : 18,
+                  color: C.g,
+                  opacity: 0.22,
+                }}
+              >
+                {num}
+              </span>
+            )}
+            <L vp={vp}>{label}</L>
+          </div>
+        )}
+        <H z={48} s={{ marginBottom: 16 }} vp={vp}>
+          {title}
+        </H>
+        <P
+          vp={vp}
+          s={{
+            margin: "0 auto",
+            textAlign: "center",
+            maxWidth: vp.isNarrow ? 300 : vp.isMobile ? 340 : 620,
+          }}
+        >
+          {text}
+        </P>
+      </div>
+    </SceneShell>
+  );
+}
+
+function FunctionSlide({
+  item,
+  variant,
+  vp,
+}: {
+  item: SceneItem;
+  variant: "introduce" | "replace" | "changed" | "eliminated";
+  vp: ViewportInfo;
+}) {
+  const map = {
+    introduce: {
+      title: item.title,
+      body: item.text,
+      eyebrow: item.eyebrow ?? item.label,
+    },
+    replace: {
+      title: "What this replaces manually.",
+      body:
+        item.kind === "single"
+          ? `Without this layer, ${item.label.toLowerCase()} lives across memory, text threads, email chains, calendar checking, manual follow-up, and constant owner involvement.`
+          : `Without this layer, ${item.label.toLowerCase()} gets split across separate tools, back-and-forth confirmations, re-entry, and somebody manually holding the whole chain together.`,
+      eyebrow: "Manual load",
+    },
+    changed: {
+      title: "What changed in the business.",
+      body: item.changed,
+      eyebrow: "Operational result",
+    },
+    eliminated: {
+      title: "What is now eliminated.",
+      body: item.eliminated,
+      eyebrow: "Removed drag",
+    },
+  } as const;
+
+  const current = map[variant];
+
+  return (
+    <SceneShell vp={vp} max={840}>
+      <div style={{ textAlign: "center" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "center",
+            gap: vp.isMobile ? 10 : 12,
+            marginBottom: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <span
+            style={{
+              fontFamily: SE,
+              fontSize: vp.isMobile ? 16 : 18,
+              color: C.g,
+              opacity: 0.22,
+            }}
+          >
+            {item.num}
+          </span>
+          <L vp={vp}>{current.eyebrow}</L>
+        </div>
+        <H z={46} s={{ marginBottom: 16 }} vp={vp}>
+          {current.title}
+        </H>
+        <P
+          vp={vp}
+          s={{
+            textAlign: "center",
+            margin: "0 auto",
+            maxWidth: vp.isNarrow ? 300 : vp.isMobile ? 350 : 620,
+          }}
+        >
+          {current.body}
+        </P>
+      </div>
+    </SceneShell>
+  );
+}
+
+function SingleImageSlide({
+  item,
+  open,
+  vp,
+}: {
+  item: SingleImageScene;
+  open: (src: string, alt: string) => void;
+  vp: ViewportInfo;
+}) {
+  return (
+    <SceneShell vp={vp} max={1260}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: vp.isTablet
+            ? "1fr"
+            : "minmax(0,.9fr) minmax(0,1.1fr)",
+          gap: vp.isMobile ? 22 : 34,
+          alignItems: "center",
+        }}
+      >
+        <div style={{ order: vp.isTablet ? 2 : 1 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: vp.isMobile ? 10 : 12,
+              marginBottom: 10,
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: SE,
+                fontSize: vp.isMobile ? 16 : 18,
+                color: C.g,
+                opacity: 0.22,
+              }}
+            >
+              {item.num}
+            </span>
+            <L vp={vp}>{item.label}</L>
+          </div>
+
+          {item.eyebrow && (
+            <div
+              style={{
+                fontFamily: SA,
+                fontSize: vp.isMobile ? 8 : 8.5,
+                fontWeight: 500,
+                letterSpacing: vp.isMobile ? 2.6 : 3,
+                textTransform: "uppercase",
+                color: C.g,
+                opacity: 0.9,
+                marginBottom: 10,
+              }}
+            >
+              {item.eyebrow}
+            </div>
+          )}
+
+          <H z={38} s={{ marginBottom: 14, maxWidth: 560 }} vp={vp}>
+            {item.title}
+          </H>
+          <P vp={vp} s={{ marginBottom: 18, maxWidth: 540 }}>
+            {item.text}
+          </P>
+          <P
+            vp={vp}
+            s={{
+              fontSize: vp.isMobile ? 11.5 : 12,
+              lineHeight: 1.72,
+              color: C.m,
+            }}
+          >
+            {item.changed}
+          </P>
+        </div>
+
+        <div style={{ order: vp.isTablet ? 1 : 2 }}>
+          <ImgPanel
+            src={item.src}
+            alt={item.alt}
+            cap={item.cap}
+            onOpen={open}
+            vp={vp}
+            aspect={vp.isMobile ? "4/3" : "16/9"}
+            elevated
+            darken={0.22}
+          />
+        </div>
+      </div>
+    </SceneShell>
+  );
+}
+
+function DualImageSlide({
+  item,
+  open,
+  vp,
+}: {
+  item: DualImageScene;
+  open: (src: string, alt: string) => void;
+  vp: ViewportInfo;
+}) {
+  return (
+    <SceneShell vp={vp} max={1280}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: vp.isTablet
+            ? "1fr"
+            : "minmax(0,.9fr) minmax(0,1.1fr)",
+          gap: vp.isMobile ? 22 : 34,
+          alignItems: "center",
+        }}
+      >
+        <div style={{ order: vp.isTablet ? 2 : 1 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              gap: vp.isMobile ? 10 : 12,
+              marginBottom: 10,
+              flexWrap: "wrap",
+            }}
+          >
+            <span
+              style={{
+                fontFamily: SE,
+                fontSize: vp.isMobile ? 16 : 18,
+                color: C.g,
+                opacity: 0.22,
+              }}
+            >
+              {item.num}
+            </span>
+            <L vp={vp}>{item.label}</L>
+          </div>
+
+          {item.eyebrow && (
+            <div
+              style={{
+                fontFamily: SA,
+                fontSize: vp.isMobile ? 8 : 8.5,
+                fontWeight: 500,
+                letterSpacing: vp.isMobile ? 2.6 : 3,
+                textTransform: "uppercase",
+                color: C.g,
+                opacity: 0.9,
+                marginBottom: 10,
+              }}
+            >
+              {item.eyebrow}
+            </div>
+          )}
+
+          <H z={38} s={{ marginBottom: 14, maxWidth: 580 }} vp={vp}>
+            {item.title}
+          </H>
+          <P vp={vp} s={{ marginBottom: 18, maxWidth: 550 }}>
+            {item.text}
+          </P>
+          <P
+            vp={vp}
+            s={{
+              fontSize: vp.isMobile ? 11.5 : 12,
+              lineHeight: 1.72,
+              color: C.m,
+            }}
+          >
+            {item.changed}
+          </P>
+        </div>
+
+        <div
+          style={{
+            order: vp.isTablet ? 1 : 2,
+            display: "grid",
+            gridTemplateColumns: "1fr",
+            gap: vp.isMobile ? 14 : 18,
+          }}
+        >
+          <ImgPanel
+            src={item.srcA}
+            alt={item.altA}
+            cap={item.capA}
+            onOpen={open}
+            vp={vp}
+            aspect={vp.isMobile ? "4/3" : "16/8.7"}
+            elevated
+            darken={0.22}
+          />
+          <ImgPanel
+            src={item.srcB}
+            alt={item.altB}
+            cap={item.capB}
+            onOpen={open}
+            vp={vp}
+            aspect={vp.isMobile ? "4/3" : "16/8.7"}
+            elevated
+            darken={0.22}
+          />
+        </div>
+      </div>
+    </SceneShell>
+  );
+}
+
+function SIntro({
   open,
   vp,
 }: {
@@ -730,7 +1081,7 @@ function SThresh({
   vp: ViewportInfo;
 }) {
   return (
-    <SceneShell vp={vp} max={1220}>
+    <SceneShell vp={vp} max={1240}>
       <div style={{ textAlign: "center", marginBottom: vp.isMobile ? 26 : 34 }}>
         <L
           s={{
@@ -739,7 +1090,7 @@ function SThresh({
           }}
           vp={vp}
         >
-          Prepared for  Yacht Charters
+          Prepared for Calico Yacht Charters
         </L>
         <Ru w={32} s={{ margin: `0 auto ${vp.isMobile ? 26 : 36}px` }} />
         <h1
@@ -768,22 +1119,21 @@ function SThresh({
           s={{
             margin: `0 auto ${vp.isMobile ? 26 : 38}px`,
             textAlign: "center",
-            maxWidth: vp.isNarrow ? 292 : vp.isMobile ? 340 : 520,
+            maxWidth: vp.isNarrow ? 292 : vp.isMobile ? 340 : 540,
             fontSize: vp.isMobile ? 13 : 14.5,
           }}
         >
-          A unified charter system — designed to specification, built in 20
-          days, and permanently owned.
+          A walkthrough of the operating layer behind the charter business.
         </P>
       </div>
 
       <ImgPanel
-        src="/demo-assets/00-cover.png"
-        alt="Calico Yacht Charters cover"
-        cap="Private Operating Infrastructure"
+        src="/demo-assets/00-frontend-home.png"
+        alt="Calico Yacht Charters front-end home screen"
+        cap="Frontend Home"
         onOpen={open}
         vp={vp}
-        aspect={vp.isMobile ? "4/3" : "16/8.5"}
+        aspect={vp.isMobile ? "4/3" : "16/8.6"}
         elevated
         noBorder
         darken={0.34}
@@ -792,1098 +1142,288 @@ function SThresh({
   );
 }
 
-function SGap({
-  open,
-  vp,
-}: {
-  open: (src: string, alt: string) => void;
-  vp: ViewportInfo;
-}) {
-  const pain = [
-    "Fragmented booking channels",
-    "Manual event coordination",
-    "Scattered client data",
-    "Slow financial visibility",
-    "Disconnected crew scheduling",
-    "No single operations surface",
-  ];
-
-  return (
-    <SceneShell vp={vp} max={920}>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: vp.isTablet
-            ? "1fr"
-            : "minmax(0, 1.15fr) minmax(0, .85fr)",
-          gap: vp.isMobile ? 24 : 34,
-          alignItems: "center",
-        }}
-      >
-        <div>
-          <L s={{ marginBottom: 20 }} vp={vp}>
-            Operational Baseline
-          </L>
-          <H z={44} s={{ marginBottom: 16, maxWidth: 700 }} vp={vp}>
-            Most charter businesses are still running premium experiences on top
-            of broken internal structure.
-          </H>
-          <P vp={vp} s={{ marginBottom: vp.isMobile ? 24 : 30, maxWidth: 620 }}>
-            Bookings, scheduling, payments, crew coordination, and client
-            history live across separate tools. It works until volume rises.
-            Then speed drops, details slip, and the business starts operating
-            below its own ceiling.
-          </P>
-
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: vp.isMobile
-                ? "1fr"
-                : "repeat(2, minmax(0, 1fr))",
-              gap: 1,
-              background: "rgba(160,139,92,.05)",
-            }}
-          >
-            {pain.map((t, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: vp.isMobile ? "14px 14px" : "16px 18px",
-                  background: C.ink,
-                }}
-              >
-                <span
-                  style={{
-                    fontFamily: SA,
-                    fontSize: vp.isMobile ? 11.8 : 12.4,
-                    fontWeight: 300,
-                    color: C.m,
-                    letterSpacing: ".02em",
-                    lineHeight: 1.55,
-                  }}
-                >
-                  {t}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
-    </SceneShell>
-  );
-}
-
-function SReveal({ vp }: { vp: ViewportInfo }) {
-  return (
-    <SceneShell vp={vp} max={860}>
-      <div style={{ textAlign: "center" }}>
-        <L s={{ marginBottom: 22 }} vp={vp}>
-          The Infrastructure
-        </L>
-        <H z={48} s={{ marginBottom: 16 }} vp={vp}>
-          One private system.
-          <br />
-          Every operational layer.
-        </H>
-        <P
-          vp={vp}
-          s={{
-            margin: `0 auto ${vp.isMobile ? 8 : 0}px`,
-            textAlign: "center",
-            maxWidth: vp.isNarrow ? 300 : vp.isMobile ? 340 : 560,
-          }}
-        >
-          Not rented software. Not adapted SaaS. A business-owned charter
-          environment built to the exact structure of your operation.
-        </P>
-      </div>
-    </SceneShell>
-  );
-}
-
-function SceneMeta({
-  item,
-  vp,
-  center = false,
-  compact = false,
-}: {
-  item: ScreenItem;
-  vp: ViewportInfo;
-  center?: boolean;
-  compact?: boolean;
-}) {
-  return (
-    <div
-      style={{
-        maxWidth: center ? 720 : 560,
-        textAlign: center ? "center" : "left",
-        margin: center ? "0 auto" : undefined,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          justifyContent: center ? "center" : "flex-start",
-          gap: vp.isMobile ? 10 : 12,
-          marginBottom: 10,
-          flexWrap: "wrap",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: SE,
-            fontSize: vp.isMobile ? 16 : 18,
-            color: C.g,
-            opacity: 0.22,
-          }}
-        >
-          {item.num}
-        </span>
-        <L vp={vp}>{item.label}</L>
-      </div>
-
-      {item.eyebrow && (
-        <div
-          style={{
-            fontFamily: SA,
-            fontSize: vp.isMobile ? 8 : 8.5,
-            fontWeight: 500,
-            letterSpacing: vp.isMobile ? 2.6 : 3,
-            textTransform: "uppercase",
-            color: C.g,
-            opacity: 0.9,
-            marginBottom: 10,
-          }}
-        >
-          {item.eyebrow}
-        </div>
-      )}
-
-      <H
-        z={compact ? 28 : 34}
-        s={{ marginBottom: 12, maxWidth: compact ? 520 : 620 }}
-        vp={vp}
-      >
-        {item.title}
-      </H>
-
-      <P
-        vp={vp}
-        s={{
-          maxWidth: compact ? 500 : 560,
-          marginBottom: item.kicker || item.stat ? 14 : 0,
-        }}
-      >
-        {item.text}
-      </P>
-
-      {item.stat && (
-        <div
-          style={{
-            fontFamily: SE,
-            fontSize: vp.isNarrow ? 20 : vp.isMobile ? 24 : 30,
-            lineHeight: 1.1,
-            color: C.cr,
-            marginTop: 14,
-            marginBottom: item.kicker ? 6 : 0,
-          }}
-        >
-          {item.stat}
-        </div>
-      )}
-
-      {item.kicker && (
-        <div
-          style={{
-            fontFamily: SA,
-            fontSize: vp.isMobile ? 10.8 : 11.5,
-            lineHeight: 1.65,
-            color: C.q,
-            letterSpacing: ".01em",
-          }}
-        >
-          {item.kicker}
-        </div>
-      )}
-    </div>
-  );
-}
-
-function SScreen({
-  item,
-  open,
-  vp,
-}: {
-  item: ScreenItem;
-  open: (src: string, alt: string) => void;
-  vp: ViewportInfo;
-}) {
-  if (item.kind === "hero") {
-    return (
-      <SceneShell vp={vp} max={1280}>
-        <div style={{ position: "relative" }}>
-          <ImgPanel
-            src={item.src}
-            alt={item.alt}
-            cap={item.cap}
-            onOpen={open}
-            vp={vp}
-            aspect={vp.isMobile ? "4/3" : "16/7.8"}
-            elevated
-            noBorder
-            darken={0.42}
-          />
-
-          {!vp.isMobile && (
-            <div
-              style={{
-                position: "absolute",
-                left: 34,
-                bottom: 30,
-                width: "min(520px, 46%)",
-                padding: "26px 26px 24px",
-                background: "linear-gradient(180deg, rgba(7,7,7,.72), rgba(7,7,7,.88))",
-                border: "1px solid rgba(160,139,92,.10)",
-                backdropFilter: "blur(8px)",
-                WebkitBackdropFilter: "blur(8px)",
-              }}
-            >
-              <SceneMeta item={item} vp={vp} compact />
-            </div>
-          )}
-
-          {vp.isMobile && (
-            <div style={{ marginTop: 18 }}>
-              <SceneMeta item={item} vp={vp} />
-            </div>
-          )}
-        </div>
-      </SceneShell>
-    );
-  }
-
-  if (item.kind === "overlay") {
-    return (
-      <SceneShell vp={vp} max={1240}>
-        <div style={{ position: "relative" }}>
-          <ImgPanel
-            src={item.src}
-            alt={item.alt}
-            cap={item.cap}
-            onOpen={open}
-            vp={vp}
-            aspect={vp.isMobile ? "4/3" : "16/8.8"}
-            elevated
-            noBorder
-            darken={0.40}
-          />
-
-          {!vp.isMobile && (
-            <div
-              style={{
-                position: "absolute",
-                right: 28,
-                bottom: 28,
-                width: "min(470px, 40%)",
-                padding: "22px 22px 20px",
-                background:
-                  "linear-gradient(180deg, rgba(7,7,7,.78), rgba(7,7,7,.92))",
-                border: "1px solid rgba(160,139,92,.12)",
-                boxShadow: "0 18px 60px rgba(0,0,0,.35)",
-              }}
-            >
-              <SceneMeta item={item} vp={vp} compact />
-            </div>
-          )}
-
-          {vp.isMobile && (
-            <div style={{ marginTop: 18 }}>
-              <SceneMeta item={item} vp={vp} />
-            </div>
-          )}
-        </div>
-      </SceneShell>
-    );
-  }
-
-  if (item.kind === "split") {
-    return (
-      <SceneShell vp={vp} max={1220}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: vp.isMobile ? 20 : 34,
-            alignItems: "center",
-          }}
-        >
-          <div style={{ order: vp.isTablet ? 1 : 1 }}>
-            <ImgPanel
-              src={item.src}
-              alt={item.alt}
-              cap={item.cap}
-              onOpen={open}
-              vp={vp}
-              aspect={vp.isMobile ? "4/3" : "16/9"}
-              elevated
-              darken={0.28}
-            />
-          </div>
-          <div style={{ order: vp.isTablet ? 2 : 2 }}>
-            <SceneMeta item={item} vp={vp} />
-          </div>
-        </div>
-      </SceneShell>
-    );
-  }
-
-  if (item.kind === "metrics") {
-    return (
-      <SceneShell vp={vp} max={1220}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: vp.isTablet
-              ? "1fr"
-              : "minmax(0, .9fr) minmax(0, 1.1fr)",
-            gap: vp.isMobile ? 22 : 32,
-            alignItems: "center",
-          }}
-        >
-          <div style={{ order: vp.isTablet ? 2 : 1 }}>
-            <SceneMeta item={item} vp={vp} />
-          </div>
-          <div style={{ order: vp.isTablet ? 1 : 2 }}>
-            <ImgPanel
-              src={item.src}
-              alt={item.alt}
-              cap={item.cap}
-              onOpen={open}
-              vp={vp}
-              aspect={vp.isMobile ? "4/3" : "16/9"}
-              elevated
-              darken={0.30}
-            />
-          </div>
-        </div>
-      </SceneShell>
-    );
-  }
-
-  return (
-    <SceneShell vp={vp} max={980}>
-      <div style={{ textAlign: "center", marginBottom: vp.isMobile ? 18 : 22 }}>
-        <SceneMeta item={item} vp={vp} center />
-      </div>
-
-      <div style={{ maxWidth: 960, margin: "0 auto" }}>
-        <ImgPanel
-          src={item.src}
-          alt={item.alt}
-          cap={item.cap}
-          onOpen={open}
-          vp={vp}
-          aspect={vp.isMobile ? "4/3" : "16/9.1"}
-          elevated
-          darken={0.26}
-        />
-      </div>
-    </SceneShell>
-  );
-}
-
-function SContrast({ vp }: { vp: ViewportInfo }) {
-  const rows = [
-    ["Disconnected tools", "Single private environment"],
-    ["Manual re-entry", "Automated data flow"],
-    ["Scattered client information", "One-view client record"],
-    ["Generic SaaS adapted to fit", "Built to your specifications"],
-    ["Subscription dependency", "Permanent ownership"],
-    ["Fragmented booking channels", "Unified booking engine"],
-    ["Manual event coordination", "Structured charter workflows"],
-    ["Slow reconciliation", "Real-time revenue visibility"],
-    ["No inquiry pipeline", "Visual status pipeline"],
-    ["Vendor-controlled updates", "You own the system"],
-  ];
-
-  return (
-    <SceneShell vp={vp} max={1020}>
-      <L s={{ marginBottom: 24 }} vp={vp}>
-        Infrastructure Contrast
-      </L>
-      <H z={44} s={{ marginBottom: 16, maxWidth: 760 }} vp={vp}>
-        The decision is not software versus software.
-        <br />
-        It is fragmented operation versus owned infrastructure.
-      </H>
-      <P vp={vp} s={{ marginBottom: vp.isMobile ? 28 : 36, maxWidth: 600 }}>
-        The difference shows up in speed, clarity, consistency, and how the
-        business is perceived from the outside.
-      </P>
-
-      <div
-        style={{
-          borderTop: `1px solid rgba(160,139,92,.08)`,
-          borderBottom: `1px solid rgba(160,139,92,.08)`,
-          background: "linear-gradient(180deg, rgba(255,255,255,.01), rgba(255,255,255,.015))",
-        }}
-      >
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)",
-            gap: 0,
-          }}
-        >
-          <div
-            style={{
-              padding: vp.isMobile ? "14px 0 12px" : "16px 0 14px",
-              borderRight: `1px solid rgba(160,139,92,.05)`,
-            }}
-          >
-            <L s={{ color: C.m }} vp={vp}>
-              Fragmented
-            </L>
-          </div>
-          <div
-            style={{
-              padding: vp.isMobile ? "14px 0 12px 14px" : "16px 0 14px 22px",
-            }}
-          >
-            <L s={{ color: C.g }} vp={vp}>
-              Unified
-            </L>
-          </div>
-        </div>
-
-        {rows.map(([left, right], i) => (
-          <div
-            key={i}
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0,1fr) minmax(0,1fr)",
-              gap: 0,
-              borderTop: `1px solid rgba(160,139,92,.05)`,
-            }}
-          >
-            <div
-              style={{
-                padding: vp.isMobile ? "14px 10px 14px 0" : "18px 18px 18px 0",
-                borderRight: `1px solid rgba(160,139,92,.05)`,
-                color: C.m,
-                fontFamily: SA,
-                fontSize: vp.isNarrow ? 11.5 : vp.isMobile ? 12 : 13.5,
-                fontWeight: 300,
-                lineHeight: vp.isMobile ? 1.48 : 1.55,
-                letterSpacing: ".01em",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <span
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: "rgba(160,139,92,.16)",
-                  flexShrink: 0,
-                }}
-              />
-              <span>{left}</span>
-            </div>
-            <div
-              style={{
-                padding: vp.isMobile ? "14px 0 14px 14px" : "18px 0 18px 22px",
-                color: C.pa,
-                fontFamily: SA,
-                fontSize: vp.isNarrow ? 11.5 : vp.isMobile ? 12 : 13.5,
-                fontWeight: 300,
-                lineHeight: vp.isMobile ? 1.48 : 1.55,
-                letterSpacing: ".01em",
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-              }}
-            >
-              <span
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background: C.g,
-                  boxShadow: "0 0 22px rgba(160,139,92,.35)",
-                  flexShrink: 0,
-                }}
-              />
-              <span>{right}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </SceneShell>
-  );
-}
-
-function SPeak({
-  open,
-  vp,
-}: {
-  open: (src: string, alt: string) => void;
-  vp: ViewportInfo;
-}) {
-  const items = [
-    ["Fully visible calendar movement", "No guessing what the week looks like"],
-    ["Repeat-client intelligence", "Premium service gets remembered and reused"],
-    ["Add-on revenue clarity", "Upsells stop disappearing into manual work"],
-    ["Automated communication", "The business keeps moving without extra labor"],
-  ];
-
-  return (
-    <SceneShell vp={vp} max={1260}>
-      <div style={{ textAlign: "center", marginBottom: vp.isMobile ? 22 : 28 }}>
-        <L s={{ marginBottom: 18 }} vp={vp}>
-          Six Months Forward
-        </L>
-        <H z={48} s={{ marginBottom: 14 }} vp={vp}>
-          What this business feels like after the infrastructure is live.
-        </H>
-        <P
-          vp={vp}
-          s={{
-            margin: "0 auto",
-            textAlign: "center",
-            maxWidth: 640,
-          }}
-        >
-          More booked. More controlled. More premium from the inside — not just
-          on the website.
-        </P>
-      </div>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr",
-          gap: vp.isMobile ? 22 : 30,
-          alignItems: "stretch",
-          maxWidth: 760,
-          margin: "0 auto",
-        }}
-      >
-        
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr",
-            gap: 1,
-            background: "rgba(160,139,92,.05)",
-            animation: "glowPulse 5s ease-in-out infinite",
-          }}
-        >
-          {items.map(([t, d], i) => (
-            <div
-              key={i}
-              style={{
-                background: i === 0 ? "rgba(255,255,255,.02)" : C.ink,
-                padding: vp.isMobile ? "20px 18px 22px" : "24px 22px 26px",
-              }}
-            >
-              <div
-                style={{
-                  fontFamily: SE,
-                  fontSize: vp.isNarrow ? 18 : vp.isMobile ? 20 : 22,
-                  color: C.cr,
-                  lineHeight: 1.15,
-                  marginBottom: 10,
-                }}
-              >
-                {t}
-              </div>
-              <div
-                style={{
-                  fontFamily: SA,
-                  fontSize: vp.isMobile ? 12.3 : 13.2,
-                  color: C.sa,
-                  lineHeight: 1.72,
-                  letterSpacing: ".01em",
-                }}
-              >
-                {d}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </SceneShell>
-  );
-}
-
-function SScope({ vp }: { vp: ViewportInfo }) {
-  const left = [
-    "Custom frontend experience layer",
-    "Luxury booking flow",
-    "Admin booking control",
-    "Vessel & calendar infrastructure",
-    "Client intelligence system",
-    "Inquiry-to-booking pipeline",
-    "Event configuration engine",
-  ];
-
-  const right = [
-    "Crew & vessel operations layer",
-    "Financial visibility layer (QuickBooks-integrated)",
-    "Automated communication engine",
-    "Admin operations dashboard",
-    "Private architecture",
-    "Review, refine & launch",
-  ];
-
-  return (
-    <SceneShell vp={vp} max={980}>
-      <L s={{ marginBottom: 24 }} vp={vp}>
-        Commissioned Scope
-      </L>
-      <H z={44} s={{ marginBottom: 16, maxWidth: 760 }} vp={vp}>
-        The full infrastructure delivered within the 20-day build window.
-      </H>
-      <P vp={vp} s={{ marginBottom: vp.isMobile ? 28 : 36, maxWidth: 620 }}>
-        This is not an outline. It is the actual system surface being delivered.
-      </P>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: vp.isMobile
-            ? "1fr"
-            : "minmax(0,1fr) minmax(0,1fr)",
-          gap: vp.isMobile ? 16 : 28,
-          marginBottom: vp.isMobile ? 24 : 32,
-        }}
-      >
-        {[left, right].map((col, idx) => (
-          <div key={idx}>
-            {col.map((item, i) => (
-              <div
-                key={i}
-                style={{
-                  padding: vp.isMobile ? "12px 0" : "14px 0",
-                  borderBottom: `1px solid rgba(160,139,92,.05)`,
-                  fontFamily: SA,
-                  fontSize: vp.isNarrow ? 12.5 : vp.isMobile ? 13 : 13.5,
-                  fontWeight: 300,
-                  color: C.pa,
-                  letterSpacing: ".01em",
-                  lineHeight: 1.55,
-                }}
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-
-      <div
-        style={{
-          borderTop: `1px solid rgba(160,139,92,.06)`,
-          paddingTop: 24,
-        }}
-      >
-        <L s={{ marginBottom: 18 }} vp={vp}>
-          Project Terms
-        </L>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: vp.isMobile
-              ? "1fr"
-              : vp.isTablet
-              ? "repeat(2, minmax(0, 1fr))"
-              : "repeat(4, minmax(0, 1fr))",
-            gap: vp.isMobile ? 18 : 22,
-          }}
-        >
-          {[
-            ["Baseline Investment", "$20,000"],
-            ["Initial Authorization", "$10,000"],
-            ["Completion Balance", "$10,000"],
-            ["Delivery Window", "20 Days"],
-            ["Hosting", "$199/month (2 months complimentary)"],
-          ].map(([k, v], i) => (
-            <div key={i}>
-              <div
-                style={{
-                  fontFamily: SA,
-                  fontSize: vp.isNarrow ? 7 : vp.isMobile ? 7.5 : 8,
-                  fontWeight: 500,
-                  letterSpacing: vp.isNarrow ? 2 : vp.isMobile ? 2.4 : 3.2,
-                  textTransform: "uppercase",
-                  color: C.q,
-                  marginBottom: 8,
-                }}
-              >
-                {k}
-              </div>
-              <div
-                style={{
-                  fontFamily: SE,
-                  fontSize: vp.isNarrow ? 18 : vp.isMobile ? 20 : 24,
-                  fontWeight: 400,
-                  color: C.cr,
-                  lineHeight: 1.18,
-                  wordBreak: "break-word",
-                }}
-              >
-                {v}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <P
-          vp={vp}
-          s={{
-            marginTop: 22,
-            maxWidth: 760,
-            fontSize: vp.isNarrow ? 11 : vp.isMobile ? 11.5 : 12,
-            color: C.m,
-            lineHeight: 1.75,
-          }}
-        >
-          The system can be scaled up or down with pricing adjusted to final
-          configuration. Additional intelligence capabilities can be developed
-          after the initial build and hosting period.
-        </P>
-      </div>
-    </SceneShell>
-  );
-}
-
-function SProcess({ vp }: { vp: ViewportInfo }) {
-  const items = [
-    {
-      t: "Current operations stay in place",
-      d: "Your current operation remains untouched while the private system is built in parallel.",
-    },
-    {
-      t: "Guided build process",
-      d: "Every major layer moves through structure, review, refinement, and approval.",
-    },
-    {
-      t: "Review before final transfer",
-      d: "Nothing is forced into place before your team sees and signs off on it.",
-    },
-    {
-      t: "Parallel transition",
-      d: "The handoff stays controlled, deliberate, and operationally clean.",
-    },
-  ];
-
-  return (
-    <SceneShell vp={vp} max={980}>
-      <L s={{ marginBottom: 24 }} vp={vp}>
-        Controlled Process
-      </L>
-      <H z={44} s={{ marginBottom: 16, maxWidth: 720 }} vp={vp}>
-        Build progression remains controlled from first review through final
-        transfer.
-      </H>
-      <P vp={vp} s={{ marginBottom: vp.isMobile ? 28 : 36, maxWidth: 620 }}>
-        The objective is not just delivery. It is a clean delivery that does
-        not break active operations.
-      </P>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: vp.isMobile
-            ? "1fr"
-            : "repeat(2, minmax(0, 1fr))",
-          gap: 1,
-          background: "rgba(160,139,92,.05)",
-        }}
-      >
-        {items.map((item, i) => (
-          <div
-            key={i}
-            style={{
-              background: C.ink,
-              padding: vp.isMobile ? "22px 18px 24px" : "28px 26px 30px",
-              minHeight: vp.isMobile ? undefined : 170,
-            }}
-          >
-            <div
-              style={{
-                fontFamily: SE,
-                fontSize: vp.isNarrow ? 18 : vp.isMobile ? 20 : 22,
-                fontWeight: 400,
-                color: C.cr,
-                lineHeight: 1.2,
-                marginBottom: 12,
-              }}
-            >
-              {item.t}
-            </div>
-            <div
-              style={{
-                fontFamily: SA,
-                fontSize: vp.isNarrow ? 12.5 : vp.isMobile ? 13 : 13.5,
-                fontWeight: 300,
-                color: C.sa,
-                lineHeight: 1.8,
-                letterSpacing: ".01em",
-                maxWidth: 320,
-              }}
-            >
-              {item.d}
-            </div>
-          </div>
-        ))}
-      </div>
-    </SceneShell>
-  );
-}
-
-function SStructural({ vp }: { vp: ViewportInfo }) {
-  const items = [
-    {
-      t: "Operational Maturity",
-      d: "Standardized systems signal disciplined management to crew, clients, and stakeholders.",
-    },
-    {
-      t: "Clean Transferability",
-      d: "A unified operating layer makes ownership transitions simpler and more attractive.",
-    },
-    {
-      t: "Valuation Clarity",
-      d: "Modern infrastructure elevates how the business is assessed, presented, and priced.",
-    },
-    {
-      t: "Permanent Sovereignty",
-      d: "No vendor dependency. No subscription fragility. The infrastructure is yours.",
-    },
-  ];
-
-  return (
-    <SceneShell vp={vp} max={980}>
-      <L s={{ marginBottom: 24 }} vp={vp}>
-        Structural Position
-      </L>
-      <H z={44} s={{ marginBottom: 16, maxWidth: 760 }} vp={vp}>
-        Unified infrastructure is a business asset — not just an operational
-        tool.
-      </H>
-      <P vp={vp} s={{ marginBottom: vp.isMobile ? 28 : 36, maxWidth: 660 }}>
-        Clean systems affect daily function, stakeholder perception, transition
-        readiness, and how the charter business is valued over time.
-      </P>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: vp.isMobile
-            ? "1fr"
-            : "repeat(2, minmax(0,1fr))",
-          gap: 1,
-          background: "rgba(160,139,92,.05)",
-        }}
-      >
-        {items.map((item, i) => (
-          <div
-            key={i}
-            style={{
-              background:
-                !vp.isMobile && i % 2 === 0 ? C.bg : "rgba(255,255,255,.02)",
-              padding: vp.isMobile ? "22px 18px 24px" : "30px 26px 34px",
-              minHeight: vp.isMobile ? undefined : 144,
-            }}
-          >
-            <div
-              style={{
-                fontFamily: SE,
-                fontSize: vp.isNarrow ? 18 : vp.isMobile ? 20 : 22,
-                fontWeight: 400,
-                color: C.cr,
-                lineHeight: 1.2,
-                marginBottom: 12,
-              }}
-            >
-              {item.t}
-            </div>
-            <div
-              style={{
-                fontFamily: SA,
-                fontSize: vp.isNarrow ? 12.5 : vp.isMobile ? 13 : 13.5,
-                fontWeight: 300,
-                color: C.sa,
-                lineHeight: 1.8,
-                letterSpacing: ".01em",
-                maxWidth: 340,
-              }}
-            >
-              {item.d}
-            </div>
-          </div>
-        ))}
-      </div>
-    </SceneShell>
-  );
-}
-
 function SFinal({
-  go,
   vp,
+  go,
 }: {
-  go: () => void;
   vp: ViewportInfo;
+  go: () => void;
 }) {
   return (
-    <SceneShell vp={vp} max={780}>
-      <div style={{ textAlign: "center" }}>
-        <Ru w={32} s={{ margin: `0 auto ${vp.isMobile ? 28 : 40}px` }} />
-        <H z={54} s={{ marginBottom: vp.isMobile ? 16 : 20 }} vp={vp}>
-          Commission the build.
+    <SceneShell vp={vp} max={880}>
+      <div
+        style={{
+          textAlign: "center",
+          padding: vp.isMobile ? "8px 0" : "14px 0",
+        }}
+      >
+        <L s={{ marginBottom: 20 }} vp={vp}>
+          Live Environment
+        </L>
+        <H z={52} s={{ marginBottom: 16 }} vp={vp}>
+          The walkthrough is only the explanation.
         </H>
         <P
           vp={vp}
           s={{
             textAlign: "center",
-            margin: `0 auto ${vp.isMobile ? 26 : 34}px`,
+            margin: `0 auto ${vp.isMobile ? 22 : 28}px`,
             maxWidth: 520,
           }}
         >
-          If the direction is right, move into configuration and define the
-          exact system surface.
+          The interface can now be explored directly. Access the live
+          environment below, then begin configuration when ready.
         </P>
-        <button
-          type="button"
-          onClick={go}
+
+        <div
           style={{
-            ...buttonBase(vp),
-            padding: vp.isMobile ? "15px 24px" : "17px 54px",
-            minWidth: vp.isMobile ? "100%" : 290,
-            maxWidth: vp.isMobile ? 340 : undefined,
-            width: vp.isMobile ? "100%" : undefined,
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: vp.isMobile ? 24 : 30,
           }}
         >
-          Begin Configuration
-        </button>
+          <a
+            href="/ui-preview"
+            style={{
+              ...buttonBase(vp),
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: vp.isMobile ? "100%" : 290,
+              maxWidth: vp.isMobile ? 340 : undefined,
+              width: vp.isMobile ? "100%" : undefined,
+            }}
+          >
+            Access Live UI
+          </a>
+        </div>
+
+        <div style={{ marginTop: vp.isMobile ? 8 : 14 }}>
+          <button
+            type="button"
+            onClick={go}
+            style={{
+              ...buttonBase(vp),
+              padding: vp.isMobile ? "15px 24px" : "17px 54px",
+              minWidth: vp.isMobile ? "100%" : 290,
+              maxWidth: vp.isMobile ? 340 : undefined,
+              width: vp.isMobile ? "100%" : undefined,
+            }}
+          >
+            Begin Configuration
+          </button>
+        </div>
       </div>
     </SceneShell>
   );
 }
 
-const SCREENS: ScreenItem[] = [
+function SDone({ vp }: { vp: ViewportInfo }) {
+  return (
+    <SceneShell vp={vp} max={760}>
+      <div style={{ textAlign: "center" }}>
+        <L s={{ marginBottom: 18 }} vp={vp}>
+          Submitted
+        </L>
+        <H z={54} s={{ marginBottom: 16 }} vp={vp}>
+          Configuration received.
+        </H>
+        <P
+          vp={vp}
+          s={{
+            textAlign: "center",
+            margin: "0 auto",
+            maxWidth: 520,
+          }}
+        >
+          The submission has been logged. The next step is translating the
+          business into a structured build surface.
+        </P>
+      </div>
+    </SceneShell>
+  );
+}
+
+const SCENES: SceneItem[] = [
   {
+    kind: "single",
     num: "01",
-    label: "Backend — Command Center",
-    title: "The business opens here each day.",
-    text: "Today’s activity, pending bookings, upcoming charters, vessel status, and revenue snapshots — visible immediately.",
+    label: "Frontend Home Page",
+    eyebrow: "Entry point",
+    title: "The outside layer should make the business feel precise before anyone speaks to you.",
+    text: "The public-facing surface introduces the fleet, destinations, and booking path without noise. It sets expectation, trust, and pace before the first inquiry.",
+    changed:
+      "The business starts from a controlled first impression instead of a thin brochure site that forces the back office to compensate later.",
+    eliminated:
+      "No vague landing page. No weak handoff from brand to booking. No dependence on manual explanation to create clarity.",
+    src: "/demo-assets/00-frontend-home.png",
+    alt: "Calico Yacht Charters frontend home page",
+    cap: "Frontend Home",
+  },
+  {
+    kind: "single",
+    num: "02",
+    label: "Dashboard",
+    eyebrow: "Operating view",
+    title: "Your only concern should ever be closing deals.",
+    text: "The dashboard is the first operating surface. Revenue, active charters, fleet status, pending issues, and what needs attention are visible immediately.",
+    changed:
+      "The owner stops opening five tabs just to understand the day. The business opens with clarity, not recovery.",
+    eliminated:
+      "No guessing. No status hunting. No invisible problems waiting inside messages, waivers, or invoices.",
     src: "/demo-assets/01-dashboard.png",
     alt: "Calico Yacht Charters dashboard screen",
-    cap: "Operations Dashboard",
-    kind: "hero",
-    eyebrow: "Executive visibility first",
-    stat: "One surface. Immediate control.",
-    kicker: "The system starts with clarity, not guesswork.",
+    cap: "Command Center Dashboard",
   },
   {
-    num: "02",
-    label: "Frontend — Booking Experience",
-    title: "The client-facing layer feels premium before the yacht even leaves the dock.",
-    text: "Vessel selection, date, duration, charter type, guest count, and add-ons presented in a clean luxury flow built to convert.",
-    src: "/demo-assets/02-frontend-booking.png",
-    alt: "Calico Yacht Charters frontend booking screen",
-    cap: "Frontend Booking Flow",
-    kind: "overlay",
-    eyebrow: "Sell the experience earlier",
-    stat: "Premium in. Premium out.",
-  },
-  {
+    kind: "single",
     num: "03",
-    label: "Backend — Financial Layer",
-    title: "Revenue is visible while the business is moving.",
-    text: "Deposits, balances, add-ons, transaction notes, and QuickBooks-integrated accounting stay connected to the actual charter workflow.",
-    src: "/demo-assets/03-revenue.png",
-    alt: "Calico Yacht Charters revenue screen",
-    cap: "Revenue & QuickBooks",
-    kind: "metrics",
-    eyebrow: "Money should not be a cleanup process",
-    stat: "Real-time financial visibility",
+    label: "AI Command",
+    eyebrow: "Execution layer",
+    title: "Every tool connected. Every step autonomous.",
+    text: "The command surface turns instructions into actions across bookings, invoices, maintenance, client communication, and reporting from one place.",
+    changed:
+      "Work moves from clicking through systems to directing the operation at the system level.",
+    eliminated:
+      "No repetitive admin motion. No re-entry. No operator acting as middleware between disconnected tools.",
+    src: "/demo-assets/02-ai-command.png",
+    alt: "Calico Yacht Charters AI command screen",
+    cap: "AI Command Center",
   },
   {
+    kind: "dual",
     num: "04",
-    label: "Backend — Booking Engine",
-    title: "Every charter lives inside one controlled pipeline.",
-    text: "Inquiry to completion, with status, vessel assignment, deposit state, crew allocation, and special requests surfaced in one view.",
-    src: "/demo-assets/04-bookings.png",
-    alt: "Calico Yacht Charters bookings screen",
-    cap: "Bookings Pipeline",
-    kind: "split",
-    eyebrow: "No lost leads. No scattered threads.",
+    label: "Bookings + Calendar",
+    eyebrow: "Acquisition to scheduling flow",
+    title: "Communications. Scheduling. Books. These should never fail.",
+    text: "The booking pipeline and calendar function as one operational chain. Inquiry status, charter dates, vessel allocation, and timing pressure stay connected.",
+    changed:
+      "The business sees demand and capacity in the same system. Sales flow and operational placement stop fighting each other.",
+    eliminated:
+      "No separate calendar checking. No double-booking guesswork. No status drift between inquiry, confirmation, and actual vessel placement.",
+    srcA: "/demo-assets/03-bookings.png",
+    altA: "Calico Yacht Charters bookings pipeline",
+    capA: "Bookings Pipeline",
+    srcB: "/demo-assets/04-calendar.png",
+    altB: "Calico Yacht Charters charter calendar",
+    capB: "Charter Calendar",
   },
   {
+    kind: "single",
     num: "05",
-    label: "Backend — Scheduling Layer",
-    title: "The week stops living in separate calendars, calls, and memory.",
-    text: "Day, week, and month views with vessel logic, buffer windows, crew placement, and charter timing all visible at once.",
-    src: "/demo-assets/05-schedule.png",
-    alt: "Calico Yacht Charters schedule screen",
-    cap: "Schedule",
-    kind: "stacked",
-    eyebrow: "Operational movement, not calendar clutter",
-  },
-  {
-    num: "06",
-    label: "Backend — Client Intelligence",
-    title: "One client. One record. One deeper memory of the relationship.",
-    text: "Contact data, booking history, preferences, spend, event type, communication log, and referral source stay attached to the client — not hidden across tools.",
-    src: "/demo-assets/06-clients.png",
+    label: "Clients",
+    eyebrow: "Relational memory",
+    title: "One client record replaces scattered memory across the business.",
+    text: "Profiles carry booking history, spend, preferences, communication context, and attached documents so repeat service becomes structured instead of improvised.",
+    changed:
+      "Client quality becomes repeatable because the business remembers the relationship the same way every time.",
+    eliminated:
+      "No hidden preferences. No lost context. No owner-only memory acting as the CRM.",
+    src: "/demo-assets/05-clients.png",
     alt: "Calico Yacht Charters clients screen",
     cap: "Client Profiles",
-    kind: "split",
-    eyebrow: "Premium service becomes repeatable",
   },
   {
+    kind: "dual",
+    num: "06",
+    label: "Fleet + Crew",
+    eyebrow: "Asset and personnel coordination",
+    title: "Vessels and people stop being tracked as separate problems.",
+    text: "Fleet status and crew allocation work together. Availability, crew load, costs, certs, incidents, and next maintenance all stay attached to the operating asset.",
+    changed:
+      "The business can place real service capacity, not just vessel availability.",
+    eliminated:
+      "No detached crew planning. No asset blind spots. No expensive surprises from maintenance or staffing gaps.",
+    srcA: "/demo-assets/06-fleet.png",
+    altA: "Calico Yacht Charters fleet management screen",
+    capA: "Fleet Management",
+    srcB: "/demo-assets/07-crew.png",
+    altB: "Calico Yacht Charters crew management screen",
+    capB: "Crew Management",
+  },
+  {
+    kind: "dual",
     num: "07",
-    label: "Backend — Event Configuration",
-    title: "Every charter type carries its own execution logic.",
-    text: "Proposals, birthdays, sunset cruises, Catalina trips, and private events all move with structured setup instead of last-minute improvisation.",
-    src: "/demo-assets/07-charter-setup.png",
-    alt: "Calico Yacht Charters event configuration screen",
-    cap: "Charter Configuration",
-    kind: "split",
-    eyebrow: "Consistency under pressure",
+    label: "Revenue + Documents",
+    eyebrow: "Money visibility and business records",
+    title: "Revenue and compliance stop living in cleanup mode.",
+    text: "Invoices, totals, payment status, waivers, contracts, and yacht documents remain linked to the actual booking and client instead of drifting into separate admin folders.",
+    changed:
+      "Money and records are visible while the business is moving, not reconstructed after the fact.",
+    eliminated:
+      "No invoice fog. No missing waivers. No document chasing right before departure.",
+    srcA: "/demo-assets/08-revenue.png",
+    altA: "Calico Yacht Charters revenue reporting screen",
+    capA: "Revenue & Reporting",
+    srcB: "/demo-assets/09-documents.png",
+    altB: "Calico Yacht Charters documents and waivers screen",
+    capB: "Documents & Waivers",
   },
   {
+    kind: "single",
     num: "08",
-    label: "Frontend — Brand Experience",
-    title: "The presentation layer earns trust before the sales conversation begins.",
-    text: "Mobile-first performance, visual storytelling, clear vessel choice, trust signals, and a direct path into booking.",
-    src: "/demo-assets/08-frontend-brand.png",
-    alt: "Calico Yacht Charters frontend brand experience screen",
-    cap: "Frontend Brand Layer",
-    kind: "hero",
-    eyebrow: "Perceived value rises immediately",
-    stat: "Luxury presentation with direct conversion logic",
+    label: "Messages",
+    eyebrow: "Unified communication",
+    title: "The communication layer belongs inside the operation, not outside it.",
+    text: "Client messages stay linked to bookings and clients so requests, updates, and service details move with the charter instead of sitting in isolated threads.",
+    changed:
+      "Service communication becomes operational data, not loose conversation.",
+    eliminated:
+      "No message hunting. No missed detail. No split between what the client asked for and what the team is actually executing.",
+    src: "/demo-assets/10-messages.png",
+    alt: "Calico Yacht Charters communications hub screen",
+    cap: "Communications Hub",
   },
   {
+    kind: "dual",
     num: "09",
-    label: "Backend — Communications",
-    title: "The business keeps moving even when nobody is manually chasing details.",
-    text: "Inquiry acknowledgment, quote follow-up, deposit confirmation, reminders, pre-charter instructions, review requests, and repeat-booking prompts — automated and branded.",
-    src: "/demo-assets/09-comms.png",
-    alt: "Calico Yacht Charters communications screen",
-    cap: "Communication Engine",
-    kind: "overlay",
-    eyebrow: "Automation where the drag usually lives",
-    stat: "Precision without extra labor",
+    label: "Marketing + Reviews",
+    eyebrow: "Demand generation and trust layer",
+    title: "Demand and reputation become visible operating surfaces.",
+    text: "Leads, campaign spend, conversion movement, featured reviews, and social proof can be managed as part of growth instead of being left outside the core system.",
+    changed:
+      "The business sees how attention becomes revenue and how reputation feeds the next booking cycle.",
+    eliminated:
+      "No blind ad spend. No detached lead lists. No reviews floating outside the revenue chain.",
+    srcA: "/demo-assets/11-marketing.png",
+    altA: "Calico Yacht Charters marketing pipeline screen",
+    capA: "Marketing Pipeline",
+    srcB: "/demo-assets/12-reviews.png",
+    altB: "Calico Yacht Charters reviews and testimonials screen",
+    capB: "Reviews & Testimonials",
+  },
+  {
+    kind: "dual",
+    num: "10",
+    label: "Notes + Incidents",
+    eyebrow: "Operational memory and issue handling",
+    title: "The business keeps its own memory and tracks its own problems inside one spine.",
+    text: "Internal notes preserve context. Incident tracking preserves accountability. Together they turn operational friction into visible, managed process.",
+    changed:
+      "Context survives staff changes, busy weeks, and edge cases because the system retains what the business learns.",
+    eliminated:
+      "No forgotten prep details. No issue buried in text. No recurring problem because nothing was structurally recorded.",
+    srcA: "/demo-assets/13-notes.png",
+    altA: "Calico Yacht Charters notes and logs screen",
+    capA: "Notes & Logs",
+    srcB: "/demo-assets/14-incidents.png",
+    altB: "Calico Yacht Charters incident tracking screen",
+    capB: "Incident Tracking",
+  },
+  {
+    kind: "single",
+    num: "11",
+    label: "Settings / AI Customization",
+    eyebrow: "System behavior",
+    title: "A Digital Spine.",
+    text: "Configuration controls behavior across automation, integrations, review flow, waivers, defaults, and how the AI operates inside the business.",
+    changed:
+      "The system behaves like infrastructure because the business defines the rules instead of adapting itself to generic software limits.",
+    eliminated:
+      "No fragmented configuration. No hidden automation logic. No dependence on patched tools that were never built to act as one system.",
+    src: "/demo-assets/15-settings.png",
+    alt: "Calico Yacht Charters settings screen",
+    cap: "Settings & AI Configuration",
   },
 ];
 
@@ -1913,70 +1453,112 @@ export default function Page() {
   }, []);
 
   const closeLightbox = useCallback(() => {
-    setLb((p) => ({ ...p, open: false }));
+    setLb({ open: false, src: "", alt: "" });
   }, []);
 
-  const u = (k: keyof FormDataShape, v: string) =>
-    setFd((p) => ({ ...p, [k]: v }));
-
-  const t = (k: keyof FormDataShape, v: string) =>
+  const tog = useCallback((k: keyof FormDataShape, v: string) => {
     setFd((p) => {
-      const cur = p[k];
-      if (!Array.isArray(cur)) return p;
+      const arr = p[k] as string[];
       return {
         ...p,
-        [k]: cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v],
+        [k]: arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v],
       };
     });
+  }, []);
+
+  const upd = useCallback(
+    (k: keyof FormDataShape) =>
+      (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+        setFd((p) => ({ ...p, [k]: e.target.value })),
+    []
+  );
 
   const slides = useMemo<Slide[]>(() => {
     const r: Slide[] = [];
 
     r.push({
-      id: "threshold",
-      r: () => <SThresh open={openLightbox} vp={vp} />,
+      id: "cover",
+      r: () => <SIntro open={openLightbox} vp={vp} />,
     });
 
     r.push({
-      id: "gap",
-      r: () => <SGap open={openLightbox} vp={vp} />,
-    });
+      id: "pre-1",
+  r: () => (
+    <Statement
+      vp={vp}
+      num="P1"
+      label="Opening"
+      title="To Be Elite Requires Full Attention"
+      text="Your current business structure shouldn't rely on fragmented tools, when an autonomous, unified option exists."
+    />
+  ),
+},);
 
     r.push({
-      id: "reveal",
-      r: () => <SReveal vp={vp} />,
+      id: "pre-2",
+      r: () => (
+        <Statement
+          vp={vp}
+          num="P2"
+          label="Operational reality"
+          title="Communications. Scheduling. Books. These should never fail."
+          text="When these functions are fragmented, the business runs on hidden labor. The cost is not just inefficiency. It is missed clarity, slower response, avoidable error, and unnecessary owner involvement."
+        />
+      ),
     });
 
-    SCREENS.forEach((item) =>
+    SCENES.forEach((item) => {
       r.push({
-        id: `screen-${item.num}`,
-        r: () => <SScreen item={item} open={openLightbox} vp={vp} />,
-      })
-    );
-
-    r.push({
-      id: "peak",
-      r: () => <SPeak open={openLightbox} vp={vp} />,
+        id: `${item.num}-a`,
+        r: () => <FunctionSlide item={item} variant="introduce" vp={vp} />,
+      });
+      r.push({
+        id: `${item.num}-b`,
+        r: () => <FunctionSlide item={item} variant="replace" vp={vp} />,
+      });
+      r.push({
+        id: `${item.num}-img`,
+        r: () =>
+          item.kind === "single" ? (
+            <SingleImageSlide item={item} open={openLightbox} vp={vp} />
+          ) : (
+            <DualImageSlide item={item} open={openLightbox} vp={vp} />
+          ),
+      });
+      r.push({
+        id: `${item.num}-c`,
+        r: () => <FunctionSlide item={item} variant="changed" vp={vp} />,
+      });
+      r.push({
+        id: `${item.num}-d`,
+        r: () => <FunctionSlide item={item} variant="eliminated" vp={vp} />,
+      });
     });
 
     r.push({
-      id: "contrast",
-      r: () => <SContrast vp={vp} />,
+      id: "post-1",
+      r: () => (
+        <Statement
+          vp={vp}
+          num="PX1"
+          label="System unification"
+          title="Every tool connected. Every step autonomous."
+          text="Bookings, clients, fleet, crew, waivers, messages, reviews, revenue, and AI behavior stop acting like separate software purchases. They become one operating environment with one logic chain behind them."
+        />
+      ),
     });
 
     r.push({
-      id: "scope",
-      r: () => <SScope vp={vp} />,
-    });
-
-    r.push({
-      id: "process",
-      r: () => <SProcess vp={vp} />,
-    });
-
-    r.push({
-      id: "structural",
-      r: () => <SStructural vp={vp} />,
+      id: "post-2",
+      r: () => (
+        <Statement
+          vp={vp}
+          num="PX2"
+          label="Infrastructure"
+          title="A Digital Spine."
+          text="This is the layer that unifies the charter business instead of forcing it to patch together disconnected tools. The value is not just software. The value is structural control."
+        />
+      ),
     });
 
     r.push({
@@ -2053,6 +1635,19 @@ export default function Page() {
     }
   }, [fd, submitting]);
 
+  useEffect(() => {
+    if (mode !== "walk") return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (lb.open) return;
+      if (e.key === "ArrowRight") go(sl + 1);
+      if (e.key === "ArrowLeft") go(sl - 1);
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mode, sl, go, lb.open]);
+
   if (mode === "gate") {
     return (
       <div
@@ -2094,86 +1689,481 @@ export default function Page() {
               letterSpacing: vp.isMobile ? 3.4 : 4,
               color: C.w,
               textTransform: "uppercase",
-              marginBottom: vp.isMobile ? 34 : 48,
+              marginBottom: vp.isMobile ? 30 : 36,
             }}
           >
-            System Access
+            Private Walkthrough Access
           </div>
+
           <input
-            type="password"
-            placeholder="Access Code"
             value={code}
-            onChange={(e) => {
-              setCode(e.target.value);
-              setCe(false);
-            }}
+            onChange={(e) => setCode(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && enter()}
+            placeholder="Enter access code"
             style={{
-              fontFamily: SA,
-              fontSize: vp.isMobile ? 14 : 13,
-              fontWeight: 300,
-              color: C.cr,
-              letterSpacing: vp.isMobile ? 2.1 : 2.5,
-              textAlign: "center",
-              background: "transparent",
               width: "100%",
-              border: "none",
-              borderBottom: `1px solid ${
-                ce ? C.er : "rgba(160,139,92,.15)"
-              }`,
-              padding: vp.isMobile ? "14px 0" : "12px 0",
+              padding: vp.isMobile ? "14px 14px" : "15px 16px",
+              background: "transparent",
+              border: `1px solid ${ce ? C.er : C.gl}`,
+              color: C.cr,
+              fontFamily: SA,
+              fontSize: 13,
               outline: "none",
-              transition: "border-color .3s",
+              marginBottom: 12,
             }}
           />
-          <div
-            style={{
-              height: 22,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {ce && (
-              <span
-                style={{
-                  fontFamily: SA,
-                  fontSize: 10,
-                  color: C.er,
-                  letterSpacing: 1,
-                  animation: "fi .25s both",
-                }}
-              >
-                Not recognized
-              </span>
-            )}
-          </div>
+
           <button
             type="button"
             onClick={enter}
             style={{
               ...buttonBase(vp),
-              marginTop: 18,
-              padding: vp.isMobile ? "13px 28px" : "13px 44px",
-              fontSize: vp.isMobile ? 8.5 : 9,
-              width: vp.isMobile ? "100%" : undefined,
+              width: "100%",
+              justifyContent: "center",
             }}
           >
             Enter
           </button>
+
           <div
             style={{
-              marginTop: vp.isMobile ? 42 : 56,
+              marginTop: 14,
+              minHeight: 16,
               fontFamily: SA,
-              fontSize: 7.5,
-              letterSpacing: vp.isMobile ? 2.8 : 3.5,
-              color: "rgba(106,102,95,.3)",
-              textTransform: "uppercase",
+              fontSize: 11.5,
+              color: ce ? "#C88989" : C.m,
+              opacity: ce ? 1 : 0.7,
             }}
           >
-            Authorized Access Only
+            {ce ? "Invalid access code." : "Authorized viewers only."}
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (mode === "intake") {
+    const steps = [
+      "Business Surface",
+      "Bookings",
+      "Fleet & Crew",
+      "Revenue & Records",
+      "Coordination",
+      "Priorities",
+      "Build Notes",
+      "Review",
+    ];
+
+    return (
+      <div
+        style={{
+          minHeight: "100dvh",
+          background: C.bg,
+          color: C.cr,
+          padding: vp.isMobile ? "22px 16px 36px" : "34px 28px 48px",
+        }}
+      >
+        <style>{CSS}</style>
+        <SceneShell vp={vp} max={960} align="left">
+          <div style={{ marginBottom: vp.isMobile ? 24 : 30 }}>
+            <L s={{ marginBottom: 14 }} vp={vp}>
+              Configuration Intake
+            </L>
+            <H z={46} s={{ marginBottom: 12 }} vp={vp}>
+              Build the yacht charter operating surface.
+            </H>
+            <P vp={vp} s={{ maxWidth: 640 }}>
+              Define the operational layers that matter most so the build starts
+              from actual business coordination, not generic software logic.
+            </P>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: 8,
+              flexWrap: "wrap",
+              marginBottom: vp.isMobile ? 22 : 28,
+            }}
+          >
+            {steps.map((s, i) => {
+              const on = is === i + 1;
+              return (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setIs(i + 1)}
+                  style={{
+                    fontFamily: SA,
+                    fontSize: 10.5,
+                    fontWeight: 500,
+                    letterSpacing: 1.3,
+                    textTransform: "uppercase",
+                    padding: "9px 12px",
+                    border: `1px solid ${
+                      on ? "rgba(160,139,92,.35)" : "rgba(160,139,92,.12)"
+                    }`,
+                    background: on ? C.gd : "transparent",
+                    color: on ? C.g : C.m,
+                    cursor: "pointer",
+                  }}
+                >
+                  {i + 1}. {s}
+                </button>
+              );
+            })}
+          </div>
+
+          <div
+            style={{
+              border: `1px solid ${C.gl}`,
+              padding: vp.isMobile ? 18 : 22,
+              background: "rgba(255,255,255,.01)",
+            }}
+          >
+            {is === 1 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: vp.isTablet ? "1fr" : "1fr 1fr",
+                  gap: vp.isMobile ? 16 : 18,
+                }}
+              >
+                <Fi
+                  label="Project Lead"
+                  ph="Owen Lane"
+                  value={fd.pn}
+                  onChange={upd("pn")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Company / Brand"
+                  ph="Calico Yacht Charters"
+                  value={fd.cn}
+                  onChange={upd("cn")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Email"
+                  ph="contact@company.com"
+                  type="email"
+                  value={fd.em}
+                  onChange={upd("em")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Phone"
+                  ph="+1 ..."
+                  value={fd.ph}
+                  onChange={upd("ph")}
+                  vp={vp}
+                />
+                <Ch
+                  label="Core operational layers"
+                  opts={[
+                    "Bookings",
+                    "Calendar",
+                    "Fleet",
+                    "Crew",
+                    "Clients",
+                    "Revenue",
+                    "Documents",
+                    "Messages",
+                    "Marketing",
+                    "Reviews",
+                    "Incidents",
+                    "AI Command",
+                  ]}
+                  sel={fd.cd}
+                  tog={(v) => tog("cd", v)}
+                  vp={vp}
+                />
+                <Ch
+                  label="Priority system surfaces"
+                  opts={[
+                    "Owner dashboard",
+                    "Admin dashboard",
+                    "Client-facing booking flow",
+                    "Crew operations",
+                    "Document workflow",
+                    "Revenue reporting",
+                  ]}
+                  sel={fd.vs}
+                  tog={(v) => tog("vs", v)}
+                  vp={vp}
+                />
+              </div>
+            )}
+
+            {is === 2 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: vp.isTablet ? "1fr" : "1fr 1fr",
+                  gap: vp.isMobile ? 16 : 18,
+                }}
+              >
+                <Fi
+                  label="Booking volume"
+                  ph="How many bookings per week / month?"
+                  value={fd.bn}
+                  onChange={upd("bn")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Booking friction"
+                  ph="Where do bookings slow down or break?"
+                  value={fd.fn}
+                  onChange={upd("fn")}
+                  vp={vp}
+                />
+                <Ch
+                  label="Booking flow requirements"
+                  opts={[
+                    "Inquiry capture",
+                    "Quote flow",
+                    "Deposit tracking",
+                    "Status pipeline",
+                    "Conflict detection",
+                    "Add-on management",
+                    "Waiver enforcement",
+                  ]}
+                  sel={fd.fp}
+                  tog={(v) => tog("fp", v)}
+                  vp={vp}
+                />
+                <Ch
+                  label="Calendar requirements"
+                  opts={[
+                    "Month view",
+                    "Buffer windows",
+                    "Crew visibility",
+                    "Yacht conflict checking",
+                    "Season planning",
+                    "Maintenance blocking",
+                  ]}
+                  sel={fd.bp}
+                  tog={(v) => tog("bp", v)}
+                  vp={vp}
+                />
+              </div>
+            )}
+
+            {is === 3 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: vp.isTablet ? "1fr" : "1fr 1fr",
+                  gap: vp.isMobile ? 16 : 18,
+                }}
+              >
+                <Fi
+                  label="Fleet surface"
+                  ph="How many vessels and how should they be viewed?"
+                  value={fd.bnn}
+                  onChange={upd("bnn")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Crew surface"
+                  ph="Crew roles, certifications, assignment logic"
+                  value={fd.an}
+                  onChange={upd("an")}
+                  vp={vp}
+                />
+                <Ch
+                  label="Fleet requirements"
+                  opts={[
+                    "Availability status",
+                    "Incident linking",
+                    "Maintenance schedule",
+                    "Operating costs",
+                    "Asset documents",
+                    "Rate visibility",
+                  ]}
+                  sel={fd.ap}
+                  tog={(v) => tog("ap", v)}
+                  vp={vp}
+                />
+              </div>
+            )}
+
+            {is === 4 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: vp.isTablet ? "1fr" : "1fr 1fr",
+                  gap: vp.isMobile ? 16 : 18,
+                }}
+              >
+                <Fi
+                  label="Revenue visibility"
+                  ph="What should the owner see financially at a glance?"
+                  value={fd.pa}
+                  onChange={upd("pa")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Record requirements"
+                  ph="Contracts, waivers, insurance, IDs, invoices"
+                  value={fd.im}
+                  onChange={upd("im")}
+                  vp={vp}
+                />
+              </div>
+            )}
+
+            {is === 5 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: vp.isTablet ? "1fr" : "1fr 1fr",
+                  gap: vp.isMobile ? 16 : 18,
+                }}
+              >
+                <Fi
+                  label="Communication flow"
+                  ph="Where do client messages currently live?"
+                  value={fd.ta}
+                  onChange={upd("ta")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Scheduling complexity"
+                  ph="What creates the most coordination pressure?"
+                  value={fd.cu}
+                  onChange={upd("cu")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Incident handling"
+                  ph="How should issues be logged, tracked, and surfaced?"
+                  value={fd.sp}
+                  onChange={upd("sp")}
+                  vp={vp}
+                />
+                <Fi
+                  label="AI usage"
+                  ph="What should natural language command be able to execute?"
+                  value={fd.ad}
+                  onChange={upd("ad")}
+                  vp={vp}
+                />
+              </div>
+            )}
+
+            {is === 6 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr",
+                  gap: vp.isMobile ? 16 : 18,
+                }}
+              >
+                <Fi
+                  label="Top business priorities"
+                  ph="What must this system solve first?"
+                  ta
+                  value={fd.ta}
+                  onChange={upd("ta")}
+                  vp={vp}
+                />
+                <Fi
+                  label="Where coordination currently breaks"
+                  ph="Describe the current pressure points in operations."
+                  ta
+                  value={fd.cu}
+                  onChange={upd("cu")}
+                  vp={vp}
+                />
+              </div>
+            )}
+
+            {is === 7 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr",
+                  gap: vp.isMobile ? 16 : 18,
+                }}
+              >
+                <Fi
+                  label="Additional build notes"
+                  ph="Anything specific about vessel logic, seasonal demand, staff structure, ownership view, or client experience"
+                  ta
+                  value={fd.ad}
+                  onChange={upd("ad")}
+                  vp={vp}
+                />
+              </div>
+            )}
+
+            {is === 8 && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr",
+                  gap: vp.isMobile ? 16 : 18,
+                }}
+              >
+                <P vp={vp} s={{ maxWidth: "100%" }}>
+                  Review the configuration surface, then submit. This intake is
+                  built to define the charter operation across bookings, fleet,
+                  crew, clients, revenue, documents, communication, scheduling,
+                  and issue handling.
+                </P>
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 12,
+                marginTop: vp.isMobile ? 18 : 22,
+                flexWrap: "wrap",
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setIs((p) => Math.max(1, p - 1))}
+                style={{
+                  ...buttonBase(vp),
+                  minWidth: vp.isMobile ? "48%" : 160,
+                }}
+              >
+                Back
+              </button>
+
+              {is < IT ? (
+                <button
+                  type="button"
+                  onClick={() => setIs((p) => Math.min(IT, p + 1))}
+                  style={{
+                    ...solidButton(vp),
+                    minWidth: vp.isMobile ? "48%" : 160,
+                  }}
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={sub}
+                  disabled={submitting}
+                  style={{
+                    ...solidButton(vp),
+                    minWidth: vp.isMobile ? "100%" : 220,
+                    opacity: submitting ? 0.7 : 1,
+                    cursor: submitting ? "default" : "pointer",
+                  }}
+                >
+                  {submitting ? "Submitting..." : "Submit Configuration"}
+                </button>
+              )}
+            </div>
+          </div>
+        </SceneShell>
       </div>
     );
   }
@@ -2191,750 +2181,170 @@ export default function Page() {
         }}
       >
         <style>{CSS}</style>
-        <div
-          style={{
-            textAlign: "center",
-            animation: "si 1s cubic-bezier(.16,1,.3,1) both",
-            maxWidth: 460,
-            padding: vp.isMobile ? "0 6px" : "0 28px",
-          }}
-        >
-          <div
-            style={{
-              width: 44,
-              height: 44,
-              border: `1px solid rgba(160,139,92,.22)`,
-              borderRadius: "50%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 32px",
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={C.g}
-              strokeWidth="1.5"
-              aria-hidden="true"
-            >
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-          <L s={{ marginBottom: 14 }} vp={vp}>
-            Configuration Received
-          </L>
-          <h1
-            style={{
-              fontFamily: SE,
-              fontSize: vp.isMobile ? 26 : 30,
-              fontWeight: 400,
-              color: C.cr,
-              lineHeight: 1.3,
-              marginBottom: 32,
-            }}
-          >
-            Build request submitted.
-          </h1>
-          <Ru w={28} s={{ margin: "0 auto 32px" }} />
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 16,
-              textAlign: "left",
-              maxWidth: 380,
-              margin: "0 auto",
-            }}
-          >
-            {[
-              "Your build configuration has been received.",
-              "Our team will review within 24 hours.",
-              "Confirmation with scope and timeline will be sent to your email.",
-              "Wire transfer invoice and authorization documents will follow.",
-            ].map((x, i) => (
-              <div
-                key={i}
-                style={{ display: "flex", gap: 12, alignItems: "baseline" }}
-              >
-                <div
-                  style={{
-                    width: 2.5,
-                    height: 2.5,
-                    borderRadius: "50%",
-                    background: C.g,
-                    opacity: 0.3,
-                    flexShrink: 0,
-                    marginTop: 2,
-                  }}
-                />
-                <span
-                  style={{
-                    fontFamily: SA,
-                    fontSize: vp.isMobile ? 12 : 12.5,
-                    fontWeight: 300,
-                    lineHeight: 1.65,
-                    color: C.sa,
-                  }}
-                >
-                  {x}
-                </span>
-              </div>
-            ))}
-          </div>
-          <div
-            style={{
-              marginTop: vp.isMobile ? 48 : 64,
-              fontFamily: SA,
-              fontSize: 7.5,
-              letterSpacing: vp.isMobile ? 2.4 : 3,
-              color: "rgba(106,102,95,.22)",
-              textTransform: "uppercase",
-            }}
-          >
-            Calico Yacht Charters
-          </div>
-        </div>
+        <SDone vp={vp} />
       </div>
     );
   }
-
-  if (mode === "intake") {
-    return (
-      <div
-        style={{
-          minHeight: "100dvh",
-          background: C.bg,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <style>{CSS}</style>
-        <div
-          style={{
-            flex: 1,
-            overflow: "auto",
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 500,
-              width: "100%",
-              padding: vp.isMobile ? "30px 18px 82px" : "64px 28px 100px",
-            }}
-          >
-            <L
-              s={{
-                textAlign: "center",
-                marginBottom: vp.isMobile ? 28 : 40,
-                letterSpacing: vp.isMobile ? 4 : 5,
-              }}
-              vp={vp}
-            >
-              Build Configuration
-            </L>
-
-            <div
-              style={{
-                display: "flex",
-                gap: 3,
-                marginBottom: vp.isMobile ? 28 : 44,
-              }}
-            >
-              {Array.from({ length: IT }).map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    flex: 1,
-                    height: 1,
-                    background: i < is ? C.g : "rgba(160,139,92,.07)",
-                    transition: "background .4s",
-                    borderRadius: 1,
-                  }}
-                />
-              ))}
-            </div>
-
-            <div
-              key={is}
-              style={{ animation: "si .5s cubic-bezier(.16,1,.3,1) both" }}
-            >
-              <div
-                style={{
-                  fontFamily: SA,
-                  fontSize: vp.isMobile ? 8 : 8.5,
-                  color: C.w,
-                  letterSpacing: vp.isMobile ? 1.6 : 2,
-                  textTransform: "uppercase",
-                  marginBottom: 7,
-                }}
-              >
-                {is} — {IT}
-              </div>
-
-              {is === 1 && (
-                <>
-                  <H z={24} s={{ marginBottom: 5 }} vp={vp}>
-                    Company Identity
-                  </H>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 24,
-                      fontSize: vp.isMobile ? 11 : 11.5,
-                      color: C.m,
-                    }}
-                  >
-                    Foundation details.
-                  </P>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 16,
-                    }}
-                  >
-                    <Fi
-                      vp={vp}
-                      label="Company Name"
-                      ph="Calico Yacht Charters"
-                      value={fd.pn}
-                      onChange={(e) => u("pn", e.target.value)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Primary Contact"
-                      ph="Full name"
-                      value={fd.cn}
-                      onChange={(e) => u("cn", e.target.value)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Email"
-                      ph="you@calicoyacht.com"
-                      type="email"
-                      value={fd.em}
-                      onChange={(e) => u("em", e.target.value)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Phone"
-                      ph="(310) 000-0000"
-                      type="tel"
-                      value={fd.ph}
-                      onChange={(e) => u("ph", e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {is === 2 && (
-                <>
-                  <H z={24} s={{ marginBottom: 5 }} vp={vp}>
-                    Fleet & Charter Types
-                  </H>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 24,
-                      fontSize: vp.isMobile ? 11 : 11.5,
-                      color: C.m,
-                    }}
-                  >
-                    Vessel and experience structure.
-                  </P>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 16,
-                    }}
-                  >
-                    <Ch
-                      vp={vp}
-                      label="Charter Types Offered"
-                      opts={[
-                        "Harbor Cruises",
-                        "Sunset Cruises",
-                        "Proposals",
-                        "Birthdays & Events",
-                        "Whale Watching",
-                        "Malibu Voyages",
-                        "Catalina Day Trips",
-                        "Ash Scatterings",
-                        "Corporate Events",
-                      ]}
-                      sel={fd.cd}
-                      tog={(v) => t("cd", v)}
-                    />
-                    <Ch
-                      vp={vp}
-                      label="Vessel Count"
-                      opts={[
-                        "1 Vessel",
-                        "2 Vessels",
-                        "3+ Vessels",
-                        "Fleet Expansion Planned",
-                      ]}
-                      sel={fd.vs}
-                      tog={(v) => t("vs", v)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Fleet Notes"
-                      ph="Vessel details, capacities, naming..."
-                      ta
-                      value={fd.bn}
-                      onChange={(e) => u("bn", e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {is === 3 && (
-                <>
-                  <H z={24} s={{ marginBottom: 5 }} vp={vp}>
-                    Frontend Experience
-                  </H>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 24,
-                      fontSize: vp.isMobile ? 11 : 11.5,
-                      color: C.m,
-                    }}
-                  >
-                    Client-facing booking layer.
-                  </P>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 16,
-                    }}
-                  >
-                    <Ch
-                      vp={vp}
-                      label="Booking Style"
-                      opts={[
-                        "Direct Booking",
-                        "Inquiry-First",
-                        "Hybrid (Direct + Inquiry)",
-                        "Quote Request",
-                      ]}
-                      sel={fd.fp}
-                      tog={(v) => t("fp", v)}
-                    />
-                    <Ch
-                      vp={vp}
-                      label="Frontend Priorities"
-                      opts={[
-                        "Luxury Aesthetic",
-                        "Mobile-First",
-                        "Fast Booking Flow",
-                        "Visual Storytelling",
-                        "Trust & Reviews",
-                        "Experience Showcase",
-                      ]}
-                      sel={fd.bp}
-                      tog={(v) => t("bp", v)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Notes"
-                      ph="Specific frontend requirements..."
-                      ta
-                      value={fd.fn}
-                      onChange={(e) => u("fn", e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {is === 4 && (
-                <>
-                  <H z={24} s={{ marginBottom: 5 }} vp={vp}>
-                    Backend Operations
-                  </H>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 24,
-                      fontSize: vp.isMobile ? 11 : 11.5,
-                      color: C.m,
-                    }}
-                  >
-                    Operator-facing depth.
-                  </P>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 16,
-                    }}
-                  >
-                    <Ch
-                      vp={vp}
-                      label="Operations Priorities"
-                      opts={[
-                        "Bookings Pipeline",
-                        "Client Profiles",
-                        "Crew Scheduling",
-                        "Vessel Management",
-                        "Event Checklists",
-                        "Revenue Tracking",
-                        "Communications",
-                        "Reporting",
-                      ]}
-                      sel={fd.ap}
-                      tog={(v) => t("ap", v)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Notes"
-                      ph="Workflow details, operational specifics..."
-                      ta
-                      value={fd.bnn}
-                      onChange={(e) => u("bnn", e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {is === 5 && (
-                <>
-                  <H z={24} s={{ marginBottom: 5 }} vp={vp}>
-                    Add-Ons & Enhancements
-                  </H>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 24,
-                      fontSize: vp.isMobile ? 11 : 11.5,
-                      color: C.m,
-                    }}
-                  >
-                    Revenue-expanding capabilities.
-                  </P>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 16,
-                    }}
-                  >
-                    <Ch
-                      vp={vp}
-                      label="Client Add-Ons to Manage"
-                      opts={[
-                        "Stewardess Service",
-                        "Food & Beverage",
-                        "Decorations",
-                        "Photography",
-                        "DJ / Music",
-                        "Swimming Equipment",
-                        "Special Routes",
-                        "Event Planning",
-                      ]}
-                      sel={fd.fp}
-                      tog={(v) => t("fp", v)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Notes"
-                      ph="Custom add-ons, vendor coordination..."
-                      ta
-                      value={fd.an}
-                      onChange={(e) => u("an", e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {is === 6 && (
-                <>
-                  <H z={24} s={{ marginBottom: 5 }} vp={vp}>
-                    Financial & Integrations
-                  </H>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 24,
-                      fontSize: vp.isMobile ? 11 : 11.5,
-                      color: C.m,
-                    }}
-                  >
-                    Revenue infrastructure and accounting.
-                  </P>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 16,
-                    }}
-                  >
-                    <Ch
-                      vp={vp}
-                      label="Financial Tracking"
-                      opts={[
-                        "Deposit Tracking",
-                        "Balance Due Alerts",
-                        "Revenue by Vessel",
-                        "Revenue by Charter Type",
-                        "Add-On Revenue",
-                        "Refund / Cancellation Tracking",
-                      ]}
-                      sel={fd.bp}
-                      tog={(v) => t("bp", v)}
-                    />
-                    <Ch
-                      vp={vp}
-                      label="Integrations"
-                      opts={[
-                        "QuickBooks Integration",
-                        "Payment Gateway",
-                        "Calendar Sync",
-                        "Review Automation",
-                      ]}
-                      sel={fd.cd}
-                      tog={(v) => t("cd", v)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Notes"
-                      ph="Current accounting setup, payment methods accepted..."
-                      ta
-                      value={fd.pa}
-                      onChange={(e) => u("pa", e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {is === 7 && (
-                <>
-                  <H z={24} s={{ marginBottom: 5 }} vp={vp}>
-                    Final Notes
-                  </H>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 18,
-                      fontSize: vp.isMobile ? 11 : 11.5,
-                      color: C.m,
-                    }}
-                  >
-                    Anything additional.
-                  </P>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 24,
-                      fontSize: vp.isNarrow ? 11 : vp.isMobile ? 11.5 : 12,
-                      color: C.q,
-                      lineHeight: 1.75,
-                      fontStyle: "italic",
-                    }}
-                  >
-                    If you have a specific budget in mind, complete the build as
-                    usual and include your target budget below. We will tailor
-                    the system accordingly — features can be added, removed, or
-                    scaled to match.
-                  </P>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 16,
-                    }}
-                  >
-                    <Fi
-                      vp={vp}
-                      label="Custom Requests"
-                      ph="Features, specific workflows, vendor integrations..."
-                      ta
-                      value={fd.cu}
-                      onChange={(e) => u("cu", e.target.value)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Target Budget (Optional)"
-                      ph="If you have a target investment range, include it here..."
-                      ta
-                      value={fd.sp}
-                      onChange={(e) => u("sp", e.target.value)}
-                    />
-                    <Fi
-                      vp={vp}
-                      label="Anything Else"
-                      ph="Final notes, timelines, special requirements..."
-                      ta
-                      value={fd.ad}
-                      onChange={(e) => u("ad", e.target.value)}
-                    />
-                  </div>
-                </>
-              )}
-
-              {is === 8 && (
-                <>
-                  <H z={24} s={{ marginBottom: 5 }} vp={vp}>
-                    Acknowledgment
-                  </H>
-                  <P
-                    vp={vp}
-                    s={{
-                      marginBottom: 24,
-                      fontSize: vp.isMobile ? 11 : 11.5,
-                      color: C.m,
-                    }}
-                  >
-                    Review before submission.
-                  </P>
-                  <div
-                    style={{
-                      borderTop: `1px solid rgba(160,139,92,.06)`,
-                      paddingTop: 20,
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 14,
-                    }}
-                  >
-                    {[
-                      "Review within 24 hours of submission.",
-                      "Confirmation email with scope and timeline.",
-                      "Wire transfer invoice and authorization documents to follow.",
-                      "$20,000 baseline — $10,000 to authorize — $10,000 upon completion — 20-day delivery. Hosting is $199/month strictly for system upkeep only — First 2 months of hosting are complementary, on us.",
-                      "System can be scaled up or down. Pricing adjusts based on final build configuration.",
-                    ].map((x, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          display: "flex",
-                          gap: 10,
-                          alignItems: "baseline",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: 2.5,
-                            height: 2.5,
-                            borderRadius: "50%",
-                            background: C.g,
-                            opacity: 0.25,
-                            flexShrink: 0,
-                            marginTop: 2,
-                          }}
-                        />
-                        <span
-                          style={{
-                            fontFamily: SA,
-                            fontSize: vp.isMobile ? 11 : 11.5,
-                            fontWeight: 300,
-                            lineHeight: 1.6,
-                            color: C.sa,
-                          }}
-                        >
-                          {x}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 12,
-                marginTop: 40,
-                flexWrap: vp.isMobile ? "wrap" : "nowrap",
-              }}
-            >
-              {is > 1 ? (
-                <button
-                  type="button"
-                  onClick={() => setIs((s) => Math.max(s - 1, 1))}
-                  style={{
-                    ...buttonBase(vp),
-                    padding: vp.isMobile ? "12px 18px" : "11px 26px",
-                    fontSize: 8.5,
-                    width: vp.isMobile ? "calc(50% - 6px)" : undefined,
-                    minWidth: vp.isMobile ? undefined : 110,
-                  }}
-                  disabled={submitting}
-                >
-                  Back
-                </button>
-              ) : (
-                <div
-                  style={
-                    vp.isMobile ? { width: "calc(50% - 6px)" } : undefined
-                  }
-                />
-              )}
-
-              {is < IT ? (
-                <button
-                  type="button"
-                  onClick={() => setIs((s) => Math.min(s + 1, IT))}
-                  style={{
-                    ...solidButton(vp),
-                    padding: vp.isMobile ? "12px 18px" : "11px 26px",
-                    fontSize: 8.5,
-                    width: vp.isMobile ? "calc(50% - 6px)" : undefined,
-                    minWidth: vp.isMobile ? undefined : 110,
-                    marginLeft: vp.isMobile ? "auto" : undefined,
-                  }}
-                >
-                  Continue
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={sub}
-                  style={{
-                    ...solidButton(vp),
-                    padding: vp.isMobile ? "12px 18px" : "11px 26px",
-                    fontSize: 8.5,
-                    opacity: submitting ? 0.7 : 1,
-                    width: vp.isMobile ? "calc(50% - 6px)" : undefined,
-                    minWidth: vp.isMobile ? undefined : 110,
-                    marginLeft: vp.isMobile ? "auto" : undefined,
-                  }}
-                  disabled={submitting}
-                >
-                  {submitting ? "Submitting..." : "Submit"}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const cur = slides[sl];
 
   return (
     <div
       style={{
         minHeight: "100dvh",
-        height: "100dvh",
         background: C.bg,
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
+        color: C.cr,
         overflow: "hidden",
       }}
     >
       <style>{CSS}</style>
+
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 30,
+          borderBottom: "1px solid rgba(160,139,92,.08)",
+          background: "rgba(7,7,7,.88)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1360,
+            margin: "0 auto",
+            padding: vp.isMobile ? "12px 14px" : "14px 22px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 14,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontFamily: SE,
+                fontSize: vp.isMobile ? 18 : 20,
+                color: C.cr,
+                lineHeight: 1,
+              }}
+            >
+              Calico Yacht Charters
+            </div>
+            <div
+              style={{
+                fontFamily: SA,
+                fontSize: 8.5,
+                fontWeight: 500,
+                letterSpacing: 2.8,
+                textTransform: "uppercase",
+                color: C.q,
+                marginTop: 6,
+              }}
+            >
+              Private Walkthrough
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: vp.isMobile ? 10 : 12,
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => go(sl - 1)}
+              style={{
+                ...buttonBase(vp),
+                padding: vp.isMobile ? "10px 12px" : "12px 16px",
+                opacity: sl === 0 ? 0.45 : 1,
+                pointerEvents: sl === 0 ? "none" : "auto",
+              }}
+            >
+              Prev
+            </button>
+            <div
+              style={{
+                fontFamily: SA,
+                fontSize: 10.5,
+                color: C.m,
+                letterSpacing: 1.4,
+                textTransform: "uppercase",
+                minWidth: 78,
+                textAlign: "center",
+              }}
+            >
+              {String(sl + 1).padStart(2, "0")} / {String(tot).padStart(2, "0")}
+            </div>
+            <button
+              type="button"
+              onClick={() => go(sl + 1)}
+              style={{
+                ...solidButton(vp),
+                padding: vp.isMobile ? "10px 12px" : "12px 16px",
+                opacity: sl === tot - 1 ? 0.45 : 1,
+                pointerEvents: sl === tot - 1 ? "none" : "auto",
+              }}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          paddingTop: vp.isMobile ? 86 : 96,
+          paddingBottom: vp.isMobile ? 34 : 40,
+        }}
+      >
+        <div
+          key={`${slides[sl].id}-${ak}`}
+          style={{
+            animation: "sli .58s cubic-bezier(.16,1,.3,1) both",
+            padding: vp.isMobile ? "22px 16px" : "30px 24px",
+          }}
+        >
+          {slides[sl].r()}
+        </div>
+      </div>
+
+      <div
+        style={{
+          position: "fixed",
+          left: "50%",
+          bottom: vp.isMobile ? 14 : 18,
+          transform: "translateX(-50%)",
+          zIndex: 28,
+          display: "flex",
+          gap: 6,
+          padding: "8px 10px",
+          background: "rgba(7,7,7,.72)",
+          border: "1px solid rgba(160,139,92,.08)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+        }}
+      >
+        {slides.map((s, i) => (
+          <button
+            key={s.id}
+            type="button"
+            onClick={() => go(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            style={{
+              width: 18,
+              height: 2,
+              border: "none",
+              padding: 0,
+              background: i === sl ? C.g : "rgba(160,139,92,.18)",
+              cursor: "pointer",
+            }}
+          />
+        ))}
+      </div>
 
       <Lightbox
         open={lb.open}
@@ -2943,172 +2353,6 @@ export default function Page() {
         onClose={closeLightbox}
         vp={vp}
       />
-
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background:
-            "radial-gradient(ellipse 55% 40% at 50% 38%,rgba(160,139,92,.014),transparent)",
-        }}
-      />
-
-      <div
-        style={{
-          position: "relative",
-          zIndex: 10,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: vp.isMobile ? 10 : 16,
-          padding: vp.isMobile ? "16px 16px 0" : "24px 36px 0",
-          flexShrink: 0,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: SA,
-            fontSize: vp.isMobile ? 7.5 : 8,
-            fontWeight: 500,
-            letterSpacing: vp.isMobile ? 2.6 : 4,
-            color: C.w,
-            textTransform: "uppercase",
-            flexShrink: 0,
-          }}
-        >
-          Calico Yacht Charters
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            gap: vp.isMobile ? 2 : 3,
-            alignItems: "center",
-            flex: 1,
-            justifyContent: "center",
-            minWidth: 0,
-            overflow: "hidden",
-          }}
-        >
-          {slides.map((_, i) => (
-            <div
-              key={i}
-              style={{
-                width: i === sl ? (vp.isMobile ? 10 : 14) : 3,
-                height: 1.5,
-                borderRadius: 1,
-                background:
-                  i === sl
-                    ? C.g
-                    : i < sl
-                    ? "rgba(160,139,92,.16)"
-                    : "rgba(160,139,92,.05)",
-                transition: "all .4s cubic-bezier(.16,1,.3,1)",
-                flexShrink: 0,
-              }}
-            />
-          ))}
-        </div>
-
-        <div
-          style={{
-            fontFamily: SA,
-            fontSize: vp.isMobile ? 7.5 : 8,
-            fontWeight: 400,
-            letterSpacing: vp.isMobile ? 2.2 : 3,
-            color: C.w,
-            textTransform: "uppercase",
-            minWidth: vp.isMobile ? 42 : 48,
-            textAlign: "right",
-            flexShrink: 0,
-          }}
-        >
-          {String(sl + 1).padStart(2, "0")} / {String(tot).padStart(2, "0")}
-        </div>
-      </div>
-
-      <div
-        style={{
-          flex: 1,
-          minHeight: 0,
-          display: "flex",
-          alignItems: vp.isMobile ? "flex-start" : "center",
-          justifyContent: "center",
-          padding: vp.isMobile ? "14px 16px 0" : "32px 44px 0",
-          position: "relative",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          key={ak}
-          style={{
-            width: "100%",
-            maxHeight: "100%",
-            overflow: "auto",
-            WebkitOverflowScrolling: "touch",
-            animation: "sli .65s cubic-bezier(.16,1,.3,1) both",
-            padding: vp.isMobile ? "0 0 26px" : "0 0 32px",
-          }}
-        >
-          {cur.r()}
-        </div>
-      </div>
-
-      <div
-        style={{
-          position: "relative",
-          zIndex: 10,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: 12,
-          padding: vp.isMobile ? "0 16px 16px" : "0 36px 28px",
-          flexShrink: 0,
-        }}
-      >
-        {sl > 0 ? (
-          <button
-            type="button"
-            onClick={() => go(sl - 1)}
-            style={{
-              ...buttonBase(vp),
-              padding: vp.isMobile ? "12px 18px" : "11px 28px",
-              fontSize: 8.5,
-              opacity: 0.65,
-              width: vp.isMobile ? "calc(50% - 6px)" : undefined,
-              minWidth: vp.isMobile ? undefined : 90,
-            }}
-          >
-            Back
-          </button>
-        ) : (
-          <div
-            style={vp.isMobile ? { width: "calc(50% - 6px)" } : { width: 90 }}
-          />
-        )}
-
-        {sl < tot - 1 ? (
-          <button
-            type="button"
-            onClick={() => go(sl + 1)}
-            style={{
-              ...buttonBase(vp),
-              padding: vp.isMobile ? "12px 18px" : "11px 28px",
-              fontSize: 8.5,
-              width: vp.isMobile ? "calc(50% - 6px)" : undefined,
-              minWidth: vp.isMobile ? undefined : 90,
-              marginLeft: vp.isMobile ? "auto" : undefined,
-            }}
-          >
-            Continue
-          </button>
-        ) : (
-          <div
-            style={vp.isMobile ? { width: "calc(50% - 6px)" } : { width: 90 }}
-          />
-        )}
-      </div>
     </div>
   );
 }
